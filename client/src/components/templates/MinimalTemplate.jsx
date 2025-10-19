@@ -33,9 +33,10 @@ const MinimalTemplate = ({ data, accentColor }) => {
             {/* Professional Summary */}
             {data.professional_summary && (
                 <section className="mb-10">
-                    <p className="text-base text-gray-700">
-                        {data.professional_summary}
-                    </p>
+                    <div
+                        className="text-base text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: data.professional_summary }}
+                    />
                 </section>
             )}
 
@@ -57,9 +58,10 @@ const MinimalTemplate = ({ data, accentColor }) => {
                                 </div>
                                 <p className="text-base text-gray-600 mb-2">{exp.company}</p>
                                 {exp.description && (
-                                    <div className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
-                                        {exp.description}
-                                    </div>
+                                    <div
+                                        className="text-base text-gray-700 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: exp.description }}
+                                    />
                                 )}
                             </div>
                         ))}
@@ -78,7 +80,10 @@ const MinimalTemplate = ({ data, accentColor }) => {
                         {data.project.map((proj, index) => (
                             <div key={index} className="project-item flex flex-col gap-2 justify-between items-baseline">
                                 <h3 className="text-xl font-medium ">{proj.name}</h3>
-                                <p className="text-base text-gray-600">{proj.description}</p>
+                                <div
+                                    className="text-base text-gray-600"
+                                    dangerouslySetInnerHTML={{ __html: proj.description }}
+                                />
                             </div>
                         ))}
                     </div>

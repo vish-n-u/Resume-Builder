@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import React from 'react'
+import QuillEditor from './QuillTextEditor'
 
 const ProjectForm = ({ data, onChange }) => {
 
@@ -53,7 +54,10 @@ const updateProject = (index, field, value)=>{
 
                         <input value={project.type || ""} onChange={(e)=>updateProject(index, "type", e.target.value)} type="text" placeholder="Project Type" className="px-3 py-2 text-sm rounded-lg"/>
 
-                        <textarea rows={4} value={project.description || ""} onChange={(e)=>updateProject(index, "description", e.target.value)} placeholder="Describe your project..." className="w-full px-3 py-2 text-sm rounded-lg resize-none"/>
+                        <div className="space-y-2">
+                            <label className='text-sm font-medium text-gray-700'>Project Description</label>
+                            <QuillEditor content={project.description || ""} onTextChange={(value)=> updateProject(index, "description", value)} />
+                        </div>
             
                     </div>
 

@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
+import QuillEditor from './QuillTextEditor'
 
 const ExperienceForm = ({ data, onChange }) => {
 
@@ -106,7 +107,7 @@ const updateExperience = (index, field, value)=>{
                                 Enhance with AI
                             </button>
                         </div>
-                        <textarea value={experience.description || ""} onChange={(e)=> updateExperience(index, "description", e.target.value)} rows={4} className="w-full text-sm px-3 py-2 rounded-lg resize-none" placeholder="Describe your key responsibilities and achievements..."/>
+                        <QuillEditor content={experience.description || ""} onTextChange={(value)=> updateExperience(index, "description", value)} rows={4} className="w-full text-sm px-3 py-2 rounded-lg resize-none" readOnly={true}/>
                     </div>
                 </div>
             ))}
