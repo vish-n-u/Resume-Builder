@@ -1,0 +1,92 @@
+import React from 'react'
+import ClassicTemplate from './templates/ClassicTemplate'
+import ModernTemplate from './templates/ModernTemplate'
+import MinimalTemplate from './templates/MinimalTemplate'
+import MinimalImageTemplate from './templates/MinimalImageTemplate'
+
+const ResumePreview = ({data, template, accentColor, classes = ""}) => {
+
+    const renderTemplate = ()=>{
+        switch (template) {
+            case "modern":
+                return <ModernTemplate data={data} accentColor={accentColor}/>;
+            case "minimal":
+                return <MinimalTemplate data={data} accentColor={accentColor}/>;
+            case "minimal-image":
+                return <MinimalImageTemplate data={data} accentColor={accentColor}/>;
+
+            default:
+                return <ClassicTemplate data={data} accentColor={accentColor}/>;
+        }
+    }
+
+  return (
+    <div className='w-full bg-gray-100 print:bg-white print:m-0 print:p-0'>
+      <div id="resume-preview" className={"border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 " + classes}>
+        {renderTemplate()}
+      </div>
+
+      <style>
+        {`
+        @page {
+          size: letter;
+          margin: 0;
+        }
+        @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100%;
+            height: auto;
+          }
+
+          /* Hide everything except resume */
+          body * {
+            visibility: hidden;
+          }
+
+          #resume-preview,
+          #resume-preview * {
+            visibility: visible;
+          }
+
+          #resume-preview {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            display: block;
+            width: 100%;
+            height: auto;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+          }
+
+          /* Prevent awkward breaks */
+          #resume-preview h1,
+          #resume-preview h2,
+          #resume-preview h3 {
+            page-break-after: avoid;
+          }
+
+          /* Keep experience/project/education items together when possible */
+          #resume-preview .experience-item,
+          #resume-preview .project-item,
+          #resume-preview .education-item {
+            page-break-inside: avoid;
+          }
+        }
+        `}
+      </style>
+    </div>
+  )
+}
+
+export default ResumePreview
