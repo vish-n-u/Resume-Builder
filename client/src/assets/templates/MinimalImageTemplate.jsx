@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 
-const MinimalImageTemplate = ({ data, accentColor }) => {
+const MinimalImageTemplate = ({ data, accentColor, sectionVisibility }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -71,7 +71,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     </section>
 
                     {/* Education */}
-                    {data.education && data.education.length > 0 && (
+                    {sectionVisibility?.education && data.education && data.education.length > 0 && (
                         <section className="mb-8">
                             <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                                 EDUCATION
@@ -91,8 +91,8 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Skills */}
-                    {data.skills && data.skills.length > 0 && (
-                        <section>
+                    {sectionVisibility?.skills && data.skills && data.skills.length > 0 && (
+                        <section className="mb-8">
                             <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                                 SKILLS
                             </h2>
@@ -103,13 +103,33 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                             </ul>
                         </section>
                     )}
+
+                    {/* Certifications */}
+                    {sectionVisibility?.certifications && data.certifications && data.certifications.length > 0 && (
+                        <section>
+                            <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
+                                CERTIFICATIONS
+                            </h2>
+                            <div className="space-y-3 text-sm">
+                                {data.certifications.map((cert, index) => (
+                                    <div key={index}>
+                                        <p className="font-semibold">{cert.name}</p>
+                                        <p className="text-zinc-600">{cert.issuer}</p>
+                                        <p className="text-xs text-zinc-500">
+                                            {formatDate(cert.date)}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </aside>
 
                 {/* Right Content */}
                 <main className="col-span-2 p-8 pt-0">
 
                     {/* Summary */}
-                    {data.professional_summary && (
+                    {sectionVisibility?.summary && data.professional_summary && (
                         <section className="mb-8">
                             <h2 className="text-sm font-semibold tracking-widest mb-3" style={{ color: accentColor }} >
                                 SUMMARY
@@ -121,7 +141,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Experience */}
-                    {data.experience && data.experience.length > 0 && (
+                    {sectionVisibility?.experience && data.experience && data.experience.length > 0 && (
                         <section>
                             <h2 className="text-sm font-semibold tracking-widest mb-4" style={{ color: accentColor }} >
                                 EXPERIENCE
@@ -155,8 +175,8 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Projects */}
-                    {data.project && data.project.length > 0 && (
-                        <section>
+                    {sectionVisibility?.projects && data.project && data.project.length > 0 && (
+                        <section className="mb-8">
                             <h2 className="text-sm uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
                                 PROJECTS
                             </h2>
@@ -173,6 +193,34 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                                     <li key={i}>{line}</li>
                                                 ))}
                                             </ul>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Achievements */}
+                    {sectionVisibility?.achievements && data.achievements && data.achievements.length > 0 && (
+                        <section>
+                            <h2 className="text-sm uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
+                                ACHIEVEMENTS
+                            </h2>
+                            <div className="space-y-4">
+                                {data.achievements.map((achievement, index) => (
+                                    <div key={index}>
+                                        <div className="flex justify-between items-center mt-3">
+                                            <h3 className="font-semibold text-zinc-900">
+                                                {achievement.title}
+                                            </h3>
+                                            <span className="text-xs text-zinc-500">
+                                                {formatDate(achievement.date)}
+                                            </span>
+                                        </div>
+                                        {achievement.description && (
+                                            <p className="text-sm text-zinc-700 leading-relaxed">
+                                                {achievement.description}
+                                            </p>
                                         )}
                                     </div>
                                 ))}

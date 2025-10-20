@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { ArrowLeftIcon, UserIcon, KeyIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { ArrowLeftIcon, UserIcon, KeyIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon, Award, Trophy } from 'lucide-react'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import { login } from '../app/features/authSlice'
@@ -11,6 +11,8 @@ import ExperienceForm from '../components/ExperienceForm'
 import EducationForm from '../components/EducationForm'
 import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
+import CertificationsForm from '../components/CertificationsForm'
+import AchievementsForm from '../components/AchievementsForm'
 
 const UserProfile = () => {
 
@@ -46,6 +48,8 @@ const UserProfile = () => {
     experience: [],
     project: [],
     education: [],
+    certifications: [],
+    achievements: [],
   })
 
   const [removeBackground, setRemoveBackground] = useState(false)
@@ -78,6 +82,8 @@ const UserProfile = () => {
             experience: data.defaultResumeData.experience || [],
             project: data.defaultResumeData.project || [],
             education: data.defaultResumeData.education || [],
+            certifications: data.defaultResumeData.certifications || [],
+            achievements: data.defaultResumeData.achievements || [],
           })
         }
       } catch (error) {
@@ -333,7 +339,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Projects Section */}
-                <div className='pb-8'>
+                <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <FolderIcon className='size-5 text-indigo-600' />
                     Projects
@@ -341,6 +347,30 @@ const UserProfile = () => {
                   <ProjectForm
                     data={defaultResumeData.project}
                     onChange={(data) => setDefaultResumeData(prev => ({ ...prev, project: data }))}
+                  />
+                </div>
+
+                {/* Certifications Section */}
+                <div className='border-b border-gray-200 pb-8'>
+                  <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
+                    <Award className='size-5 text-indigo-600' />
+                    Certifications
+                  </h3>
+                  <CertificationsForm
+                    data={defaultResumeData.certifications}
+                    onChange={(data) => setDefaultResumeData(prev => ({ ...prev, certifications: data }))}
+                  />
+                </div>
+
+                {/* Achievements Section */}
+                <div className='pb-8'>
+                  <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
+                    <Trophy className='size-5 text-indigo-600' />
+                    Achievements
+                  </h3>
+                  <AchievementsForm
+                    data={defaultResumeData.achievements}
+                    onChange={(data) => setDefaultResumeData(prev => ({ ...prev, achievements: data }))}
                   />
                 </div>
 

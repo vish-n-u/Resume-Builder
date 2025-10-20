@@ -157,6 +157,105 @@ export const uploadResume = async (req, res) => {
     }
 }
 
+// controller for providing AI suggestions based on job description
+// POST: /api/ai/suggest-job-desc
+export const suggestJobDescription = async (req, res) => {
+    try {
+        const { currentDescription, jobDescription, position, company } = req.body;
+        const userId = req.userId;
+
+        if (!jobDescription) {
+            return res.status(400).json({ message: 'Job description is required' });
+        }
+
+        // Get user's detailed resume data for context
+        const detailedResume = await DetailedResume.findOne({ userId });
+
+        if (!detailedResume) {
+            return res.status(404).json({
+                message: 'No default resume data found. Please complete your profile first.'
+            });
+        }
+
+        // Prepare context from user's profile
+        const userContext = {
+            skills: detailedResume.skills,
+            professional_summary: detailedResume.professional_summary,
+            all_experience: detailedResume.experience.map(exp => ({
+                company: exp.company,
+                position: exp.position,
+                description: exp.description
+            }))
+        };
+
+        const systemPrompt = `You are an expert resume writer and career coach. Your task is to provide 5 specific, actionable suggestions for job description bullet points that align with the given job description.
+
+CRITICAL RULES:
+1. Analyze the job description to understand what skills and responsibilities are valued
+2. Use the user's background and skills as context to make realistic suggestions
+3. Each suggestion should be a complete, professional bullet point ready to use
+4. Suggestions should highlight achievements, use action verbs, and include quantifiable results when possible
+5. Make suggestions ATS-friendly and keyword-optimized for the job description
+6. Suggestions don't need to match the current description exactly - be creative and smart about what would fit the role
+7. Each suggestion should be 1-2 sentences maximum
+8. Focus on impact and results, not just responsibilities
+
+Return ONLY a JSON array of 5 suggestion strings, no additional text.`;
+
+        const userPrompt = `JOB DESCRIPTION:
+${jobDescription}
+
+CURRENT POSITION CONTEXT:
+Position: ${position || 'Not specified'}
+Company: ${company || 'Not specified'}
+Current Description: ${currentDescription || 'Not provided'}
+
+USER'S BACKGROUND (for context):
+Skills: ${userContext.skills.join(', ')}
+Professional Summary: ${userContext.professional_summary}
+
+INSTRUCTIONS:
+Based on the job description and the user's background, provide 5 specific bullet point suggestions that would make this experience stand out for the target role. The suggestions should:
+1. Align with keywords and requirements from the job description
+2. Be realistic given the user's skills and background
+3. Use strong action verbs and quantifiable achievements
+4. Be ready to add directly to the resume
+5. Not necessarily match the current description - think creatively about relevant achievements
+
+Return in this exact JSON format:
+{
+  "suggestions": [
+    "First complete bullet point suggestion",
+    "Second complete bullet point suggestion",
+    "Third complete bullet point suggestion",
+    "Fourth complete bullet point suggestion",
+    "Fifth complete bullet point suggestion"
+  ]
+}`;
+
+        const response = await ai.chat.completions.create({
+            model: process.env.OPENAI_MODEL,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.8
+        });
+
+        const suggestionData = JSON.parse(response.choices[0].message.content);
+        console.log("AI suggestions generated:", suggestionData);
+
+        return res.status(200).json({
+            suggestions: suggestionData.suggestions || []
+        });
+
+    } catch (error) {
+        console.error("Error generating suggestions:", error);
+        return res.status(400).json({ message: error.message });
+    }
+}
+
 // controller for creating a tailored resume based on job description
 // POST: /api/ai/tailor-resume
 export const tailorResume = async (req, res) => {
@@ -294,6 +393,7 @@ Return in this exact JSON format:
         const newResume = await Resume.create({
             userId,
             title,
+            job_description: jobDescription,
             professional_summary: tailoredData.professional_summary,
             skills: tailoredData.skills,
             personal_info: tailoredData.personal_info,

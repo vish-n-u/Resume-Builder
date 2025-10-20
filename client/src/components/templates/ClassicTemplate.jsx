@@ -59,7 +59,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                         PROFESSIONAL SUMMARY
                     </h2>
                     <div
-                        className="text-base text-gray-700 leading-relaxed"
+                        className="text-base text-gray-700 leading-relaxed quill-content"
                         dangerouslySetInnerHTML={{ __html: data.professional_summary }}
                     />
                 </section>
@@ -86,7 +86,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                                 </div>
                                 {exp.description && (
                                     <div
-                                        className="text-base text-gray-700 leading-relaxed"
+                                        className="text-base text-gray-700 leading-relaxed quill-content"
                                         dangerouslySetInnerHTML={{ __html: exp.description }}
                                     />
                                 )}
@@ -109,7 +109,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
                                 <div>
                                     <li className="text-lg font-semibold text-gray-800 ">{proj.name}</li>
                                     <div
-                                        className="text-base text-gray-600"
+                                        className="text-base text-gray-600 quill-content"
                                         dangerouslySetInnerHTML={{ __html: proj.description }}
                                     />
                                 </div>

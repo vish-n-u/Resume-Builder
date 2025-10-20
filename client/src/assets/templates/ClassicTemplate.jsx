@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
-const ClassicTemplate = ({ data, accentColor }) => {
+const ClassicTemplate = ({ data, accentColor, sectionVisibility }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -53,7 +53,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             </header>
 
             {/* Professional Summary */}
-            {data.professional_summary && (
+            {sectionVisibility?.summary && data.professional_summary && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-3" style={{ color: accentColor }}>
                         PROFESSIONAL SUMMARY
@@ -63,7 +63,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Experience */}
-            {data.experience && data.experience.length > 0 && (
+            {sectionVisibility?.experience && data.experience && data.experience.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         PROFESSIONAL EXPERIENCE
@@ -93,7 +93,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Projects */}
-            {data.project && data.project.length > 0 && (
+            {sectionVisibility?.projects && data.project && data.project.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         PROJECTS
@@ -113,7 +113,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Education */}
-            {data.education && data.education.length > 0 && (
+            {sectionVisibility?.education && data.education && data.education.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         EDUCATION
@@ -139,7 +139,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Skills */}
-            {data.skills && data.skills.length > 0 && (
+            {sectionVisibility?.skills && data.skills && data.skills.length > 0 && (
                 <section className="mb-6">
                     <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
                         CORE SKILLS
@@ -149,6 +149,55 @@ const ClassicTemplate = ({ data, accentColor }) => {
                         {data.skills.map((skill, index) => (
                             <div key={index} className="text-gray-700">
                                 • {skill}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Certifications */}
+            {sectionVisibility?.certifications && data.certifications && data.certifications.length > 0 && (
+                <section className="mb-6">
+                    <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
+                        CERTIFICATIONS
+                    </h2>
+
+                    <div className="space-y-3">
+                        {data.certifications.map((cert, index) => (
+                            <div key={index} className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-semibold text-gray-900">{cert.name}</h3>
+                                    <p className="text-gray-700">{cert.issuer}</p>
+                                    {cert.credential_id && <p className="text-sm text-gray-600">ID: {cert.credential_id}</p>}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    <p>{formatDate(cert.date)}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Achievements */}
+            {sectionVisibility?.achievements && data.achievements && data.achievements.length > 0 && (
+                <section className="mb-6">
+                    <h2 className="text-xl font-semibold mb-4" style={{ color: accentColor }}>
+                        ACHIEVEMENTS
+                    </h2>
+
+                    <div className="space-y-3">
+                        {data.achievements.map((achievement, index) => (
+                            <div key={index} className="border-l-3 pl-4" style={{ borderColor: accentColor }}>
+                                <div className="flex justify-between items-start mb-1">
+                                    <h3 className="font-semibold text-gray-900">{achievement.title}</h3>
+                                    <div className="text-sm text-gray-600">
+                                        <p>{formatDate(achievement.date)}</p>
+                                    </div>
+                                </div>
+                                {achievement.description && (
+                                    <p className="text-gray-700 leading-relaxed">{achievement.description}</p>
+                                )}
                             </div>
                         ))}
                     </div>

@@ -60,7 +60,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 							Professional Summary
 						</h2>
 						<div
-							className="text-base text-gray-700"
+							className="text-base text-gray-700 quill-content"
 							dangerouslySetInnerHTML={{ __html: data.professional_summary }}
 						/>
 					</section>
@@ -88,7 +88,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 									</div>
 									{exp.description && (
 										<div
-											className="text-base text-gray-700 leading-relaxed mt-3"
+											className="text-base text-gray-700 leading-relaxed mt-3 quill-content"
 											dangerouslySetInnerHTML={{ __html: exp.description }}
 										/>
 									)}
@@ -117,7 +117,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 									</div>
 									{p.description && (
 										<div
-											className="text-base text-gray-700 leading-relaxed mt-3"
+											className="text-base text-gray-700 leading-relaxed mt-3 quill-content"
 											dangerouslySetInnerHTML={{ __html: p.description }}
 										/>
 									)}

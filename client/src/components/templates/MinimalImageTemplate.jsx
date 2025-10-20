@@ -115,7 +115,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                 SUMMARY
                             </h2>
                             <div
-                                className="text-base text-zinc-700 leading-relaxed"
+                                className="text-base text-zinc-700 leading-relaxed quill-content"
                                 dangerouslySetInnerHTML={{ __html: data.professional_summary }}
                             />
                         </section>
@@ -144,7 +144,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                         </p>
                                         {exp.description && (
                                             <div
-                                                className="text-base text-zinc-700 leading-relaxed"
+                                                className="text-base text-zinc-700 leading-relaxed quill-content"
                                                 dangerouslySetInnerHTML={{ __html: exp.description }}
                                             />
                                         )}
@@ -169,7 +169,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                         </p>
                                         {project.description && (
                                             <div
-                                                className="text-base text-zinc-700 leading-relaxed"
+                                                className="text-base text-zinc-700 leading-relaxed quill-content"
                                                 dangerouslySetInnerHTML={{ __html: project.description }}
                                             />
                                         )}

@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
-const ModernTemplate = ({ data, accentColor }) => {
+const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 	const formatDate = (dateStr) => {
 		if (!dateStr) return "";
 		const [year, month] = dateStr.split("-");
@@ -54,7 +54,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 			<div className="p-8">
 				{/* Professional Summary */}
-				{data.professional_summary && (
+				{sectionVisibility?.summary && data.professional_summary && (
 					<section className="mb-8">
 						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
 							Professional Summary
@@ -64,7 +64,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 				)}
 
 				{/* Experience */}
-				{data.experience && data.experience.length > 0 && (
+				{sectionVisibility?.experience && data.experience && data.experience.length > 0 && (
 					<section className="mb-8">
 						<h2 className="text-2xl font-light mb-6 pb-2 border-b border-gray-200">
 							Experience
@@ -95,7 +95,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 				)}
 
 				{/* Projects */}
-				{data.project && data.project.length > 0 && (
+				{sectionVisibility?.projects && data.project && data.project.length > 0 && (
 					<section className="mb-8">
 						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
 							Projects
@@ -124,7 +124,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 				<div className="grid sm:grid-cols-2 gap-8">
 					{/* Education */}
-					{data.education && data.education.length > 0 && (
+					{sectionVisibility?.education && data.education && data.education.length > 0 && (
 						<section>
 							<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
 								Education
@@ -148,7 +148,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 					)}
 
 					{/* Skills */}
-					{data.skills && data.skills.length > 0 && (
+					{sectionVisibility?.skills && data.skills && data.skills.length > 0 && (
 						<section>
 							<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
 								Skills
@@ -168,6 +168,57 @@ const ModernTemplate = ({ data, accentColor }) => {
 						</section>
 					)}
 				</div>
+
+				{/* Certifications */}
+				{sectionVisibility?.certifications && data.certifications && data.certifications.length > 0 && (
+					<section className="mt-8">
+						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+							Certifications
+						</h2>
+
+						<div className="space-y-4">
+							{data.certifications.map((cert, index) => (
+								<div key={index} className="relative pl-6 border-l border-gray-200">
+									<div className="flex justify-between items-start">
+										<div>
+											<h3 className="font-semibold text-gray-900">{cert.name}</h3>
+											<p style={{ color: accentColor }}>{cert.issuer}</p>
+											{cert.credential_id && <p className="text-sm text-gray-600">ID: {cert.credential_id}</p>}
+										</div>
+										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
+											{formatDate(cert.date)}
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					</section>
+				)}
+
+				{/* Achievements */}
+				{sectionVisibility?.achievements && data.achievements && data.achievements.length > 0 && (
+					<section className="mt-8">
+						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+							Achievements
+						</h2>
+
+						<div className="space-y-4">
+							{data.achievements.map((achievement, index) => (
+								<div key={index} className="relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
+									<div className="flex justify-between items-start mb-1">
+										<h3 className="font-semibold text-gray-900">{achievement.title}</h3>
+										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
+											{formatDate(achievement.date)}
+										</div>
+									</div>
+									{achievement.description && (
+										<p className="text-gray-700 leading-relaxed">{achievement.description}</p>
+									)}
+								</div>
+							))}
+						</div>
+					</section>
+				)}
 			</div>
 		</div>
 	);

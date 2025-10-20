@@ -1,14 +1,17 @@
-import { Briefcase, Loader2, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { Briefcase, Loader2, Plus, Sparkles, Trash2, Lightbulb, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import QuillEditor from './QuillTextEditor'
 
-const ExperienceForm = ({ data, onChange }) => {
+const ExperienceForm = ({ data, onChange, jobDescription }) => {
 
     const { token } = useSelector(state => state.auth)
     const [generatingIndex, setGeneratingIndex] = useState(-1)
+    const [suggestingIndex, setSuggestingIndex] = useState(-1)
+    const [suggestions, setSuggestions] = useState({})
+    const [showSuggestions, setShowSuggestions] = useState({})
 
 const addExperience = () =>{
     const newExperience = {
@@ -46,6 +49,78 @@ const updateExperience = (index, field, value)=>{
     }finally{
         setGeneratingIndex(-1)
     }
+ }
+
+ const generateSuggestions = async (index) => {
+    if (!jobDescription || jobDescription.trim() === '') {
+        toast.error('No job description found for this resume. Please create a resume using the AI-Tailored Resume feature.')
+        return
+    }
+
+    setSuggestingIndex(index)
+    const experience = data[index]
+
+    try {
+        const { data: responseData } = await api.post('api/ai/suggest-job-desc', {
+            currentDescription: experience.description || '',
+            jobDescription: jobDescription,
+            position: experience.position,
+            company: experience.company
+        }, { headers: { Authorization: token } })
+
+        setSuggestions(prev => ({...prev, [index]: responseData.suggestions}))
+        setShowSuggestions(prev => ({...prev, [index]: true}))
+        toast.success('Suggestions generated successfully!')
+    } catch (error) {
+        toast.error(error.response?.data?.message || error.message)
+    } finally {
+        setSuggestingIndex(-1)
+    }
+ }
+
+ const addSuggestionToDescription = (index, suggestion) => {
+    const experience = data[index]
+    const currentDescription = experience.description || ''
+
+    // Strip HTML tags to check if content is truly empty
+    const stripHtml = (html) => {
+        const tmp = document.createElement('div')
+        tmp.innerHTML = html
+        return tmp.textContent || tmp.innerText || ''
+    }
+
+    const isCurrentlyEmpty = stripHtml(currentDescription).trim() === ''
+
+    // Add suggestion as a list item for better formatting
+    let newDescription
+    if (isCurrentlyEmpty) {
+        // Start a new list if empty
+        newDescription = `<ul><li>${suggestion}</li></ul>`
+    } else {
+        // Check if current content already has a list
+        if (currentDescription.includes('<ul>') || currentDescription.includes('<ol>')) {
+            // Insert before the closing list tag
+            newDescription = currentDescription.replace('</ul>', `<li>${suggestion}</li></ul>`)
+            if (!newDescription.includes(`<li>${suggestion}</li>`)) {
+                // If no <ul>, try <ol>
+                newDescription = currentDescription.replace('</ol>', `<li>${suggestion}</li></ol>`)
+            }
+            if (!newDescription.includes(`<li>${suggestion}</li>`)) {
+                // No list found, append with line break
+                newDescription = currentDescription + `<p>${suggestion}</p>`
+            }
+        } else {
+            // No existing list, add as new paragraph
+            newDescription = currentDescription + `<p>${suggestion}</p>`
+        }
+    }
+
+    updateExperience(index, "description", newDescription)
+    toast.success('Suggestion added to description!')
+ }
+
+ const closeSuggestions = (index) => {
+    setShowSuggestions(prev => ({...prev, [index]: false}))
  }
 
   return (
@@ -97,16 +172,57 @@ const updateExperience = (index, field, value)=>{
                     <div className="space-y-2">
                         <div className='flex items-center justify-between'>
                             <label className='text-sm font-medium text-gray-700'>Job Description</label>
-                            <button onClick={()=> generateDescription(index)} disabled={generatingIndex === index || !experience.position || !experience.company} className='flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50'>
-                                {generatingIndex === index ? (
-                                    <Loader2 className="w-3 h-3 animate-spin"/>
-                                ): (
-                                    <Sparkles className='w-3 h-3'/>
-                                )}
-
-                                Enhance with AI
-                            </button>
+                            <div className='flex items-center gap-2'>
+                                <button onClick={()=> generateDescription(index)} disabled={generatingIndex === index || !experience.position || !experience.company} className='flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50'>
+                                    {generatingIndex === index ? (
+                                        <Loader2 className="w-3 h-3 animate-spin"/>
+                                    ): (
+                                        <Sparkles className='w-3 h-3'/>
+                                    )}
+                                    Enhance with AI
+                                </button>
+                                <button onClick={()=> generateSuggestions(index)} disabled={suggestingIndex === index || !jobDescription} className='flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors disabled:opacity-50' title={!jobDescription ? 'No job description available for this resume' : 'Get AI suggestions based on job description'}>
+                                    {suggestingIndex === index ? (
+                                        <Loader2 className="w-3 h-3 animate-spin"/>
+                                    ): (
+                                        <Lightbulb className='w-3 h-3'/>
+                                    )}
+                                    Provide AI Suggestion
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Suggestions Dropdown */}
+                        {showSuggestions[index] && suggestions[index] && (
+                            <div className='relative'>
+                                <div className='absolute top-0 left-0 right-0 bg-white border border-blue-300 rounded-lg shadow-lg p-4 z-10 max-h-96 overflow-y-auto'>
+                                    <div className='flex items-center justify-between mb-3'>
+                                        <h4 className='text-sm font-semibold text-gray-900 flex items-center gap-2'>
+                                            <Lightbulb className='w-4 h-4 text-blue-600'/>
+                                            AI Suggestions
+                                        </h4>
+                                        <button onClick={() => closeSuggestions(index)} className='text-gray-400 hover:text-gray-600'>
+                                            <X className='w-4 h-4'/>
+                                        </button>
+                                    </div>
+                                    <div className='space-y-2'>
+                                        {suggestions[index].map((suggestion, suggestionIndex) => (
+                                            <div key={suggestionIndex} className='flex items-start gap-2 p-2 bg-blue-50 rounded hover:bg-blue-100 transition-colors'>
+                                                <p className='flex-1 text-sm text-gray-700'>{suggestion}</p>
+                                                <button
+                                                    onClick={() => addSuggestionToDescription(index, suggestion)}
+                                                    className='flex-shrink-0 p-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors'
+                                                    title='Add to description'
+                                                >
+                                                    <Plus className='w-4 h-4'/>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <QuillEditor content={experience.description || ""} onTextChange={(value)=> updateExperience(index, "description", value)} rows={4} className="w-full text-sm px-3 py-2 rounded-lg resize-none" readOnly={true}/>
                     </div>
                 </div>

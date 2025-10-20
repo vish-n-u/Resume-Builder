@@ -1,5 +1,5 @@
 
-const MinimalTemplate = ({ data, accentColor }) => {
+const MinimalTemplate = ({ data, accentColor, sectionVisibility }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -31,7 +31,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             </header>
 
             {/* Professional Summary */}
-            {data.professional_summary && (
+            {sectionVisibility?.summary && data.professional_summary && (
                 <section className="mb-10">
                     <p className=" text-gray-700">
                         {data.professional_summary}
@@ -40,7 +40,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Experience */}
-            {data.experience && data.experience.length > 0 && (
+            {sectionVisibility?.experience && data.experience && data.experience.length > 0 && (
                 <section className="mb-10">
                     <h2 className="text-sm uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Experience
@@ -68,7 +68,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Projects */}
-            {data.project && data.project.length > 0 && (
+            {sectionVisibility?.projects && data.project && data.project.length > 0 && (
                 <section className="mb-10">
                     <h2 className="text-sm uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Projects
@@ -86,7 +86,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Education */}
-            {data.education && data.education.length > 0 && (
+            {sectionVisibility?.education && data.education && data.education.length > 0 && (
                 <section className="mb-10">
                     <h2 className="text-sm uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Education
@@ -112,14 +112,63 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Skills */}
-            {data.skills && data.skills.length > 0 && (
-                <section>
+            {sectionVisibility?.skills && data.skills && data.skills.length > 0 && (
+                <section className="mb-10">
                     <h2 className="text-sm uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Skills
                     </h2>
 
                     <div className="text-gray-700">
                         {data.skills.join(" • ")}
+                    </div>
+                </section>
+            )}
+
+            {/* Certifications */}
+            {sectionVisibility?.certifications && data.certifications && data.certifications.length > 0 && (
+                <section className="mb-10">
+                    <h2 className="text-sm uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                        Certifications
+                    </h2>
+
+                    <div className="space-y-4">
+                        {data.certifications.map((cert, index) => (
+                            <div key={index} className="flex justify-between items-baseline">
+                                <div>
+                                    <h3 className="font-medium">{cert.name}</h3>
+                                    <p className="text-gray-600">{cert.issuer}</p>
+                                    {cert.credential_id && <p className="text-sm text-gray-500">ID: {cert.credential_id}</p>}
+                                </div>
+                                <span className="text-sm text-gray-500">
+                                    {formatDate(cert.date)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Achievements */}
+            {sectionVisibility?.achievements && data.achievements && data.achievements.length > 0 && (
+                <section>
+                    <h2 className="text-sm uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                        Achievements
+                    </h2>
+
+                    <div className="space-y-4">
+                        {data.achievements.map((achievement, index) => (
+                            <div key={index}>
+                                <div className="flex justify-between items-baseline mb-1">
+                                    <h3 className="font-medium">{achievement.title}</h3>
+                                    <span className="text-sm text-gray-500">
+                                        {formatDate(achievement.date)}
+                                    </span>
+                                </div>
+                                {achievement.description && (
+                                    <p className="text-gray-700 leading-relaxed">{achievement.description}</p>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 </section>
             )}

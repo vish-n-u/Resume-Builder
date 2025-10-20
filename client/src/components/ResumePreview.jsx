@@ -6,17 +6,29 @@ import MinimalImageTemplate from './templates/MinimalImageTemplate'
 
 const ResumePreview = ({data, template, accentColor, classes = ""}) => {
 
+    const sectionVisibility = data?.sectionVisibility || {
+        summary: true,
+        experience: true,
+        education: true,
+        projects: true,
+        skills: true,
+        certifications: true,
+        achievements: true,
+    }
+
+    console.log('ResumePreview sectionVisibility:', sectionVisibility)
+
     const renderTemplate = ()=>{
         switch (template) {
             case "modern":
-                return <ModernTemplate data={data} accentColor={accentColor}/>;
+                return <ModernTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
             case "minimal":
-                return <MinimalTemplate data={data} accentColor={accentColor}/>;
+                return <MinimalTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
             case "minimal-image":
-                return <MinimalImageTemplate data={data} accentColor={accentColor}/>;
+                return <MinimalImageTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
 
             default:
-                return <ClassicTemplate data={data} accentColor={accentColor}/>;
+                return <ClassicTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
         }
     }
 

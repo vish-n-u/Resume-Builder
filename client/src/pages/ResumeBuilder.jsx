@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { dummyResumeData } from '../assets/assets'
-import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, User } from 'lucide-react'
+import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User } from 'lucide-react'
 import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
 import TemplateSelector from '../components/TemplateSelector'
@@ -11,6 +11,8 @@ import ExperienceForm from '../components/ExperienceForm'
 import EducationForm from '../components/EducationForm'
 import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
+import CertificationsForm from '../components/CertificationsForm'
+import AchievementsForm from '../components/AchievementsForm'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
@@ -23,22 +25,47 @@ const ResumeBuilder = () => {
   const [resumeData, setResumeData] = useState({
     _id: '',
     title: '',
+    job_description: '',
     personal_info: {},
     professional_summary: "",
     experience: [],
     education: [],
     project: [],
     skills: [],
+    certifications: [],
+    achievements: [],
     template: "classic",
     accent_color: "#3B82F6",
     public: false,
+    sectionVisibility: {
+      summary: true,
+      experience: true,
+      education: true,
+      projects: true,
+      skills: true,
+      certifications: true,
+      achievements: true,
+    }
   })
 
   const loadExistingResume = async () => {
    try {
     const {data} = await api.get('/api/resumes/get/' + resumeId, {headers: { Authorization: token }})
     if(data.resume){
-      setResumeData(data.resume)
+      // Ensure sectionVisibility exists with default values
+      const loadedResume = {
+        ...data.resume,
+        sectionVisibility: data.resume.sectionVisibility || {
+          summary: true,
+          experience: true,
+          education: true,
+          projects: true,
+          skills: true,
+          certifications: true,
+          achievements: true,
+        }
+      }
+      setResumeData(loadedResume)
       document.title = data.resume.title;
     }
    } catch (error) {
@@ -56,9 +83,26 @@ const ResumeBuilder = () => {
     { id: "education", name: "Education", icon: GraduationCap },
     { id: "projects", name: "Projects", icon: FolderIcon },
     { id: "skills", name: "Skills", icon: Sparkles },
+    { id: "certifications", name: "Certifications", icon: Award },
+    { id: "achievements", name: "Achievements", icon: Trophy },
   ]
 
   const activeSection = sections[activeSectionIndex]
+
+  const toggleSectionVisibility = (sectionId) => {
+    console.log('Toggling section:', sectionId)
+    setResumeData(prev => {
+      const newVisibility = !prev.sectionVisibility[sectionId]
+      console.log(`Setting ${sectionId} to:`, newVisibility)
+      return {
+        ...prev,
+        sectionVisibility: {
+          ...prev.sectionVisibility,
+          [sectionId]: newVisibility
+        }
+      }
+    })
+  }
 
   useEffect(()=>{
     loadExistingResume()
@@ -163,21 +207,111 @@ const saveResume = async () => {
                     <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev => ({...prev, personal_info: data }))} removeBackground={removeBackground} setRemoveBackground={setRemoveBackground} />
                   )}
                   {activeSection.id === 'summary' && (
-                    <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=> setResumeData(prev=> ({...prev, professional_summary: data}))} setResumeData={setResumeData}/>
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Professional Summary</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('summary')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.summary ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.summary ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.summary ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=> setResumeData(prev=> ({...prev, professional_summary: data}))} setResumeData={setResumeData}/>
+                    </div>
                   )}
                   {activeSection.id === 'experience' && (
-                    <ExperienceForm data={resumeData.experience} onChange={(data)=> setResumeData(prev=> ({...prev, experience: data}))}/>
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Experience</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('experience')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.experience ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.experience ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.experience ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <ExperienceForm data={resumeData.experience} onChange={(data)=> setResumeData(prev=> ({...prev, experience: data}))} jobDescription={resumeData.job_description}/>
+                    </div>
                   )}
                   {activeSection.id === 'education' && (
-                    <EducationForm data={resumeData.education} onChange={(data)=> setResumeData(prev=> ({...prev, education: data}))}/>
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Education</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('education')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.education ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.education ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.education ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <EducationForm data={resumeData.education} onChange={(data)=> setResumeData(prev=> ({...prev, education: data}))}/>
+                    </div>
                   )}
                   {activeSection.id === 'projects' && (
-                    <ProjectForm data={resumeData.project} onChange={(data)=> setResumeData(prev=> ({...prev, project: data}))}/>
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Projects</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('projects')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.projects ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.projects ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.projects ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <ProjectForm data={resumeData.project} onChange={(data)=> setResumeData(prev=> ({...prev, project: data}))}/>
+                    </div>
                   )}
                   {activeSection.id === 'skills' && (
-                    <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev=> ({...prev, skills: data}))}/>
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Skills</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('skills')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.skills ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.skills ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.skills ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev=> ({...prev, skills: data}))}/>
+                    </div>
                   )}
-                  
+                  {activeSection.id === 'certifications' && (
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Certifications</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('certifications')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.certifications ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.certifications ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.certifications ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <CertificationsForm data={resumeData.certifications} onChange={(data)=> setResumeData(prev=> ({...prev, certifications: data}))}/>
+                    </div>
+                  )}
+                  {activeSection.id === 'achievements' && (
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Achievements</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('achievements')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.achievements ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.achievements ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.achievements ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <AchievementsForm data={resumeData.achievements} onChange={(data)=> setResumeData(prev=> ({...prev, achievements: data}))}/>
+                    </div>
+                  )}
+
               </div>
               <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}} className='bg-gradient-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm'>
                 Save Changes

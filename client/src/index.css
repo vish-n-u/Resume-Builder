@@ -18,6 +18,69 @@
   }
 }
 
+/* Quill content styles for rendered HTML */
+.quill-content ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.quill-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.quill-content ul li,
+.quill-content ol li {
+  margin: 0.25em 0;
+  padding-left: 0.25em;
+}
+
+.quill-content ul ul {
+  list-style-type: circle;
+}
+
+.quill-content ul ul ul {
+  list-style-type: square;
+}
+
+.quill-content ol ol {
+  list-style-type: lower-alpha;
+}
+
+.quill-content ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.quill-content strong {
+  font-weight: bold;
+}
+
+.quill-content em {
+  font-style: italic;
+}
+
+.quill-content u {
+  text-decoration: underline;
+}
+
+.quill-content s {
+  text-decoration: line-through;
+}
+
+.quill-content p {
+  margin: 0.5em 0;
+}
+
+.quill-content p:first-child {
+  margin-top: 0;
+}
+
+.quill-content p:last-child {
+  margin-bottom: 0;
+}
+
 
 
 
