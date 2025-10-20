@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
-const ModernTemplate = ({ data, accentColor }) => {
+const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 	const formatDate = (dateStr) => {
 		if (!dateStr) return "";
 		const [year, month] = dateStr.split("-");
@@ -9,6 +9,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 			month: "short"
 		});
 	};
+	console.log("sectionVisibility==>",sectionVisibility)
 
 	return (
 		<div className="max-w-4xl mx-auto bg-white text-gray-800 text-base">
@@ -54,7 +55,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 			<div className="p-8">
 				{/* Professional Summary */}
-				{data.professional_summary && (
+				{data.professional_summary && sectionVisibility.summary  && (
 					<section className="mb-8">
 						<h2 className="text-3xl font-light mb-4 pb-2 border-b border-gray-200">
 							Professional Summary
@@ -67,7 +68,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 				)}
 
 				{/* Experience */}
-				{data.experience && data.experience.length > 0 && (
+				{data.experience &&   sectionVisibility.experience && data.experience.length > 0 && (
 					<section className="mb-8">
 						<h2 className="text-3xl font-light mb-6 pb-2 border-b border-gray-200">
 							Experience
@@ -99,7 +100,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 				)}
 
 				{/* Projects */}
-				{data.project && data.project.length > 0 && (
+				{data.project && data.project.length > 0 &&sectionVisibility.projects && (
 					<section className="mb-8">
 						<h2 className="text-3xl font-light mb-4 pb-2 border-b border-gray-200">
 							Projects
@@ -129,7 +130,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 				<div className="grid sm:grid-cols-2 gap-8">
 					{/* Education */}
-					{data.education && data.education.length > 0 && (
+					{data.education && data.education.length > 0 && sectionVisibility.education && (
 						<section>
 							<h2 className="text-3xl font-light mb-4 pb-2 border-b border-gray-200">
 								Education
@@ -153,7 +154,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 					)}
 
 					{/* Skills */}
-					{data.skills && data.skills.length > 0 && (
+					{data.skills && data.skills.length > 0 &&sectionVisibility.skills&& (
 						<section>
 							<h2 className="text-3xl font-light mb-4 pb-2 border-b border-gray-200">
 								Skills

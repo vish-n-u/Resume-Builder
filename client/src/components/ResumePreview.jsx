@@ -16,8 +16,6 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
         achievements: true,
     }
 
-    console.log('ResumePreview sectionVisibility:', sectionVisibility)
-
     const renderTemplate = ()=>{
         switch (template) {
             case "modern":

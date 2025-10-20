@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
-const ClassicTemplate = ({ data, accentColor }) => {
+const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
+    console.log("sectionVisibility==>",sectionVisibility)
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -53,7 +54,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             </header>
 
             {/* Professional Summary */}
-            {data.professional_summary && (
+            {data.professional_summary && sectionVisibility.summary && (
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold mb-3" style={{ color: accentColor }}>
                         PROFESSIONAL SUMMARY
@@ -66,7 +67,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Experience */}
-            {data.experience && data.experience.length > 0 && (
+            {data.experience && data.experience.length  > 0 &&   sectionVisibility.experience && (
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold mb-4" style={{ color: accentColor }}>
                         PROFESSIONAL EXPERIENCE
@@ -97,7 +98,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Projects */}
-            {data.project && data.project.length > 0 && (
+            {data.project && data.project.length > 0 &&  sectionVisibility.projects &&  (
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold mb-4" style={{ color: accentColor }}>
                         PROJECTS
@@ -120,7 +121,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Education */}
-            {data.education && data.education.length > 0 && (
+            {data.education && data.education.length > 0 && sectionVisibility.education && (
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold mb-4" style={{ color: accentColor }}>
                         EDUCATION
@@ -146,7 +147,7 @@ const ClassicTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Skills */}
-            {data.skills && data.skills.length > 0 && (
+            {data.skills && data.skills.length > 0 && sectionVisibility.skills&&  (
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold mb-4" style={{ color: accentColor }}>
                         CORE SKILLS

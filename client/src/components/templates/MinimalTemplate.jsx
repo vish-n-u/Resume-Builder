@@ -1,5 +1,5 @@
 
-const MinimalTemplate = ({ data, accentColor }) => {
+const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -31,7 +31,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             </header>
 
             {/* Professional Summary */}
-            {data.professional_summary && (
+            {data.professional_summary && sectionVisibility.summary && (
                 <section className="mb-10">
                     <div
                         className="text-base text-gray-700 quill-content"
@@ -41,7 +41,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Experience */}
-            {data.experience && data.experience.length > 0 && (
+            {data.experience && data.experience.length > 0 && sectionVisibility.experience && (
                 <section className="mb-10">
                     <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Experience
@@ -70,7 +70,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Projects */}
-            {data.project && data.project.length > 0 && (
+            {data.project && data.project.length > 0 && sectionVisibility.projects && (
                 <section className="mb-10">
                     <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Projects
@@ -91,7 +91,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Education */}
-            {data.education && data.education.length > 0 && (
+            {data.education && data.education.length > 0 && sectionVisibility.education && (
                 <section className="mb-10">
                     <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Education
@@ -117,7 +117,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
             )}
 
             {/* Skills */}
-            {data.skills && data.skills.length > 0 && (
+            {data.skills && data.skills.length > 0 && sectionVisibility.skills && (
                 <section>
                     <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Skills

@@ -90,18 +90,13 @@ const ResumeBuilder = () => {
   const activeSection = sections[activeSectionIndex]
 
   const toggleSectionVisibility = (sectionId) => {
-    console.log('Toggling section:', sectionId)
-    setResumeData(prev => {
-      const newVisibility = !prev.sectionVisibility[sectionId]
-      console.log(`Setting ${sectionId} to:`, newVisibility)
-      return {
-        ...prev,
-        sectionVisibility: {
-          ...prev.sectionVisibility,
-          [sectionId]: newVisibility
-        }
+    setResumeData(prev => ({
+      ...prev,
+      sectionVisibility: {
+        ...prev.sectionVisibility,
+        [sectionId]: !prev.sectionVisibility[sectionId]
       }
-    })
+    }))
   }
 
   useEffect(()=>{

@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 
-const MinimalImageTemplate = ({ data, accentColor }) => {
+const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -71,7 +71,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     </section>
 
                     {/* Education */}
-                    {data.education && data.education.length > 0 && (
+                    {data.education && data.education.length > 0 && sectionVisibility.education && (
                         <section className="mb-8">
                             <h2 className="text-base font-semibold tracking-widest text-zinc-600 mb-3">
                                 EDUCATION
@@ -91,7 +91,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Skills */}
-                    {data.skills && data.skills.length > 0 && (
+                    {data.skills && data.skills.length > 0 &&sectionVisibility.skills && (
                         <section>
                             <h2 className="text-base font-semibold tracking-widest text-zinc-600 mb-3">
                                 SKILLS
@@ -109,7 +109,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                 <main className="col-span-2 p-8 pt-0">
 
                     {/* Summary */}
-                    {data.professional_summary && (
+                    {data.professional_summary && sectionVisibility.summary &&  (
                         <section className="mb-8">
                             <h2 className="text-lg font-semibold tracking-widest mb-3" style={{ color: accentColor }} >
                                 SUMMARY
@@ -122,7 +122,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Experience */}
-                    {data.experience && data.experience.length > 0 && (
+                    {data.experience && data.experience.length > 0 && sectionVisibility.experience && (
                         <section>
                             <h2 className="text-lg font-semibold tracking-widest mb-4" style={{ color: accentColor }} >
                                 EXPERIENCE
@@ -155,7 +155,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Projects */}
-                    {data.project && data.project.length > 0 && (
+                    {data.project && data.project.length > 0 &&  sectionVisibility.projects && (
                         <section>
                             <h2 className="text-lg uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
                                 PROJECTS
