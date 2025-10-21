@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import './QuillTextEditor.css';
 
 const QuillEditor = ({ content, onTextChange, onSelectionChange, readOnly }) => {
   console.log("content==>",content)
@@ -15,7 +16,7 @@ const QuillEditor = ({ content, onTextChange, onSelectionChange, readOnly }) => 
     onTextChange(value)
   },[value])
 
-  return <ReactQuill style={{fontSize:"40px"}} theme="snow" value={value} onChange={setValue} />;
+  return <ReactQuill className="quill-editor-large" theme="snow" value={value} onChange={setValue} />;
 };
 
 export default QuillEditor;

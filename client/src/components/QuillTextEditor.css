@@ -1,0 +1,29 @@
+/* Increase font size for Quill editor content */
+.quill-editor-large .ql-editor {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Also increase font size for toolbar */
+.quill-editor-large .ql-snow .ql-picker-label {
+  font-size: 14px;
+}
+
+/* Make the editor more readable */
+.quill-editor-large .ql-editor p,
+.quill-editor-large .ql-editor ol,
+.quill-editor-large .ql-editor ul,
+.quill-editor-large .ql-editor pre,
+.quill-editor-large .ql-editor blockquote,
+.quill-editor-large .ql-editor h1,
+.quill-editor-large .ql-editor h2,
+.quill-editor-large .ql-editor h3,
+.quill-editor-large .ql-editor h4,
+.quill-editor-large .ql-editor h5,
+.quill-editor-large .ql-editor h6 {
+  font-size: 16px;
+}
+
+.quill-editor-large .ql-editor li {
+  font-size: 16px;
+}

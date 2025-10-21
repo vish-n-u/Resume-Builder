@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import React from 'react'
 import QuillEditor from './QuillTextEditor'
 
@@ -24,6 +24,20 @@ const updateProject = (index, field, value)=>{
     onChange(updated)
 }
 
+const moveProjectUp = (index) => {
+    if (index === 0) return; // Can't move up if it's the first item
+    const updated = [...data];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    onChange(updated);
+}
+
+const moveProjectDown = (index) => {
+    if (index === data.length - 1) return; // Can't move down if it's the last item
+    const updated = [...data];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    onChange(updated);
+}
+
   return (
     <div>
       <div className='flex items-center justify-between'>
@@ -43,9 +57,27 @@ const updateProject = (index, field, value)=>{
                 <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-3">
                     <div className='flex justify-between items-start'>
                         <h4>Project #{index + 1}</h4>
-                        <button onClick={()=> removeProject(index)} className='text-red-500 hover:text-red-700 transition-colors'>
-                            <Trash2 className="size-4"/>
-                        </button>
+                        <div className='flex items-center gap-2'>
+                            <button
+                                onClick={()=> moveProjectUp(index)}
+                                disabled={index === 0}
+                                className={`${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-500 hover:text-blue-700'} transition-colors`}
+                                title="Move up"
+                            >
+                                <ChevronUp className="size-4"/>
+                            </button>
+                            <button
+                                onClick={()=> moveProjectDown(index)}
+                                disabled={index === data.length - 1}
+                                className={`${index === data.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-500 hover:text-blue-700'} transition-colors`}
+                                title="Move down"
+                            >
+                                <ChevronDown className="size-4"/>
+                            </button>
+                            <button onClick={()=> removeProject(index)} className='text-red-500 hover:text-red-700 transition-colors' title="Delete">
+                                <Trash2 className="size-4"/>
+                            </button>
+                        </div>
                     </div>
 
                     <div className='grid gap-3'>
