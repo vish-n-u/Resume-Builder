@@ -13,13 +13,18 @@ import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
 import CertificationsForm from '../components/CertificationsForm'
 import AchievementsForm from '../components/AchievementsForm'
+import CustomSectionsForm from '../components/CustomSectionsForm'
 
 const UserProfile = () => {
 
   const { user, token } = useSelector(state => state.auth)
   const dispatch = useDispatch()
 
-  const [activeTab, setActiveTab] = useState('account') // account, resume-data, security
+  // Check if coming from onboarding (set resume-data as default tab)
+  const params = new URLSearchParams(window.location.search)
+  const fromOnboarding = params.get('onboarding') === 'true'
+
+  const [activeTab, setActiveTab] = useState(fromOnboarding ? 'resume-data' : 'account') // account, resume-data, security
   const [isLoading, setIsLoading] = useState(false)
 
   // Account fields
@@ -50,6 +55,7 @@ const UserProfile = () => {
     education: [],
     certifications: [],
     achievements: [],
+    custom_sections: [],
   })
 
   const [removeBackground, setRemoveBackground] = useState(false)
@@ -84,6 +90,7 @@ const UserProfile = () => {
             education: data.defaultResumeData.education || [],
             certifications: data.defaultResumeData.certifications || [],
             achievements: data.defaultResumeData.achievements || [],
+            custom_sections: data.defaultResumeData.custom_sections || [],
           })
         }
       } catch (error) {
@@ -204,7 +211,7 @@ const UserProfile = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 font-medium transition-all ${
                   activeTab === tab.id
-                    ? 'text-indigo-600 border-b-2 border-indigo-600'
+                    ? 'text-yellow-600 border-b-2 border-yellow-600'
                     : 'text-slate-600 hover:text-slate-800'
                 }`}
               >
@@ -231,7 +238,7 @@ const UserProfile = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
                     required
                   />
                 </div>
@@ -243,14 +250,14 @@ const UserProfile = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
                     required
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className='bg-gradient-to-br from-indigo-500 to-indigo-600 text-white px-8 py-2.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -278,7 +285,7 @@ const UserProfile = () => {
                 {/* Personal Info Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <UserIcon className='size-5 text-indigo-600' />
+                    <UserIcon className='size-5 text-yellow-600' />
                     Personal Information
                   </h3>
                   <PersonalInfoForm
@@ -292,7 +299,7 @@ const UserProfile = () => {
                 {/* Professional Summary Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <FileTextIcon className='size-5 text-indigo-600' />
+                    <FileTextIcon className='size-5 text-yellow-600' />
                     Professional Summary
                   </h3>
                   <ProfessionalSummaryForm
@@ -305,7 +312,7 @@ const UserProfile = () => {
                 {/* Skills Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <Sparkles className='size-5 text-indigo-600' />
+                    <Sparkles className='size-5 text-yellow-600' />
                     Skills
                   </h3>
                   <SkillsForm
@@ -317,7 +324,7 @@ const UserProfile = () => {
                 {/* Experience Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <Briefcase className='size-5 text-indigo-600' />
+                    <Briefcase className='size-5 text-yellow-600' />
                     Work Experience
                   </h3>
                   <ExperienceForm
@@ -329,7 +336,7 @@ const UserProfile = () => {
                 {/* Education Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <GraduationCap className='size-5 text-indigo-600' />
+                    <GraduationCap className='size-5 text-yellow-600' />
                     Education
                   </h3>
                   <EducationForm
@@ -341,7 +348,7 @@ const UserProfile = () => {
                 {/* Projects Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <FolderIcon className='size-5 text-indigo-600' />
+                    <FolderIcon className='size-5 text-yellow-600' />
                     Projects
                   </h3>
                   <ProjectForm
@@ -353,7 +360,7 @@ const UserProfile = () => {
                 {/* Certifications Section */}
                 <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <Award className='size-5 text-indigo-600' />
+                    <Award className='size-5 text-yellow-600' />
                     Certifications
                   </h3>
                   <CertificationsForm
@@ -363,9 +370,9 @@ const UserProfile = () => {
                 </div>
 
                 {/* Achievements Section */}
-                <div className='pb-8'>
+                <div className='border-b border-gray-200 pb-8'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
-                    <Trophy className='size-5 text-indigo-600' />
+                    <Trophy className='size-5 text-yellow-600' />
                     Achievements
                   </h3>
                   <AchievementsForm
@@ -374,12 +381,24 @@ const UserProfile = () => {
                   />
                 </div>
 
+                {/* Custom Sections */}
+                <div className='pb-8'>
+                  <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
+                    <FileTextIcon className='size-5 text-yellow-600' />
+                    Custom Sections
+                  </h3>
+                  <CustomSectionsForm
+                    data={defaultResumeData.custom_sections}
+                    onChange={(data) => setDefaultResumeData(prev => ({ ...prev, custom_sections: data }))}
+                  />
+                </div>
+
                 {/* Save Button */}
                 <div className='pt-4 border-t border-gray-200'>
                   <button
                     onClick={() => toast.promise(handleSaveDefaultResumeData(), { loading: 'Saving...' })}
                     disabled={isLoading}
-                    className='flex items-center gap-2 bg-gradient-to-br from-green-500 to-green-600 text-white px-8 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='flex items-center gap-2 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
                   >
                     <SaveIcon className='size-5' />
                     Save Default Resume Data
@@ -406,7 +425,7 @@ const UserProfile = () => {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
                     required
                   />
                 </div>
@@ -418,7 +437,7 @@ const UserProfile = () => {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
                     required
                     minLength={6}
                   />
@@ -432,7 +451,7 @@ const UserProfile = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
                     required
                     minLength={6}
                   />
@@ -440,7 +459,7 @@ const UserProfile = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className='bg-gradient-to-br from-indigo-500 to-indigo-600 text-white px-8 py-2.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {isLoading ? 'Updating...' : 'Update Password'}
                 </button>

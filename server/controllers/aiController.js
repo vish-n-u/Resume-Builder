@@ -59,6 +59,127 @@ export const enhanceJobDescription = async (req, res) => {
     }
 }
 
+// controller for uploading resume and saving to default resume data (for onboarding)
+// POST: /api/ai/upload-resume-to-profile
+export const uploadResumeToProfile = async (req, res) => {
+    try {
+        const {resumeText} = req.body;
+        const userId = req.userId;
+
+        if(!resumeText){
+            return res.status(400).json({message: 'Missing required fields'})
+        }
+
+        const systemPrompt = "You are an expert AI Agent to extract data from resume."
+
+        const userPrompt = `extract data from this resume: ${resumeText}
+
+        Provide data in the following JSON format with no additional text before or after:
+
+        {
+        professional_summary: { type: String, default: '' },
+        skills: [{ type: String }],
+        personal_info: {
+            image: {type: String, default: '' },
+            full_name: {type: String, default: '' },
+            profession: {type: String, default: '' },
+            email: {type: String, default: '' },
+            phone: {type: String, default: '' },
+            location: {type: String, default: '' },
+            linkedin: {type: String, default: '' },
+            website: {type: String, default: '' },
+        },
+        experience: [
+            {
+                company: { type: String },
+                position: { type: String },
+                start_date: { type: String },
+                end_date: { type: String },
+                description: { type: String },
+                is_current: { type: Boolean },
+            }
+        ],
+        project: [
+            {
+                name: { type: String },
+                type: { type: String },
+                description: { type: String },
+            }
+        ],
+        education: [
+            {
+                institution: { type: String },
+                degree: { type: String },
+                field: { type: String },
+                graduation_date: { type: String },
+                gpa: { type: String },
+            }
+        ],
+        certifications: [
+            {
+                name: { type: String },
+                issuer: { type: String },
+                date: { type: String },
+                credential_id: { type: String },
+            }
+        ],
+        achievements: [
+            {
+                title: { type: String },
+                description: { type: String },
+            }
+        ],
+        }
+        Instructions:-
+        1) Provide the data in json structure, but dont add the type field, that is there to provide u the context in which the response for each field is expected.
+        2) Extract as much information as possible including certifications and achievements if present.
+        `;
+
+       const response = await ai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                { role: "system",
+                 content: systemPrompt },
+                {
+                    role: "user",
+                    content: userPrompt,
+                },
+        ],
+        response_format: {type:  'json_object'}
+        })
+
+        const extractedData = response.choices[0].message.content;
+        console.log("extractedData==>",extractedData)
+
+        const parsedData = JSON.parse(extractedData)
+        console.log("data parsed")
+
+        // Save to DetailedResume (default resume data) instead of creating a resume
+        const detailedResume = await DetailedResume.findOneAndUpdate(
+            { userId },
+            {
+                userId,
+                professional_summary: parsedData.professional_summary || '',
+                skills: parsedData.skills || [],
+                personal_info: parsedData.personal_info || {},
+                experience: parsedData.experience || [],
+                project: parsedData.project || [],
+                education: parsedData.education || [],
+                certifications: parsedData.certifications || [],
+                achievements: parsedData.achievements || [],
+                custom_sections: []
+            },
+            { new: true, upsert: true }
+        )
+        console.log("default resume data saved")
+
+        res.json({message: 'Resume data saved to profile successfully'})
+    } catch (error) {
+        console.error("error uploading resume to profile:", error)
+        return res.status(400).json({message: error.message})
+    }
+}
+
 // controller for uploading a resume to the database
 // POST: /api/ai/upload-resume
 export const uploadResume = async (req, res) => {
@@ -290,51 +411,50 @@ export const tailorResume = async (req, res) => {
 
         const systemPrompt = `You are an expert resume tailoring AI. Your task is to analyze a job description and the user's complete profile data, then create a perfectly tailored resume that highlights the most relevant experience, skills, and achievements for that specific role.
 
-CRITICAL RULES - ABSOLUTELY NO HALLUCINATION:
+CRITICAL RULES
 1. ONLY use data that exists in the user's profile - DO NOT invent, add, or fabricate ANY information
-2. NEVER add skills that are not explicitly listed in the user's skills array
-3. NEVER modify job titles, company names, dates, or any factual details from experience
-4. NEVER add projects that don't exist in the user's project array
-5. NEVER change education details (institution, degree, field, dates, GPA)
-6. NEVER add responsibilities or achievements that aren't in the original descriptions
-7. If the user's profile lacks relevant experience for the job, work with what exists - DO NOT make up experience
+2. NEVER modify job titles, company names, dates
+3. NEVER add projects that don't exist in the user's project array
+4. NEVER change education details (institution, degree, field, dates, GPA)
+5. Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
 
 WHAT YOU CAN DO:
 1. SELECT the most relevant items from the user's existing data
 2. REORDER experience/projects to show most relevant first
-3. FILTER skills to include only those relevant to the job description
+3. Based on the user experience and projects you can take the liberty to add skills based on Job Desription
 4. REWRITE the professional summary using the user's actual background to target this specific role
 5. EMPHASIZE relevant parts of existing descriptions without changing facts
+6. You have the liberty to change experience a bit if it naturally fits with the Users's experience and projects to match the JD.
+7. Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
 
 SELECTION CRITERIA:
 - Analyze the job description to understand required skills and responsibilities
 - From the user's profile, select items that best match the job requirements
 - Prioritize experience and projects that demonstrate relevant capabilities
-- Include only skills from the user's profile that match the job description
 
 Return ONLY valid JSON with no additional text.`;
 
         const userPrompt = `JOB DESCRIPTION:
 ${jobDescription}
 
-USER'S COMPLETE PROFILE DATA (USE ONLY THIS DATA - DO NOT ADD ANYTHING):
+USER'S COMPLETE PROFILE DATA :
 ${JSON.stringify(userProfileData, null, 2)}
 
 INSTRUCTIONS:
-Create a tailored resume using ONLY the data provided above. Select and reorder the most relevant items.
+Create a tailored resume using  the data provided above. Select and reorder the most relevant items.
 
 CRITICAL:
-- DO NOT add any skills not in the user's skills array
 - DO NOT modify company names, job titles, or dates in experience
 - DO NOT add projects not in the user's project array
-- DO NOT invent any achievements or responsibilities
+- DO NOT invent any achievements 
 - DO NOT change education details
-- Only SELECT, FILTER, and REORDER existing data
+- Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
+
 
 Return in this exact JSON format:
 {
-  "professional_summary": "Write a 2-3 sentence summary using ONLY the user's actual background and experience from the profile data above, tailored to highlight relevance to this job",
-  "skills": ["Select ONLY skills from the user's skills array above that are relevant to the job - do not add new skills"],
+  "professional_summary": "Write a 2-3 sentence summary using ONLY the user's  background and experience from the profile data above, tailored to highlight relevance to this job",
+  "skills": [],
   "personal_info": {
     "image": "${detailedResume.personal_info.image || ''}",
     "full_name": "${detailedResume.personal_info.full_name || ''}",
@@ -351,7 +471,7 @@ Return in this exact JSON format:
       "position": "EXACT position from user's data",
       "start_date": "EXACT start_date from user's data",
       "end_date": "EXACT end_date from user's data",
-      "description": "EXACT description from user's data - do not modify",
+      "description": "Can modify slightly based on above rules.",
       "is_current": "EXACT is_current value from user's data"
     }
     // Include most relevant experiences, reordered by relevance to the job
@@ -360,7 +480,7 @@ Return in this exact JSON format:
     {
       "name": "EXACT name from user's data",
       "type": "EXACT type from user's data",
-      "description": "EXACT description from user's data - do not modify"
+      "description": ""
     }
     // Include most relevant projects, reordered by relevance
   ],

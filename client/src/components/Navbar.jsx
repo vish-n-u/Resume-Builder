@@ -19,8 +19,9 @@ const Navbar = () => {
   return (
     <div className='shadow bg-white'>
       <nav className='flex items-center justify-between max-w-7xl mx-auto px-4 py-3.5 text-slate-800 transition-all'>
-        <Link to='/'>
-            <img src="/logo.svg" alt="logo" className="h-11 w-auto" />
+        <Link to='/' className="flex items-center gap-2">
+            <span className="text-2xl">🌻</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
         </Link>
         <div className='flex items-center gap-4 text-sm'>
             <p className='max-sm:hidden'>Hi, {user?.name}</p>

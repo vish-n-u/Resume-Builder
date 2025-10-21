@@ -22,8 +22,34 @@ const Dashboard = () => {
   const [jobDescription, setJobDescription] = useState('')
 
   const [isLoading, setIsLoading] = useState(false)
+  const [hasDefaultResumeData, setHasDefaultResumeData] = useState(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const navigate = useNavigate()
+
+  const checkDefaultResumeData = async () => {
+    try {
+      const { data } = await api.get('/api/users/default-resume-data', {headers: { Authorization: token }})
+      const hasData = data.defaultResumeData && Object.keys(data.defaultResumeData).length > 0
+
+      // Check if there's meaningful data (not just empty fields)
+      const hasMeaningfulData = hasData && (
+        data.defaultResumeData.personal_info?.full_name ||
+        data.defaultResumeData.professional_summary ||
+        (data.defaultResumeData.experience && data.defaultResumeData.experience.length > 0) ||
+        (data.defaultResumeData.education && data.defaultResumeData.education.length > 0)
+      )
+
+      setHasDefaultResumeData(hasMeaningfulData)
+      if (!hasMeaningfulData) {
+        setShowOnboarding(true)
+      }
+    } catch (error) {
+      console.error('Error checking default resume data:', error)
+      setHasDefaultResumeData(false)
+      setShowOnboarding(true)
+    }
+  }
 
   const loadAllResumes = async () =>{
     try {
@@ -52,11 +78,24 @@ const Dashboard = () => {
     setIsLoading(true)
     try {
       const resumeText = await pdfToText(resume)
-      const { data } = await api.post('/api/ai/upload-resume', {title, resumeText}, {headers: { Authorization: token }})
-      setTitle('')
-      setResume(null)
-      setShowUploadResume(false)
-      navigate(`/app/builder/${data.resumeId}`)
+
+      // If user doesn't have default resume data, save to profile instead of creating resume
+      if (hasDefaultResumeData === false) {
+        await api.post('/api/ai/upload-resume-to-profile', {resumeText}, {headers: { Authorization: token }})
+        setTitle('')
+        setResume(null)
+        setShowUploadResume(false)
+        setHasDefaultResumeData(true) // Update state
+        toast.success('Resume uploaded successfully! Please review and complete your profile.')
+        navigate('/app/profile?onboarding=true')
+      } else {
+        // User has profile data, create a new resume
+        const { data } = await api.post('/api/ai/upload-resume', {title, resumeText}, {headers: { Authorization: token }})
+        setTitle('')
+        setResume(null)
+        setShowUploadResume(false)
+        navigate(`/app/builder/${data.resumeId}`)
+      }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message)
     }
@@ -126,6 +165,7 @@ const Dashboard = () => {
   }
 
   useEffect(()=>{
+    checkDefaultResumeData()
     loadAllResumes()
   },[])
 
@@ -136,22 +176,22 @@ const Dashboard = () => {
         <p className='text-2xl font-medium mb-6 bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden'>Welcome, {user?.name}</p>
 
         {/* AI-Powered Job Description Feature - Main Feature */}
-        <div className='bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl p-6 mb-8 shadow-sm'>
+        <div className='bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-6 mb-8 shadow-sm'>
           <div className='flex items-start gap-4'>
-            <div className='p-3 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg'>
+            <div className='p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg'>
               <SparklesIcon className='size-8 text-white' />
             </div>
             <div className='flex-1'>
               <h2 className='text-xl font-bold text-slate-800 mb-2 flex items-center gap-2'>
                 AI-Tailored Resume Creator
-                <span className='text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full'>NEW</span>
+                <span className='text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full'>NEW</span>
               </h2>
               <p className='text-slate-600 mb-4'>
                 Paste a job description and our AI will create a perfectly tailored resume using your profile data. Highlighting the most relevant skills and experience for the role.
               </p>
               <button
                 onClick={() => setShowJobDescriptionModal(true)}
-                className='flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all active:scale-95 shadow-md hover:shadow-lg font-medium'
+                className='flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 text-white px-6 py-3 rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-all active:scale-95 shadow-md hover:shadow-lg font-medium'
               >
                 <BriefcaseIcon className='size-5' />
                 Create AI-Tailored Resume
@@ -198,9 +238,9 @@ const Dashboard = () => {
           <form onSubmit={createResume} onClick={()=> setShowCreateResume(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center'>
             <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-sm p-6'>
               <h2 className='text-xl font-bold mb-4'>Create a Resume</h2>
-              <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-green-600 ring-green-600' required/>
+              <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-yellow-600 ring-yellow-600' required/>
 
-              <button className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors'>Create Resume</button>
+              <button className='w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors'>Create Resume</button>
               <XIcon className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors' onClick={()=> {setShowCreateResume(false); setTitle('')}}/>
             </div>
           </form>
@@ -210,14 +250,16 @@ const Dashboard = () => {
         {showUploadResume && (
           <form onSubmit={uploadResume} onClick={()=> setShowUploadResume(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center'>
             <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-sm p-6'>
-              <h2 className='text-xl font-bold mb-4'>Upload Resume</h2>
-              <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-green-600 ring-green-600' required/>
+              <h2 className='text-xl font-bold mb-4'>{hasDefaultResumeData === false ? 'Upload Resume to Profile' : 'Upload Resume'}</h2>
+              {hasDefaultResumeData !== false && (
+                <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-yellow-600 ring-yellow-600' required/>
+              )}
                 <div>
                   <label htmlFor="resume-input" className="block text-sm text-slate-700">
                     Select resume file
-                    <div className='flex flex-col items-center justify-center gap-2 border group text-slate-400 border-slate-400 border-dashed rounded-md p-4 py-10 my-4 hover:border-green-500 hover:text-green-700 cursor-pointer transition-colors'>
+                    <div className='flex flex-col items-center justify-center gap-2 border group text-slate-400 border-slate-400 border-dashed rounded-md p-4 py-10 my-4 hover:border-yellow-500 hover:text-yellow-700 cursor-pointer transition-colors'>
                       {resume ? (
-                        <p className='text-green-700'>{resume.name}</p>
+                        <p className='text-yellow-700'>{resume.name}</p>
                       ) : (
                         <>
                           <UploadCloud className='size-14 stroke-1'/>
@@ -228,7 +270,7 @@ const Dashboard = () => {
                   </label>
                   <input type="file" id='resume-input' accept='.pdf' hidden onChange={(e)=> setResume(e.target.files[0])}/>
                 </div>
-              <button disabled={isLoading} className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2'>
+              <button disabled={isLoading} className='w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors flex items-center justify-center gap-2'>
                 {isLoading && <LoaderCircleIcon className='animate-spin size-4 text-white'/>}
                 {isLoading ? 'Uploading...' : 'Upload Resume'}
                 
@@ -243,21 +285,125 @@ const Dashboard = () => {
           <form onSubmit={editTitle} onClick={()=> setEditResumeId('')} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center'>
             <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-sm p-6'>
               <h2 className='text-xl font-bold mb-4'>Edit Resume Title</h2>
-              <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-green-600 ring-green-600' required/>
+              <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-yellow-600 ring-yellow-600' required/>
 
-              <button className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors'>Update</button>
+              <button className='w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors'>Update</button>
               <XIcon className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors' onClick={()=> {setEditResumeId(''); setTitle('')}}/>
             </div>
           </form>
         )
         }
 
+        {/* Onboarding Modal */}
+        {showOnboarding && hasDefaultResumeData === false && (
+          <div className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-50 flex items-center justify-center p-4'>
+            <div className='relative bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl'>
+              {/* Header */}
+              <div className='text-center mb-8'>
+                <div className='inline-block p-4 bg-gradient-to-br from-yellow-100 to-amber-100 rounded-full mb-4'>
+                  <span className='text-5xl'>🌻</span>
+                </div>
+                <h2 className='text-3xl font-bold text-slate-800 mb-3'>
+                  Welcome to Flower Resume!
+                </h2>
+                <p className='text-lg text-slate-600 max-w-xl mx-auto'>
+                  To get started with AI-powered resume generation, we need your professional details first.
+                </p>
+              </div>
+
+              {/* Options */}
+              <div className='grid md:grid-cols-2 gap-4 mb-6'>
+                {/* Upload Resume Option */}
+                <button
+                  onClick={() => {
+                    setShowOnboarding(false)
+                    setShowUploadResume(true)
+                  }}
+                  className='group relative bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200 hover:border-purple-300 rounded-xl p-6 text-left transition-all active:scale-95'
+                >
+                  <div className='flex items-start gap-4'>
+                    <div className='p-3 bg-gradient-to-br from-purple-400 to-purple-500 rounded-lg group-hover:scale-110 transition-transform'>
+                      <UploadCloudIcon className='size-6 text-white' />
+                    </div>
+                    <div className='flex-1'>
+                      <h3 className='text-lg font-bold text-slate-800 mb-2'>
+                        Upload Resume
+                      </h3>
+                      <p className='text-sm text-slate-600'>
+                        Have an existing resume? Upload it and we'll extract all your information automatically.
+                      </p>
+                    </div>
+                  </div>
+                  <div className='absolute top-4 right-4'>
+                    <div className='px-3 py-1 bg-purple-500 text-white text-xs font-medium rounded-full'>
+                      Fastest
+                    </div>
+                  </div>
+                </button>
+
+                {/* Manual Entry Option */}
+                <button
+                  onClick={() => {
+                    setShowOnboarding(false)
+                    navigate('/app/profile?onboarding=true')
+                  }}
+                  className='group relative bg-gradient-to-br from-yellow-50 to-amber-100 hover:from-yellow-100 hover:to-amber-200 border-2 border-yellow-200 hover:border-yellow-300 rounded-xl p-6 text-left transition-all active:scale-95'
+                >
+                  <div className='flex items-start gap-4'>
+                    <div className='p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg group-hover:scale-110 transition-transform'>
+                      <FilePenLineIcon className='size-6 text-white' />
+                    </div>
+                    <div className='flex-1'>
+                      <h3 className='text-lg font-bold text-slate-800 mb-2'>
+                        Enter Details Manually
+                      </h3>
+                      <p className='text-sm text-slate-600'>
+                        Fill out your information step-by-step. Add experience, education, skills, and more.
+                      </p>
+                    </div>
+                  </div>
+                  <div className='absolute top-4 right-4'>
+                    <div className='px-3 py-1 bg-yellow-500 text-white text-xs font-medium rounded-full'>
+                      Most Control
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Info Box */}
+              <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6'>
+                <div className='flex items-start gap-3'>
+                  <SparklesIcon className='size-5 text-blue-600 mt-0.5 flex-shrink-0' />
+                  <div className='flex-1'>
+                    <p className='text-sm text-blue-900 font-medium mb-1'>
+                      Why do we need this?
+                    </p>
+                    <p className='text-sm text-blue-800'>
+                      Your profile information is used by our AI to create tailored resumes for each job you apply to. The more detailed you are, the better your resumes will be!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Skip Option */}
+              <div className='text-center'>
+                <button
+                  onClick={() => setShowOnboarding(false)}
+                  className='text-sm text-slate-500 hover:text-slate-700 underline transition-colors'
+                >
+                  I'll do this later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Job Description Modal - AI Tailored Resume */}
         {showJobDescriptionModal && (
           <form onSubmit={createTailoredResume} onClick={()=> setShowJobDescriptionModal(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center p-4'>
             <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-2xl p-6'>
               <div className='flex items-center gap-3 mb-4'>
-                <div className='p-2 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg'>
+                <div className='p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg'>
                   <SparklesIcon className='size-6 text-white' />
                 </div>
                 <h2 className='text-2xl font-bold text-slate-800'>Create AI-Tailored Resume</h2>
@@ -277,7 +423,7 @@ const Dashboard = () => {
                     value={title}
                     type="text"
                     placeholder='e.g., Senior Software Engineer at Google'
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent'
+                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
                     required
                   />
                 </div>
@@ -294,7 +440,7 @@ const Dashboard = () => {
 
 Example:
 We are looking for a Senior Software Engineer with 5+ years of experience in React, Node.js, and AWS. You will lead the development of our SaaS platform...'
-                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none'
+                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none'
                     rows={12}
                     required
                   />
@@ -308,7 +454,7 @@ We are looking for a Senior Software Engineer with 5+ years of experience in Rea
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className='flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium'
+                  className='flex-1 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium'
                 >
                   {isLoading ? (
                     <>
