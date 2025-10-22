@@ -417,20 +417,23 @@ CRITICAL RULES
 3. NEVER add projects that don't exist in the user's project array
 4. NEVER change education details (institution, degree, field, dates, GPA)
 5. Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
+6. Dont Hallucinate or make up data to just to match the JD, it has to be relevant with what the User actually knows.
 
 WHAT YOU CAN DO:
 1. SELECT the most relevant items from the user's existing data
 2. REORDER experience/projects to show most relevant first
-3. Based on the user experience and projects you can take the liberty to add skills based on Job Desription
-4. REWRITE the professional summary using the user's actual background to target this specific role
+3. Based on the user experience and projects you can take the liberty to add skills based on Job Desription(but it has to be in sync with User Profile Data , For example if user uses node-fetch , u can add Axios in his skills but not Drupal , because it is not similar at all to node-fetch.)
+4. REWRITE the professional summary using the user's actual background to target this specific role(but dont hallucinate just to match JD)
 5. EMPHASIZE relevant parts of existing descriptions without changing facts
 6. You have the liberty to change experience a bit if it naturally fits with the Users's experience and projects to match the JD.
 7. Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
+8. INCORPORATE soft skills mentioned in the job description - weave them naturally into the professional summary and/or experience descriptions where they align with the user's background
 
 SELECTION CRITERIA:
-- Analyze the job description to understand required skills and responsibilities
+- Analyze the job description to understand required skills (both technical and soft skills) and responsibilities
 - From the user's profile, select items that best match the job requirements
 - Prioritize experience and projects that demonstrate relevant capabilities
+- Identify soft skills (communication, leadership, teamwork, problem-solving, etc.) from the JD and integrate them naturally(without hallucinating or making up completely new data.)
 
 Return ONLY valid JSON with no additional text.`;
 
@@ -446,14 +449,17 @@ Create a tailored resume using  the data provided above. Select and reorder the 
 CRITICAL:
 - DO NOT modify company names, job titles, or dates in experience
 - DO NOT add projects not in the user's project array
-- DO NOT invent any achievements 
+- DO NOT invent any achievements
 - DO NOT change education details
 - Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
+- IDENTIFY and INCORPORATE soft skills from the job description (e.g., communication, leadership, teamwork, collaboration, problem-solving, adaptability, time management, critical thinking) naturally into:
+  1. The professional summary - weave in relevant soft skills that match the user's background
+  2. Experience descriptions - highlight instances where these soft skills were demonstrated
 
 
 Return in this exact JSON format:
 {
-  "professional_summary": "Write a 2-3 sentence summary using ONLY the user's  background and experience from the profile data above, tailored to highlight relevance to this job",
+  "professional_summary": "Write a 2-3 sentence summary using ONLY the user's  background and experience from the profile data above, tailored to highlight relevance to this job. Include relevant soft skills from the job description naturally.",
   "skills": [],
   "personal_info": {
     "image": "${detailedResume.personal_info.image || ''}",
@@ -471,7 +477,7 @@ Return in this exact JSON format:
       "position": "EXACT position from user's data",
       "start_date": "EXACT start_date from user's data",
       "end_date": "EXACT end_date from user's data",
-      "description": "Can modify slightly based on above rules.",
+      "description": "Can modify slightly based on above rules. Incorporate relevant soft skills from the job description naturally into the descriptions where appropriate.",
       "is_current": "EXACT is_current value from user's data"
     }
     // Include most relevant experiences, reordered by relevance to the job
@@ -503,7 +509,7 @@ Return in this exact JSON format:
                 { role: "user", content: userPrompt }
             ],
             response_format: { type: 'json_object' },
-            temperature: 0.7
+            temperature: 0.5
         });
 
         const tailoredData = JSON.parse(response.choices[0].message.content);
