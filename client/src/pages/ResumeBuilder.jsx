@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { dummyResumeData } from '../assets/assets'
-import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User } from 'lucide-react'
+import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User, Plus } from 'lucide-react'
 import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
 import TemplateSelector from '../components/TemplateSelector'
@@ -13,9 +13,11 @@ import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
 import CertificationsForm from '../components/CertificationsForm'
 import AchievementsForm from '../components/AchievementsForm'
+import CustomSectionsForm from '../components/CustomSectionsForm'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
+import SEO from '../components/SEO'
 
 const ResumeBuilder = () => {
 
@@ -34,6 +36,7 @@ const ResumeBuilder = () => {
     skills: [],
     certifications: [],
     achievements: [],
+    custom_sections: [],
     template: "classic",
     accent_color: "#3B82F6",
     public: false,
@@ -45,6 +48,7 @@ const ResumeBuilder = () => {
       skills: true,
       certifications: true,
       achievements: true,
+      customSections: true,
     }
   })
 
@@ -55,6 +59,7 @@ const ResumeBuilder = () => {
       // Ensure sectionVisibility exists with default values
       const loadedResume = {
         ...data.resume,
+        custom_sections: data.resume.custom_sections || [],
         sectionVisibility: data.resume.sectionVisibility || {
           summary: true,
           experience: true,
@@ -63,6 +68,7 @@ const ResumeBuilder = () => {
           skills: true,
           certifications: true,
           achievements: true,
+          customSections: true,
         }
       }
       setResumeData(loadedResume)
@@ -87,6 +93,7 @@ const ResumeBuilder = () => {
     { id: "skills", name: "Skills", icon: Sparkles },
     { id: "certifications", name: "Certifications", icon: Award },
     { id: "achievements", name: "Achievements", icon: Trophy },
+    { id: "customSections", name: "Custom Sections", icon: Plus },
   ]
 
   const activeSection = sections[activeSectionIndex]
@@ -173,8 +180,13 @@ const saveResume = async () => {
 }
 
   return (
-    <div>
-
+    <>
+      <SEO
+        title="Resume Builder - Flower Resume | Create Your Professional Resume"
+        description="Build and customize your professional resume with AI assistance. Choose templates, add sections, and export to PDF."
+        keywords="build resume, resume editor, professional resume builder, customize resume, resume templates"
+        ogUrl="https://flowerresume.com/app/builder"
+      />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
           <ArrowLeftIcon className="size-4"/> Back to Dashboard
@@ -318,6 +330,21 @@ const saveResume = async () => {
                         </button>
                       </div>
                       <AchievementsForm data={resumeData.achievements} onChange={(data)=> setResumeData(prev=> ({...prev, achievements: data}))}/>
+                    </div>
+                  )}
+                  {activeSection.id === 'customSections' && (
+                    <div>
+                      <div className='flex items-center justify-between mb-4'>
+                        <h3 className='text-lg font-semibold text-gray-900'>Custom Sections</h3>
+                        <button
+                          onClick={() => toggleSectionVisibility('customSections')}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.customSections ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility.customSections ? 'Hide in preview' : 'Show in preview'}
+                        >
+                          {resumeData.sectionVisibility.customSections ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                        </button>
+                      </div>
+                      <CustomSectionsForm data={resumeData.custom_sections} onChange={(data)=> setResumeData(prev=> ({...prev, custom_sections: data}))}/>
                     </div>
                   )}
 
@@ -489,7 +516,7 @@ const saveResume = async () => {
         </div>
       </div>
 
-    </div>
+    </>
   )
 }
 

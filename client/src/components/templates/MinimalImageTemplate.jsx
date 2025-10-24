@@ -156,7 +156,7 @@ const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
 
                     {/* Projects */}
                     {data.project && data.project.length > 0 &&  sectionVisibility.projects && (
-                        <section>
+                        <section className="mb-8">
                             <h2 className="text-lg uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
                                 PROJECTS
                             </h2>
@@ -177,6 +177,59 @@ const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
                                 ))}
                             </div>
                         </section>
+                    )}
+
+                    {/* Certifications */}
+                    {data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
+                        <section className="mb-8">
+                            <h2 className="text-lg font-semibold tracking-widest mb-4" style={{ color: accentColor }}>
+                                CERTIFICATIONS
+                            </h2>
+                            <div className="space-y-4">
+                                {data.certifications.map((cert, index) => (
+                                    <div key={index}>
+                                        <h3 className="text-lg font-semibold text-zinc-900">{cert.name}</h3>
+                                        {cert.issuer && <p className="text-base" style={{ color: accentColor }}>{cert.issuer}</p>}
+                                        {cert.date && <p className="text-base text-zinc-500">{formatDate(cert.date)}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Achievements */}
+                    {data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
+                        <section className="mb-8">
+                            <h2 className="text-lg font-semibold tracking-widest mb-4" style={{ color: accentColor }}>
+                                ACHIEVEMENTS
+                            </h2>
+                            <ul className="space-y-2 list-disc pl-6">
+                                {data.achievements.map((achievement, index) => (
+                                    <li key={index} className="text-base text-zinc-700">
+                                        {achievement}
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+
+                    {/* Custom Sections */}
+                    {data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
+                        <>
+                            {data.custom_sections.map((section, index) => (
+                                section.section_name && section.content && (
+                                    <section key={index} className="mb-8">
+                                        <h2 className="text-lg font-semibold tracking-widest mb-4" style={{ color: accentColor }}>
+                                            {section.section_name.toUpperCase()}
+                                        </h2>
+                                        <div
+                                            className="text-base text-zinc-700 leading-relaxed quill-content"
+                                            dangerouslySetInnerHTML={{ __html: section.content }}
+                                        />
+                                    </section>
+                                )
+                            ))}
+                        </>
                     )}
                 </main>
             </div>

@@ -1,0 +1,11 @@
+# robots.txt for Flower Resume
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /view/
+
+# Sitemap location
+Sitemap: https://flowerresume.com/sitemap.xml
+
+# Crawl-delay (optional, adjust as needed)
+Crawl-delay: 1

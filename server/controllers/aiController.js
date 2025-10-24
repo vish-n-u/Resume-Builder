@@ -409,57 +409,59 @@ export const tailorResume = async (req, res) => {
             project: detailedResume.project
         };
 
-        const systemPrompt = `You are an expert resume tailoring AI. Your task is to analyze a job description and the user's complete profile data, then create a perfectly tailored resume that highlights the most relevant experience, skills, and achievements for that specific role.
+        const systemPrompt = `
+You are an expert resume tailoring AI that customizes resumes strictly based on verified user data.
 
-CRITICAL RULES
-1. ONLY use data that exists in the user's profile - DO NOT invent, add, or fabricate ANY information
-2. NEVER modify job titles, company names, dates
-3. NEVER add projects that don't exist in the user's project array
-4. NEVER change education details (institution, degree, field, dates, GPA)
-5. Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
-6. Dont Hallucinate or make up data to just to match the JD, it has to be relevant with what the User actually knows.
+PRIMARY OBJECTIVE:
+Create a resume tailored to a job description — only by reorganizing, rewording, and emphasizing data that already exists in the user's profile.
 
-WHAT YOU CAN DO:
-1. SELECT the most relevant items from the user's existing data
-2. REORDER experience/projects to show most relevant first
-3. Based on the user experience and projects you can take the liberty to add skills based on Job Desription(but it has to be in sync with User Profile Data , For example if user uses node-fetch , u can add Axios in his skills but not Drupal , because it is not similar at all to node-fetch.)
-4. REWRITE the professional summary using the user's actual background to target this specific role(but dont hallucinate just to match JD)
-5. EMPHASIZE relevant parts of existing descriptions without changing facts
-6. You have the liberty to change experience a bit if it naturally fits with the Users's experience and projects to match the JD.
-7. Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
-8. INCORPORATE soft skills mentioned in the job description - weave them naturally into the professional summary and/or experience descriptions where they align with the user's background
+CRITICAL RULES:
+1. DO NOT fabricate, assume, or infer information that isn't explicitly present in the user's profile.
+2. DO NOT modify company names, job titles, dates, education details, or add new projects.
+3. DO NOT create achievements, metrics, or results that are not already in the profile.
+4. Only rephrase or highlight details that genuinely exist in the user data.
+5. If something is missing (e.g. a required JD skill is not in user data), simply omit it — do not try to fill that gap.
+6. Use minimal HTML formatting (<b>, <i>, <u>, <ol>, <li>, <a href>) to enhance readability. Do not overuse formatting.
+7. NEVER generate content that would make the resume factually inaccurate.
 
-SELECTION CRITERIA:
-- Analyze the job description to understand required skills (both technical and soft skills) and responsibilities
-- From the user's profile, select items that best match the job requirements
-- Prioritize experience and projects that demonstrate relevant capabilities
-- Identify soft skills (communication, leadership, teamwork, problem-solving, etc.) from the JD and integrate them naturally(without hallucinating or making up completely new data.)
+ALLOWED FLEXIBILITY:
+- You may reorder experience or projects for better relevance.
+- You may slightly rephrase text for clarity or alignment with the JD (only if true to the user’s background).
+- You may include *closely related skills* if they are implied by the user’s actual tools or technologies (e.g., user lists “fetch API” → “Axios” is acceptable; “Drupal” is not).
+- You may mention soft skills (communication, teamwork, etc.) only if they naturally fit with the user’s history.
 
-Return ONLY valid JSON with no additional text.`;
+BEHAVIOR GUIDELINES:
+- When unsure whether a skill, tool, or detail exists → assume it does NOT exist.
+- It’s better to omit something than to risk fabrication.
+- Focus on truth, clarity, and relevance over keyword matching.
 
-        const userPrompt = `JOB DESCRIPTION:
+Return ONLY valid JSON. No explanations or extra text.
+`;
+
+
+const userPrompt = `
+JOB DESCRIPTION:
 ${jobDescription}
 
-USER'S COMPLETE PROFILE DATA :
+USER PROFILE DATA:
 ${JSON.stringify(userProfileData, null, 2)}
 
 INSTRUCTIONS:
-Create a tailored resume using  the data provided above. Select and reorder the most relevant items.
+Using the job description above, tailor the resume strictly using the data provided. 
+Select and reorder the most relevant items — do not invent or assume.
 
 CRITICAL:
-- DO NOT modify company names, job titles, or dates in experience
-- DO NOT add projects not in the user's project array
-- DO NOT invent any achievements
-- DO NOT change education details
-- Use HTML Formatting (use stuff like <bold> , <italics> , <ol>, <u>, <a href> ) to format and highlight key points of the resume, dont overdo it.
-- IDENTIFY and INCORPORATE soft skills from the job description (e.g., communication, leadership, teamwork, collaboration, problem-solving, adaptability, time management, critical thinking) naturally into:
-  1. The professional summary - weave in relevant soft skills that match the user's background
-  2. Experience descriptions - highlight instances where these soft skills were demonstrated
+- Do not modify factual details like names, titles, dates, institutions, or degrees.
+- Do not fabricate achievements, results, or metrics.
+- Use only projects, experiences, and education that exist in the user's data.
+- When incorporating soft skills, only include those that can logically fit with the user's real experience.
+- Use light HTML formatting (<b>, <i>, <u>, <ol>, <li>, <a href>) for emphasis.
 
+If certain JD requirements don’t match any part of the user’s data, simply omit them.
 
-Return in this exact JSON format:
+Return the response in this exact JSON structure:
 {
-  "professional_summary": "Write a 2-3 sentence summary using ONLY the user's  background and experience from the profile data above, tailored to highlight relevance to this job. Include relevant soft skills from the job description naturally.",
+  "professional_summary": "2–3 sentence factual summary using only the user's actual experience, tailored for this job.",
   "skills": [],
   "personal_info": {
     "image": "${detailedResume.personal_info.image || ''}",
@@ -477,18 +479,16 @@ Return in this exact JSON format:
       "position": "EXACT position from user's data",
       "start_date": "EXACT start_date from user's data",
       "end_date": "EXACT end_date from user's data",
-      "description": "Can modify slightly based on above rules. Incorporate relevant soft skills from the job description naturally into the descriptions where appropriate.",
+      "description": "Only rephrased, not fabricated. May include relevant soft skills naturally if appropriate.",
       "is_current": "EXACT is_current value from user's data"
     }
-    // Include most relevant experiences, reordered by relevance to the job
   ],
   "project": [
     {
       "name": "EXACT name from user's data",
       "type": "EXACT type from user's data",
-      "description": ""
+      "description": "Only rephrased for clarity or relevance — do not add new content."
     }
-    // Include most relevant projects, reordered by relevance
   ],
   "education": [
     {
@@ -498,9 +498,10 @@ Return in this exact JSON format:
       "graduation_date": "EXACT graduation_date from user's data",
       "gpa": "EXACT gpa from user's data"
     }
-    // Include all education entries with EXACT data
   ]
-}`;
+}
+`;
+
 
         const response = await ai.chat.completions.create({
             model: process.env.OPENAI_MODEL,

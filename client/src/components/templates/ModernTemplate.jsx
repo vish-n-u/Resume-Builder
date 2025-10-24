@@ -174,6 +174,61 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 						</section>
 					)}
 				</div>
+
+				{/* Certifications */}
+				{data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
+					<section className="mb-8 mt-8">
+						<h2 className="text-3xl font-light mb-6 pb-2 border-b border-gray-200">
+							Certifications
+						</h2>
+
+						<div className="space-y-4">
+							{data.certifications.map((cert, index) => (
+								<div key={index} className="relative pl-6 border-l border-gray-200">
+									<h3 className="text-xl font-medium text-gray-900">{cert.name}</h3>
+									{cert.issuer && <p className="text-base font-medium" style={{ color: accentColor }}>{cert.issuer}</p>}
+									{cert.date && <p className="text-base text-gray-500">{formatDate(cert.date)}</p>}
+								</div>
+							))}
+						</div>
+					</section>
+				)}
+
+				{/* Achievements */}
+				{data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
+					<section className="mb-8">
+						<h2 className="text-3xl font-light mb-6 pb-2 border-b border-gray-200">
+							Achievements
+						</h2>
+
+						<ul className="space-y-2 list-disc pl-6">
+							{data.achievements.map((achievement, index) => (
+								<li key={index} className="text-base text-gray-700">
+									{achievement}
+								</li>
+							))}
+						</ul>
+					</section>
+				)}
+
+				{/* Custom Sections */}
+				{data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
+					<>
+						{data.custom_sections.map((section, index) => (
+							section.section_name && section.content && (
+								<section key={index} className="mb-8">
+									<h2 className="text-3xl font-light mb-6 pb-2 border-b border-gray-200">
+										{section.section_name}
+									</h2>
+									<div
+										className="text-base text-gray-700 leading-relaxed quill-content"
+										dangerouslySetInnerHTML={{ __html: section.content }}
+									/>
+								</section>
+							)
+						))}
+					</>
+				)}
 			</div>
 		</div>
 	);

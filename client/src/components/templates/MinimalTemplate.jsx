@@ -118,7 +118,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Skills */}
             {data.skills && data.skills.length > 0 && sectionVisibility.skills && (
-                <section>
+                <section className="mb-10">
                     <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
                         Skills
                     </h2>
@@ -127,6 +127,61 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                         {data.skills.join(" • ")}
                     </div>
                 </section>
+            )}
+
+            {/* Certifications */}
+            {data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
+                <section className="mb-10">
+                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                        Certifications
+                    </h2>
+
+                    <div className="space-y-4">
+                        {data.certifications.map((cert, index) => (
+                            <div key={index}>
+                                <h3 className="text-lg font-medium">{cert.name}</h3>
+                                {cert.issuer && <p className="text-base text-gray-600">{cert.issuer}</p>}
+                                {cert.date && <p className="text-base text-gray-500">{formatDate(cert.date)}</p>}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Achievements */}
+            {data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
+                <section className="mb-10">
+                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                        Achievements
+                    </h2>
+
+                    <ul className="space-y-2">
+                        {data.achievements.map((achievement, index) => (
+                            <li key={index} className="text-base text-gray-700">
+                                • {achievement}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {/* Custom Sections */}
+            {data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
+                <>
+                    {data.custom_sections.map((section, index) => (
+                        section.section_name && section.content && (
+                            <section key={index} className="mb-10">
+                                <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                                    {section.section_name}
+                                </h2>
+                                <div
+                                    className="text-base text-gray-700 leading-relaxed quill-content"
+                                    dangerouslySetInnerHTML={{ __html: section.content }}
+                                />
+                            </section>
+                        )
+                    ))}
+                </>
             )}
         </div>
     );

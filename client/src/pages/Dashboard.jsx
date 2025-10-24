@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import pdfToText from 'react-pdftotext'
+import SEO from '../components/SEO'
 
 const Dashboard = () => {
 
@@ -170,7 +171,13 @@ const Dashboard = () => {
   },[])
 
   return (
-    <div>
+    <>
+      <SEO
+        title="Dashboard - Flower Resume | Manage Your Resumes"
+        description="Access your resume dashboard. Create, edit, and manage professional resumes with AI-powered assistance."
+        keywords="resume dashboard, manage resumes, create resume, edit resume"
+        ogUrl="https://flowerresume.com/app"
+      />
       <div className='max-w-7xl mx-auto px-4 py-8'>
 
         <p className='text-2xl font-medium mb-6 bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden'>Welcome, {user?.name}</p>
@@ -484,7 +491,7 @@ We are looking for a Senior Software Engineer with 5+ years of experience in Rea
         )}
 
       </div>
-    </div>
+    </>
   )
 }
 

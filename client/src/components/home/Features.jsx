@@ -5,17 +5,17 @@ import Title from './Title';
 const Features = () => {
     const [isHover, setIsHover] = React.useState(false);
   return (
-    <div id='features' className='flex flex-col items-center my-10 scroll-mt-12'>
+    <section id='features' className='flex flex-col items-center my-10 scroll-mt-12' aria-labelledby="features-heading">
 
     <div className="flex items-center gap-2 text-sm text-yellow-700 bg-yellow-400/10 rounded-full px-6 py-1.5">
-        <Zap width={14}/>
+        <Zap width={14} aria-hidden="true"/>
         <span>Simple Process</span>
     </div>
     <Title title='How Flower Resume Works' description='Just three simple steps to get your perfectly tailored, AI-powered resume that matches any job requirement.'/>
 
             <div className="flex flex-col md:flex-row items-center xl:-mt-10">
-                <img className="max-w-2xl w-full xl:-ml-32" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/features/group-image-1.png" alt="" />
-                <div className="px-4 md:px-0" onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+                <img className="max-w-2xl w-full xl:-ml-32" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/features/group-image-1.png" alt="Resume builder interface showing professional templates and customization options" loading="lazy" />
+                <article className="px-4 md:px-0" onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
                     <div className={"flex items-center justify-center gap-6 max-w-md group cursor-pointer"}>
                         <div className={`p-6 group-hover:bg-yellow-100 border border-transparent group-hover:border-yellow-300  flex gap-4 rounded-xl transition-colors ${!isHover ? 'border-yellow-300 bg-yellow-100' : ''}`}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 stroke-yellow-600"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
@@ -43,16 +43,16 @@ const Features = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </article>
             </div>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-            
+
                 * {
                     font-family: 'Poppins', sans-serif;
                 }
             `}</style>
-        </div>
+        </section>
   )
 }
 
