@@ -10,14 +10,14 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-8 bg-white text-gray-900 font-light text-base">
+        <div className="max-w-4xl mx-auto p-8 bg-white text-gray-900 font-light text-sm">
             {/* Header */}
             <header className="mb-10">
                 <h1 className="text-5xl font-thin mb-4 tracking-wide">
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>
 
-                <div className="flex flex-wrap gap-6 text-base text-gray-600">
+                <div className="flex flex-wrap gap-6 text-sm text-gray-600">
                     {data.personal_info?.email && <span>{data.personal_info.email}</span>}
                     {data.personal_info?.phone && <span>{data.personal_info.phone}</span>}
                     {data.personal_info?.location && <span>{data.personal_info.location}</span>}
@@ -34,7 +34,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
             {data.professional_summary && sectionVisibility.summary && (
                 <section className="mb-10">
                     <div
-                        className="text-base text-gray-700 quill-content"
+                        className="text-sm text-gray-700 quill-content"
                         dangerouslySetInnerHTML={{ __html: data.professional_summary }}
                     />
                 </section>
@@ -51,15 +51,15 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                         {data.experience.map((exp, index) => (
                             <div key={index} className="experience-item">
                                 <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className="text-xl font-medium">{exp.position}</h3>
-                                    <span className="text-base text-gray-500">
+                                    <h3 className="text-base font-medium">{exp.position}</h3>
+                                    <span className="text-sm text-gray-500">
                                         {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
                                     </span>
                                 </div>
-                                <p className="text-base text-gray-600 mb-2">{exp.company}</p>
+                                <p className="text-sm text-gray-600 mb-2">{exp.company}</p>
                                 {exp.description && (
                                     <div
-                                        className="text-base text-gray-700 leading-relaxed quill-content"
+                                        className="text-sm text-gray-700 leading-relaxed quill-content"
                                         dangerouslySetInnerHTML={{ __html: exp.description }}
                                     />
                                 )}
@@ -79,9 +79,9 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                     <div className="space-y-4">
                         {data.project.map((proj, index) => (
                             <div key={index} className="project-item flex flex-col gap-2 justify-between items-baseline">
-                                <h3 className="text-xl font-medium ">{proj.name}</h3>
+                                <h3 className="text-base font-medium ">{proj.name}</h3>
                                 <div
-                                    className="text-base text-gray-600 quill-content"
+                                    className="text-sm text-gray-600 quill-content"
                                     dangerouslySetInnerHTML={{ __html: proj.description }}
                                 />
                             </div>
@@ -101,13 +101,13 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                         {data.education.map((edu, index) => (
                             <div key={index} className="education-item flex justify-between items-baseline">
                                 <div>
-                                    <h3 className="text-lg font-medium">
+                                    <h3 className="text-base font-medium">
                                         {edu.degree} {edu.field && `in ${edu.field}`}
                                     </h3>
-                                    <p className="text-base text-gray-600">{edu.institution}</p>
-                                    {edu.gpa && <p className="text-base text-gray-500">GPA: {edu.gpa}</p>}
+                                    <p className="text-sm text-gray-600">{edu.institution}</p>
+                                    {edu.gpa && <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>}
                                 </div>
-                                <span className="text-base text-gray-500">
+                                <span className="text-sm text-gray-500">
                                     {formatDate(edu.graduation_date)}
                                 </span>
                             </div>
@@ -123,7 +123,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                         Skills
                     </h2>
 
-                    <div className="text-base text-gray-700">
+                    <div className="text-sm text-gray-700">
                         {data.skills.join(" • ")}
                     </div>
                 </section>
@@ -139,9 +139,9 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                     <div className="space-y-4">
                         {data.certifications.map((cert, index) => (
                             <div key={index}>
-                                <h3 className="text-lg font-medium">{cert.name}</h3>
-                                {cert.issuer && <p className="text-base text-gray-600">{cert.issuer}</p>}
-                                {cert.date && <p className="text-base text-gray-500">{formatDate(cert.date)}</p>}
+                                <h3 className="text-base font-medium">{cert.name}</h3>
+                                {cert.issuer && <p className="text-sm text-gray-600">{cert.issuer}</p>}
+                                {cert.date && <p className="text-sm text-gray-500">{formatDate(cert.date)}</p>}
                             </div>
                         ))}
                     </div>
@@ -157,7 +157,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
                     <ul className="space-y-2">
                         {data.achievements.map((achievement, index) => (
-                            <li key={index} className="text-base text-gray-700">
+                            <li key={index} className="text-sm text-gray-700">
                                 • {achievement}
                             </li>
                         ))}
@@ -175,7 +175,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                                     {section.section_name}
                                 </h2>
                                 <div
-                                    className="text-base text-gray-700 leading-relaxed quill-content"
+                                    className="text-sm text-gray-700 leading-relaxed quill-content"
                                     dangerouslySetInnerHTML={{ __html: section.content }}
                                 />
                             </section>

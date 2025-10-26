@@ -40,6 +40,9 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
         {`
         @page {
           size: letter;
+          margin: 0.75in 0 0.75in 0;
+        }
+        @page:first {
           margin: 0;
         }
         @media print {

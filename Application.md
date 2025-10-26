@@ -23,13 +23,19 @@
 The Resume Builder is a full-stack web application that enables users to create, customize, and manage professional resumes using AI-powered enhancements. The application follows a **client-server architecture** with a React-based frontend and Node.js/Express backend, connected to MongoDB for data persistence and OpenAI for AI capabilities.
 
 ### Key Capabilities
-- **User Management**: Registration, authentication, and authorization
+- **User Management**: Registration, authentication, authorization, and profile management
 - **Resume CRUD Operations**: Create, read, update, and delete resumes
 - **AI Enhancement**: Automated content improvement using OpenAI
+- **AI-Powered Resume Tailoring**: Create job-specific resumes based on job descriptions
+- **AI Job Description Suggestions**: Get intelligent suggestions for resume content based on job postings
 - **PDF Processing**: Extract resume data from uploaded PDFs
+- **Default Resume Data**: Store and manage user's master resume data for quick resume creation
 - **Template System**: Multiple customizable resume templates
+- **Rich Text Editor**: Quill-based text editor for detailed content formatting
 - **Image Management**: Profile photo upload with background removal
 - **Sharing**: Public/private resume sharing capabilities
+- **SEO Optimization**: Meta tags and structured data for public resumes
+- **Extended Sections**: Certifications, achievements, and custom sections support
 
 ---
 
@@ -76,8 +82,8 @@ The Resume Builder is a full-stack web application that enables users to create,
 │  │              │  │                                  │         │
 │  │ - User       │  │ - Database (MongoDB)             │         │
 │  │ - Resume     │  │ - AI (OpenAI)                    │         │
-│  │              │  │ - ImageKit                       │         │
-│  │              │  │ - Multer (File Upload)           │         │
+│  │ - Detailed   │  │ - ImageKit                       │         │
+│  │   Resume     │  │ - Multer (File Upload)           │         │
 │  └──────────────┘  └──────────────────────────────────┘         │
 └───────────────┬───────────────────┬────────────────┬────────────┘
                 │                   │                │
@@ -87,6 +93,7 @@ The Resume Builder is a full-stack web application that enables users to create,
     │                    │  │              │  │            │
     │ - Users Collection │  │ - GPT Models │  │ - Images   │
     │ - Resumes Coll.    │  │ - JSON Mode  │  │ - BG Rem.  │
+    │ - DetailedResumes  │  │ - Tailoring  │  │            │
     └────────────────────┘  └──────────────┘  └────────────┘
 ```
 
@@ -107,6 +114,11 @@ The Resume Builder is a full-stack web application that enables users to create,
 | Lucide React | 0.544.0 | Icon Library |
 | React Hot Toast | 2.6.0 | Toast Notifications |
 | React PDF to Text | 1.3.4 | PDF Text Extraction |
+| jsPDF | 3.0.3 | PDF Generation |
+| jsPDF AutoTable | 5.0.2 | PDF Table Generation |
+| Quill | 2.0.3 | Rich Text Editor Core |
+| React Quill New | 3.6.0 | React Wrapper for Quill |
+| React Helmet Async | 2.0.5 | SEO Meta Tags Management |
 
 ### Backend Technologies
 | Technology | Version | Purpose |
@@ -114,7 +126,7 @@ The Resume Builder is a full-stack web application that enables users to create,
 | Node.js | Latest | Runtime Environment |
 | Express | 5.1.0 | Web Framework |
 | Mongoose | 8.18.3 | MongoDB ODM |
-| OpenAI | 6.1.0 | AI Integration |
+| OpenAI | 6.5.0 | AI Integration |
 | JWT | 9.0.2 | Authentication Tokens |
 | bcrypt | 6.0.0 | Password Hashing |
 | ImageKit | 7.1.0 | Image Storage & Processing |
@@ -167,7 +179,10 @@ client/
 │   │   │   ├── ModernTemplate.jsx
 │   │   │   └── MinimalImageTemplate.jsx
 │   │   │
+│   │   ├── AchievementsForm.jsx # Achievements section form
+│   │   ├── CertificationsForm.jsx # Certifications section form
 │   │   ├── ColorPicker.jsx     # Color customization
+│   │   ├── CustomSectionsForm.jsx # Custom sections form
 │   │   ├── EducationForm.jsx   # Education section form
 │   │   ├── ExperienceForm.jsx  # Work experience form
 │   │   ├── Loader.jsx          # Loading component
@@ -175,7 +190,9 @@ client/
 │   │   ├── PersonalInfoForm.jsx # Personal info form
 │   │   ├── ProfessionalSummaryForm.jsx # Summary form
 │   │   ├── ProjectForm.jsx     # Projects form
+│   │   ├── QuillTextEditor.jsx # Rich text editor component
 │   │   ├── ResumePreview.jsx   # Live resume preview
+│   │   ├── SEO.jsx             # SEO meta tags component
 │   │   ├── SkillsForm.jsx      # Skills section form
 │   │   └── TemplateSelector.jsx # Template picker
 │   │
@@ -186,6 +203,7 @@ client/
 │   │   ├── Home.jsx            # Landing page
 │   │   ├── Dashboard.jsx       # User dashboard
 │   │   ├── ResumeBuilder.jsx   # Resume editor
+│   │   ├── UserProfile.jsx     # User profile management
 │   │   ├── Preview.jsx         # Public resume view
 │   │   ├── Login.jsx           # Auth page
 │   │   └── Layout.jsx          # Protected routes layout
@@ -222,6 +240,7 @@ server/
 │
 ├── models/                      # Database schemas
 │   ├── Resume.js               # Resume schema
+│   ├── DetailedResume.js       # Default resume data schema
 │   └── User.js                 # User schema
 │
 ├── routes/                      # API routes
@@ -304,6 +323,31 @@ Process:
 - **Fields**: Skills as tags
 - **Features**: Add/remove skills, tag-based UI
 
+#### CertificationsForm (client/src/components/CertificationsForm.jsx)
+- **Props**: `data`, `onChange`
+- **Fields**: Certification name, issuer, date, credential ID
+- **Features**: Dynamic array management, add/remove entries
+
+#### AchievementsForm (client/src/components/AchievementsForm.jsx)
+- **Props**: `data`, `onChange`
+- **Fields**: Achievement title, description
+- **Features**: Dynamic array management, add/remove entries
+
+#### CustomSectionsForm (client/src/components/CustomSectionsForm.jsx)
+- **Props**: `data`, `onChange`
+- **Fields**: Section name, content (with rich text editor)
+- **Features**: Dynamic custom sections, reorderable, rich text editing
+
+#### QuillTextEditor (client/src/components/QuillTextEditor.jsx)
+- **Props**: `value`, `onChange`, `placeholder`
+- **Purpose**: Rich text editor for formatted content
+- **Features**: HTML formatting, toolbar for text styling
+
+#### SEO (client/src/components/SEO.jsx)
+- **Props**: `title`, `description`, `keywords`, `canonicalUrl`
+- **Purpose**: Manage SEO meta tags for public resume pages
+- **Features**: Dynamic meta tags, OpenGraph tags, structured data
+
 #### TemplateSelector (client/src/components/TemplateSelector.jsx)
 - **Props**: `selectedTemplate`, `onChange`
 - **Templates**: Classic, Minimal, Modern, Minimal-Image
@@ -363,6 +407,9 @@ Process:
 4. Education
 5. Projects
 6. Skills
+7. Certifications
+8. Achievements
+9. Custom Sections
 
 ---
 
@@ -390,6 +437,7 @@ Methods:
 {
   userId: ObjectId (ref: "User"),
   title: String (default: "Untitled Resume"),
+  job_description: String (default: ""),
   public: Boolean (default: false),
   template: String (default: "classic"),
   accent_color: String (default: "#3B82F6"),
@@ -436,6 +484,78 @@ Methods:
 }
 ```
 
+### DetailedResume Schema (Default Resume Data)
+**Location**: `server/models/DetailedResume.js`
+
+```javascript
+{
+  userId: ObjectId (ref: "User", required: true, unique: true),
+  professional_summary: String (default: ''),
+  skills: [String],
+
+  personal_info: {
+    image: String,
+    full_name: String,
+    profession: String,
+    email: String,
+    phone: String,
+    location: String,
+    linkedin: String,
+    website: String
+  },
+
+  experience: [{
+    company: String,
+    position: String,
+    start_date: String,
+    end_date: String,
+    description: String,
+    is_current: Boolean
+  }],
+
+  project: [{
+    name: String,
+    type: String,
+    description: String
+  }],
+
+  education: [{
+    institution: String,
+    degree: String,
+    field: String,
+    graduation_date: String,
+    gpa: String
+  }],
+
+  certifications: [{
+    name: String,
+    issuer: String,
+    date: String,
+    credential_id: String
+  }],
+
+  achievements: [{
+    title: String,
+    description: String
+  }],
+
+  custom_sections: [{
+    section_name: String,
+    content: String
+  }],
+
+  timestamps: true,
+  minimize: false
+}
+
+Purpose:
+- Stores user's master/default resume data
+- Used as the source for AI-powered resume tailoring
+- One per user (unique constraint on userId)
+- Can be populated via PDF upload or manual entry
+- Includes extended sections (certifications, achievements, custom)
+```
+
 ---
 
 ## API Architecture
@@ -451,6 +571,10 @@ Methods:
 | POST | `/login` | No | User login |
 | GET | `/data` | Yes | Get authenticated user data |
 | GET | `/resumes` | Yes | Get all user's resumes |
+| PUT | `/update` | Yes | Update user profile |
+| PUT | `/change-password` | Yes | Change user password |
+| GET | `/default-resume-data` | Yes | Get user's default resume data |
+| PUT | `/update-default-resume-data` | Yes | Update default resume data (with image upload) |
 
 #### Resume Routes
 **Base Path**: `/api/resumes`
@@ -458,11 +582,10 @@ Methods:
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/create` | Yes | Create new resume |
-| GET | `/get/:resumeId` | No* | Get resume by ID |
-| PUT | `/update` | Yes | Update resume |
+| GET | `/get/:resumeId` | Yes | Get resume by ID (authenticated) |
+| GET | `/public/:resumeId` | No | Get public resume by ID |
+| PUT | `/update` | Yes | Update resume (with image upload) |
 | DELETE | `/delete/:resumeId` | Yes | Delete resume |
-
-*Note: Public resumes can be accessed without auth
 
 #### AI Routes
 **Base Path**: `/api/ai`
@@ -471,7 +594,10 @@ Methods:
 |--------|----------|------|-------------|
 | POST | `/enhance-pro-sum` | Yes | Enhance professional summary |
 | POST | `/enhance-job-desc` | Yes | Enhance job description |
-| POST | `/upload-resume` | Yes | Upload and parse PDF resume |
+| POST | `/suggest-job-desc` | Yes | Get AI suggestions based on job posting |
+| POST | `/upload-resume` | Yes | Upload and parse PDF resume (creates new resume) |
+| POST | `/upload-resume-to-profile` | Yes | Upload and parse PDF to default resume data |
+| POST | `/tailor-resume` | Yes | Create tailored resume from job description |
 
 ### Request/Response Examples
 
@@ -529,6 +655,65 @@ Content-Type: application/json
 Response:
 {
   "resumeId": "507f1f77bcf86cd799439011"
+}
+```
+
+#### Upload Resume to Profile
+```http
+POST /api/ai/upload-resume-to-profile
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "resumeText": "John Doe\nSoftware Engineer\n..."
+}
+
+Response:
+{
+  "message": "Resume data saved to profile successfully"
+}
+```
+
+#### Suggest Job Description
+```http
+POST /api/ai/suggest-job-desc
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "currentDescription": "Developed web applications",
+  "jobDescription": "Full job posting text...",
+  "position": "Senior Software Engineer",
+  "company": "Tech Corp"
+}
+
+Response:
+{
+  "suggestions": [
+    "Architected and deployed scalable microservices...",
+    "Led cross-functional team of 5 developers...",
+    "Reduced application load time by 40%...",
+    "Implemented CI/CD pipeline reducing deployment time...",
+    "Mentored junior developers on best practices..."
+  ]
+}
+```
+
+#### Tailor Resume
+```http
+POST /api/ai/tailor-resume
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "title": "Software Engineer - Tech Corp",
+  "jobDescription": "We are looking for a Senior Software Engineer with experience in React, Node.js..."
+}
+
+Response:
+{
+  "message": "Tailored resume created successfully",
+  "resumeId": "507f1f77bcf86cd799439012"
 }
 ```
 
@@ -749,19 +934,98 @@ Provide data in the following JSON format:
 {
   professional_summary: String,
   skills: [String],
-  personal_info: {
-    full_name: String,
-    profession: String,
-    email: String,
-    phone: String,
-    location: String,
-    linkedin: String,
-    website: String
-  },
+  personal_info: {...},
   experience: [...],
   project: [...],
   education: [...]
 }
+```
+
+#### 4. Upload Resume to Profile (Onboarding)
+**Endpoint**: `POST /api/ai/upload-resume-to-profile`
+
+```javascript
+Process:
+1. Receive PDF text from user
+2. Build structured prompt with extended JSON schema
+3. Call OpenAI GPT-4o-mini with response_format: json_object
+4. Parse returned JSON including certifications and achievements
+5. Save/update DetailedResume (upsert operation)
+6. Return success message
+
+Key Difference from upload-resume:
+- Saves to DetailedResume collection (default data)
+- Includes certifications and achievements extraction
+- Uses upsert to update existing default data
+- Does not create a new resume document
+```
+
+**Extended Schema**:
+```
+Includes all standard fields plus:
+- certifications: [{name, issuer, date, credential_id}]
+- achievements: [{title, description}]
+```
+
+#### 5. Suggest Job Description
+**Endpoint**: `POST /api/ai/suggest-job-desc`
+
+```javascript
+Process:
+1. Receive job description, current description, position, company
+2. Fetch user's DetailedResume for context
+3. Build contextual prompt with user's background
+4. Call OpenAI with temperature: 0.8 for creative suggestions
+5. Return 5 actionable bullet point suggestions
+
+AI Strategy:
+- Analyzes job description for required skills/responsibilities
+- Uses user's actual background as context
+- Generates realistic, ATS-friendly suggestions
+- Focuses on achievements and quantifiable results
+- Keyword-optimized for the target job
+```
+
+**System Prompt**:
+```
+"You are an expert resume writer and career coach. Your task is to
+provide 5 specific, actionable suggestions for job description bullet
+points that align with the given job description..."
+```
+
+#### 6. Tailor Resume (AI-Powered Resume Customization)
+**Endpoint**: `POST /api/ai/tailor-resume`
+
+```javascript
+Process:
+1. Receive job description and desired resume title
+2. Fetch user's DetailedResume (master data)
+3. Build comprehensive prompt with strict guidelines
+4. Call OpenAI with temperature: 0.5 for controlled creativity
+5. Parse AI-generated tailored resume data
+6. Create new Resume document with tailored content
+7. Return new resume ID
+
+AI Guidelines (Critical):
+- Only reorganize/rephrase existing user data
+- Never fabricate information
+- Preserve factual details (dates, names, titles)
+- Reorder content for job relevance
+- Maintain 350+ word minimum across all sections
+- Use minimal HTML formatting
+- Preserve all links in project descriptions
+
+Output:
+- New resume optimized for specific job posting
+- Prioritizes JD-matching content
+- Includes job_description field for reference
+```
+
+**System Prompt Philosophy**:
+```
+"You are an expert resume tailoring AI that customizes resumes
+strictly based on verified user data. Never fabricate, assume,
+or infer information not explicitly present in the user's profile..."
 ```
 
 ---
@@ -826,6 +1090,74 @@ Usage:
 
 ---
 
+## User Profile & Default Resume Data Workflow
+
+### Overview
+The application implements a two-tier resume data system:
+1. **DetailedResume**: User's master/default resume data
+2. **Resume**: Individual resume instances (can be tailored for specific jobs)
+
+### Default Resume Data Purpose
+```
+User Profile (DetailedResume)
+         ↓
+    Master Data
+         ↓
+    ┌────┴────┐
+    ↓         ↓
+Resume 1   Resume 2 (Tailored)
+```
+
+### Workflow
+
+#### 1. Profile Setup (Onboarding)
+```
+User uploads PDF → AI extracts data → Saves to DetailedResume
+                                    ↓
+                        User can manually edit in /app/profile
+```
+
+#### 2. Creating Tailored Resumes
+```
+User pastes job description → AI reads DetailedResume
+                            ↓
+                    AI tailors content for job
+                            ↓
+                    Creates new Resume document
+```
+
+#### 3. AI Suggestions Flow
+```
+User editing experience description → Clicks "Get Suggestions"
+                                   ↓
+                    Provides job description context
+                                   ↓
+                    AI analyzes job + user's DetailedResume
+                                   ↓
+                    Returns 5 contextual suggestions
+```
+
+### Benefits
+- **Single Source of Truth**: Maintain comprehensive profile data once
+- **Quick Resume Creation**: Generate job-specific resumes from master data
+- **Consistent Information**: Personal details consistent across all resumes
+- **AI Context**: Better AI suggestions using complete background
+- **Extended Sections**: Support for certifications, achievements, custom sections
+
+### UserProfile Page Features
+**Location**: `/app/profile`
+
+**Capabilities**:
+- View and edit default resume data
+- Upload PDF to populate profile
+- Manage certifications and achievements
+- Create custom sections
+- Update personal information
+- Change password
+- Profile photo management
+
+---
+
 ## Routing Structure
 
 ### Client Routes
@@ -838,7 +1170,8 @@ Route Hierarchy:
 │
 ├── /app (Protected Layout)
 │   ├── /app (Dashboard - index)
-│   └── /app/builder/:resumeId (Resume Builder)
+│   ├── /app/builder/:resumeId (Resume Builder)
+│   └── /app/profile (User Profile)
 │
 └── /view/:resumeId (Public Preview)
 
@@ -855,6 +1188,7 @@ Protected Routes:
 | `/` | Home.jsx | No | Landing page |
 | `/app` | Layout.jsx → Dashboard.jsx | Yes | User dashboard |
 | `/app/builder/:resumeId` | Layout.jsx → ResumeBuilder.jsx | Yes | Resume editor |
+| `/app/profile` | Layout.jsx → UserProfile.jsx | Yes | User profile & default resume data |
 | `/view/:resumeId` | Preview.jsx | No | Public resume view |
 
 ### Layout Component Pattern
@@ -1060,36 +1394,143 @@ export default imageKit
 
 1. **Scalability**: Modular structure allows easy feature additions
 2. **Maintainability**: Clear separation of concerns
-3. **User Experience**: Real-time preview, AI enhancements
-4. **Modern Stack**: Latest versions of React, Node.js
-5. **Flexibility**: Multiple templates, customization options
+3. **User Experience**: Real-time preview, AI enhancements, tailored resumes
+4. **Modern Stack**: Latest versions of React 19, Node.js, OpenAI API
+5. **Flexibility**: Multiple templates, customization options, custom sections
 6. **Performance**: Vite for fast development, optimized builds
+7. **AI Integration**: Advanced features like resume tailoring and contextual suggestions
+8. **Data Architecture**: Two-tier system (DetailedResume + Resume) for optimal workflow
+9. **Rich Content**: Quill editor for formatted text, HTML support
+10. **SEO Ready**: Meta tags and structured data for public resumes
 
 ---
 
 ## Recommended Improvements
 
-1. **TypeScript Migration**: Add type safety
-2. **Testing**: Unit tests (Jest), integration tests (Supertest), E2E (Cypress)
-3. **Error Boundaries**: React error boundaries for graceful failures
-4. **Loading States**: Skeleton screens, better UX
-5. **Form Validation**: Client and server-side validation
-6. **Caching**: Redis for session management
-7. **Logging**: Winston or Morgan for comprehensive logging
-8. **Monitoring**: Application performance monitoring (APM)
-9. **Documentation**: API documentation (Swagger/OpenAPI)
-10. **CI/CD**: Automated testing and deployment pipelines
+### High Priority
+1. **Security Hardening**:
+   - Implement input validation (express-validator/Joi)
+   - Add rate limiting (express-rate-limit)
+   - Use strong JWT secret (not "abcd")
+   - Implement helmet.js for security headers
+   - Move to httpOnly cookies for token storage
+
+2. **Testing**:
+   - Unit tests (Jest/Vitest)
+   - Integration tests (Supertest)
+   - E2E tests (Playwright/Cypress)
+   - AI prompt testing
+
+3. **Error Handling**:
+   - React error boundaries
+   - Centralized error handling middleware
+   - Better error messages and user feedback
+
+### Medium Priority
+4. **Performance**:
+   - Implement caching (Redis)
+   - Database query optimization
+   - Image optimization and lazy loading
+   - Code splitting and lazy loading
+
+5. **UX Enhancements**:
+   - Skeleton screens for loading states
+   - Undo/redo functionality
+   - Auto-save functionality
+   - Drag-and-drop section reordering
+   - Export to multiple formats (DOCX, TXT)
+
+6. **AI Improvements**:
+   - Token usage tracking and limits
+   - AI response caching for common requests
+   - Support for multiple AI models
+   - Batch processing for multiple sections
+
+### Low Priority
+7. **Developer Experience**:
+   - TypeScript migration
+   - API documentation (Swagger/OpenAPI)
+   - Comprehensive logging (Winston/Morgan)
+   - CI/CD pipeline
+   - Environment-based configuration
+
+8. **Features**:
+   - Resume analytics (views, downloads)
+   - Resume version history
+   - Collaboration features
+   - Template marketplace
+   - ATS score checker
+
+---
+
+## Recent Feature Additions (2025)
+
+Based on recent commits, the following features have been added:
+
+1. **SEO Optimization** (commit: ee378a5)
+   - React Helmet Async integration
+   - Dynamic meta tags for public resumes
+   - OpenGraph tags for social sharing
+   - Structured data for search engines
+
+2. **Custom Sections** (commit: ee378a5)
+   - User-defined resume sections
+   - Rich text editor support
+   - Reorderable sections
+   - Flexible content formatting
+
+3. **Project Sequencing** (commit: 972e21e)
+   - Ability to reorder projects
+   - Drag-and-drop functionality
+   - Custom ordering persistence
+
+4. **Hide Sections Feature** (commit: 82b7571)
+   - Toggle visibility of resume sections
+   - Conditional rendering in templates
+   - User control over what to display
+
+5. **AI Suggestion System** (commit: 2c51282)
+   - Job description-based suggestions
+   - Context-aware recommendations
+   - 5 bullet point suggestions per request
+
+6. **Certifications Section** (commit: 2c51282)
+   - Dedicated certifications form
+   - Fields: name, issuer, date, credential ID
+   - AI extraction from uploaded resumes
+
+7. **Rich Text Editor** (commit: 65a5400)
+   - Quill-based text editor
+   - HTML formatting support
+   - Toolbar for text styling
+   - Used in custom sections and descriptions
+
+8. **Resume Tailoring** (Latest)
+   - AI-powered job-specific resume creation
+   - Uses DetailedResume as source data
+   - Maintains factual accuracy
+   - 350+ word minimum content requirement
 
 ---
 
 ## Conclusion
 
-This Resume Builder application demonstrates a well-structured full-stack architecture with modern web technologies. The integration of AI capabilities for content enhancement and PDF parsing adds significant value. The modular design allows for easy maintenance and scalability, while the use of Redux and React best practices ensures a maintainable codebase.
+This Resume Builder application demonstrates a sophisticated full-stack architecture with cutting-edge AI integration. The application goes beyond basic CRUD operations to offer intelligent features like AI-powered resume tailoring, contextual job description suggestions, and comprehensive resume data management through a two-tier data architecture.
 
-The application successfully combines multiple external services (MongoDB, OpenAI, ImageKit) into a cohesive user experience, showcasing competency in system integration and API design.
+**Key Innovations**:
+- **AI-Driven Customization**: Tailors resumes based on job descriptions while maintaining factual accuracy
+- **Intelligent Suggestions**: Provides context-aware content recommendations
+- **Flexible Content Management**: Rich text editing, custom sections, reorderable components
+- **SEO Optimization**: Public resumes optimized for search engines
+- **Modern Tech Stack**: React 19, OpenAI 6.5.0, latest tooling
+
+The application successfully integrates multiple external services (MongoDB Atlas, OpenAI API, ImageKit) into a cohesive, user-friendly experience. The modular architecture, combined with Redux state management and React best practices, ensures maintainability and scalability.
+
+**Real-World Impact**: This application solves genuine user problems by automating resume optimization, reducing time spent customizing resumes for different job applications, and providing AI-powered insights for better content.
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: October 2025
+**Document Version**: 2.0
+**Last Updated**: January 2025
 **Maintained By**: Development Team
+**Major Updates**: Added AI tailoring, job suggestions, custom sections, SEO optimization, rich text editing, certifications, achievements, and default resume data management

@@ -423,17 +423,35 @@ CRITICAL RULES:
 5. If something is missing (e.g. a required JD skill is not in user data), simply omit it — do not try to fill that gap.
 6. Use minimal HTML formatting (<b>, <i>, <u>, <ol>, <li>, <a href>) to enhance readability. Do not overuse formatting.
 7. NEVER generate content that would make the resume factually inaccurate.
+8. PRESERVE ALL LINKS: Do not remove or modify any HTML links (<a href>) in project descriptions, including demo links, live site links, GitHub links, or any other URLs.
+9. Always Add All of the experience
+
+MINIMUM CONTENT REQUIREMENT:
+- The tailored resume MUST contain at least 350 words across all sections (professional summary, experience descriptions, and project descriptions).
+- PROJECTS: Include 3 most relevant projects.
+- To meet the 350-word requirement: First expand and add more detail to the Experience section descriptions if the user has work experience.
+- ONLY if the user has NO experience, then you may add more than 3 projects to meet the word count.
+- Prioritize JD-matching content first, but ensure the word count is met through Experience expansion when possible.
 
 ALLOWED FLEXIBILITY:
 - You may reorder experience or projects for better relevance.
-- You may slightly rephrase text for clarity or alignment with the JD (only if true to the user’s background).
-- You may include *closely related skills* if they are implied by the user’s actual tools or technologies (e.g., user lists “fetch API” → “Axios” is acceptable; “Drupal” is not).
-- You may mention soft skills (communication, teamwork, etc.) only if they naturally fit with the user’s history.
+- You may slightly rephrase text for clarity or alignment with the JD (only if true to the user's background).
+- You may include *closely related skills* if they are implied by the user's actual tools or technologies (e.g., user lists "fetch API" → "Axios" is acceptable; "Drupal" is not).
+- You may mention soft skills (communication, teamwork, etc.) only if they naturally fit with the user's history.
+- You may expand existing descriptions with more detail while remaining factual.
+
+FORMATTING FOR READABILITY:
+- Format key skills and technologies in BOLD (<b>tag</b>) for emphasis and easy scanning.
+- Use bullet points (<ul><li>) or numbered lists (<ol><li>) in experience and project descriptions when listing multiple accomplishments or tasks.
+- Highlight important metrics, percentages, or achievements in BOLD.
+- Structure descriptions with clear, scannable formatting to make key information stand out.
+- Example: "Developed a <b>React</b> application that increased user engagement by <b>40%</b>"
 
 BEHAVIOR GUIDELINES:
 - When unsure whether a skill, tool, or detail exists → assume it does NOT exist.
-- It’s better to omit something than to risk fabrication.
+- It's better to omit something than to risk fabrication.
 - Focus on truth, clarity, and relevance over keyword matching.
+- Always aim for comprehensive coverage of the user's background to meet the 350-word minimum.
 
 Return ONLY valid JSON. No explanations or extra text.
 `;
@@ -447,7 +465,7 @@ USER PROFILE DATA:
 ${JSON.stringify(userProfileData, null, 2)}
 
 INSTRUCTIONS:
-Using the job description above, tailor the resume strictly using the data provided. 
+Using the job description above, tailor the resume strictly using the data provided.
 Select and reorder the most relevant items — do not invent or assume.
 
 CRITICAL:
@@ -455,9 +473,18 @@ CRITICAL:
 - Do not fabricate achievements, results, or metrics.
 - Use only projects, experiences, and education that exist in the user's data.
 - When incorporating soft skills, only include those that can logically fit with the user's real experience.
-- Use light HTML formatting (<b>, <i>, <u>, <ol>, <li>, <a href>) for emphasis.
+- Use HTML formatting for better readability: Use <b> for key skills/technologies/metrics, <ul><li> or <ol><li> for lists of accomplishments.
+- FORMAT KEY AREAS: Make skills, technologies, and achievements stand out with BOLD formatting. Structure descriptions with bullet points for easy scanning.
+- PRESERVE ALL LINKS: Keep all HTML anchor tags (<a href>) intact in project descriptions. Do not remove demo links, live site links, GitHub links, or any other URLs.
 
-If certain JD requirements don’t match any part of the user’s data, simply omit them.
+MINIMUM 350-WORD REQUIREMENT:
+- The resume MUST contain at least 350 words total across professional_summary, experience descriptions, and project descriptions.
+- PROJECTS: Include  3 most relevant projects initially.
+- To meet the 350-word minimum: If the user has work experience, expand the Experience section descriptions with more detail instead of adding more projects.
+- ONLY add more than 3 projects if the user has NO work experience AND you need to reach the 350-word minimum.
+- Include JD-matching content first, prioritizing Experience expansion over adding more projects.
+
+If certain JD requirements don't match any part of the user's data, simply omit them.
 
 Return the response in this exact JSON structure:
 {
@@ -487,7 +514,7 @@ Return the response in this exact JSON structure:
     {
       "name": "EXACT name from user's data",
       "type": "EXACT type from user's data",
-      "description": "Only rephrased for clarity or relevance — do not add new content."
+      "description": "Only rephrased for clarity or relevance — do not add new content. MUST preserve all HTML links (<a href>) exactly as they appear in the original data."
     }
   ],
   "education": [

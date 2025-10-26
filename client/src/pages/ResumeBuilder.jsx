@@ -38,7 +38,7 @@ const ResumeBuilder = () => {
     achievements: [],
     custom_sections: [],
     template: "classic",
-    accent_color: "#3B82F6",
+    accent_color: "#000000",
     public: false,
     sectionVisibility: {
       summary: true,
