@@ -609,11 +609,30 @@ RESUME DATA STRUCTURE:
 - achievements: Array of objects with {title, description}
 - custom_sections: Array of objects with {section_name, content}
 
+ACTION TYPE DECISION LOGIC (VERY IMPORTANT):
+Carefully analyze the user's intent to choose the correct action:
+
+1. Use "add" when user wants to ADD NEW items:
+   - Keywords: "add", "create", "generate new", "include a new", "insert"
+   - Examples: "add a new project", "create 3 achievements", "add AWS certification"
+   - Return: ONLY the new items to be appended
+   - DO NOT return existing items
+
+2. Use "replace" when user wants to MODIFY/UPDATE/FORMAT EXISTING items:
+   - Keywords: "update", "modify", "change", "format", "improve", "enhance existing", "rewrite", "rephrase", "make bold", "add italics", "restructure"
+   - Examples: "format experience with bold", "update all descriptions", "add bullet points to projects"
+   - Return: ALL items in the section (both modified and unmodified) with changes applied
+   - MUST include all existing items, not just modified ones
+
+3. Use "update" for STRING fields only:
+   - Only for non-array fields like professional_summary
+   - When replacing a single string value
+
 INSTRUCTIONS:
-1. Analyze the user's prompt to understand what they want to add/modify
-2. Generate appropriate content that fits the requested section(s)
-3. If user asks to add to existing arrays (experience, projects, etc.), return ONLY the new items to add
-4. If user asks to modify existing content, return the complete updated section
+1. Analyze the user's prompt carefully to determine their intent
+2. Choose the appropriate action type based on the decision logic above
+3. For "replace" action: return ALL items in the array with modifications applied to relevant items
+4. For "add" action: return ONLY new items to append
 5. Keep content professional, concise, and ATS-friendly
 6. Use action verbs and quantifiable achievements where appropriate
 
@@ -630,13 +649,7 @@ Return ONLY valid JSON with the sections to be updated. Use this structure:
     "achievements": [...],
     "custom_sections": [...]
   }
-}
-
-Where:
-- "add" means append new items to existing arrays
-- "update" means merge with existing data
-- "replace" means completely replace the section
-`;
+}`;
 
         const userPromptContent = `USER'S CUSTOM REQUEST:
 ${userPrompt}
@@ -653,14 +666,28 @@ ${JSON.stringify({
 }, null, 2)}` : ''}
 
 INSTRUCTIONS:
-Based on the user's request above, generate the appropriate resume content. Return only the sections that need to be updated/added in the JSON format specified.
+Analyze the user's request carefully to determine if they want to ADD NEW content or MODIFY EXISTING content.
 
-If the user asks to:
-- Add a project → return {"action": "add", "sections": {"project": [new project object]}}
-- Add skills → return {"action": "add", "sections": {"skills": [new skills]}}
-- Update professional summary → return {"action": "update", "sections": {"professional_summary": "new summary"}}
-- Add multiple items → include all relevant sections
+DECISION EXAMPLES:
 
+ADD NEW (action: "add") - Return ONLY new items:
+✓ "Add a project about e-commerce website" → {"action": "add", "sections": {"project": [NEW project only]}}
+✓ "Create 3 new achievements" → {"action": "add", "sections": {"achievements": [3 NEW achievements only]}}
+✓ "Add AWS certification" → {"action": "add", "sections": {"certifications": [NEW cert only]}}
+✓ "Include skills: Python, Docker" → {"action": "add", "sections": {"skills": ["Python", "Docker"]}}
+
+MODIFY EXISTING (action: "replace") - Return ALL items with changes:
+✓ "Update all experience descriptions with bold formatting" → {"action": "replace", "sections": {"experience": [ALL experiences with bold applied]}}
+✓ "Format the experience section with bullet points" → {"action": "replace", "sections": {"experience": [ALL experiences formatted]}}
+✓ "Add italics to all project names" → {"action": "replace", "sections": {"project": [ALL projects with italics]}}
+✓ "Improve wording of existing achievements" → {"action": "replace", "sections": {"achievements": [ALL achievements improved]}}
+✓ "Make skills in experience section bold" → {"action": "replace", "sections": {"experience": [ALL experiences with skills bolded]}}
+
+UPDATE STRING (action: "update") - For single string fields:
+✓ "Rewrite my professional summary" → {"action": "update", "sections": {"professional_summary": "new summary"}}
+✓ "Improve the professional summary" → {"action": "update", "sections": {"professional_summary": "improved summary"}}
+
+Based on the user's request, determine the correct action and generate the appropriate content.
 Make the content professional, specific, and ready to use in the resume.`;
 
         const response = await ai.chat.completions.create({
