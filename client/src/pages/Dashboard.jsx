@@ -1,6 +1,5 @@
 import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { dummyResumeData } from '../assets/assets'
 import {useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
@@ -207,7 +206,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <p className='text-sm font-medium text-slate-500 mb-3'>Or create manually:</p>
+        {/* Hidden - Create manually options */}
+        {/* <p className='text-sm font-medium text-slate-500 mb-3'>Or create manually:</p>
         <div className='flex gap-4 '>
             <button onClick={()=> setShowCreateResume(true)} className='w-full bg-white sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 text-slate-600 border border-dashed border-slate-300 group hover:border-indigo-500 hover:shadow-lg transition-all duration-300 cursor-pointer'>
               <PlusIcon className='size-11 transition-all duration-300 p-2.5 bg-gradient-to-br from-indigo-300 to-indigo-500  text-white rounded-full'/>
@@ -217,7 +217,7 @@ const Dashboard = () => {
               <UploadCloudIcon className='size-11 transition-all duration-300 p-2.5 bg-gradient-to-br from-purple-300 to-purple-500  text-white rounded-full'/>
               <p className='text-sm group-hover:text-purple-600 transition-all duration-300'>Upload PDF</p>
             </button>
-        </div>
+        </div> */}
 
       <hr className='border-slate-300 my-6 sm:w-[305px]' />
 
@@ -393,14 +393,14 @@ const Dashboard = () => {
               </div>
 
               {/* Skip Option */}
-              <div className='text-center'>
+              {/* <div className='text-center'>
                 <button
                   onClick={() => setShowOnboarding(false)}
                   className='text-sm text-slate-500 hover:text-slate-700 underline transition-colors'
                 >
                   I'll do this later
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
