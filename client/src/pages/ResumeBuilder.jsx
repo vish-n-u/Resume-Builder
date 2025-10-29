@@ -14,6 +14,7 @@ import SkillsForm from '../components/SkillsForm'
 import CertificationsForm from '../components/CertificationsForm'
 import AchievementsForm from '../components/AchievementsForm'
 import CustomSectionsForm from '../components/CustomSectionsForm'
+import CustomPromptModal from '../components/CustomPromptModal'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
@@ -83,6 +84,7 @@ const ResumeBuilder = () => {
   const [removeBackground, setRemoveBackground] = useState(false)
   const [showProfileData, setShowProfileData] = useState(false)
   const [defaultResumeData, setDefaultResumeData] = useState(null)
+  const [showCustomPrompt, setShowCustomPrompt] = useState(false)
 
   const sections = [
     { id: "personal", name: "Personal Info", icon: User },
@@ -208,6 +210,13 @@ const saveResume = async () => {
                 <div className='flex items-center gap-2'>
                   <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
                   <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
+                  <button
+                    onClick={() => setShowCustomPrompt(true)}
+                    className='flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 rounded-lg hover:from-purple-200 hover:to-purple-300 transition-all text-sm font-medium'
+                    title="Use AI to generate custom content"
+                  >
+                    <Sparkles className="size-4"/> AI Prompt
+                  </button>
                 </div>
 
                 <div className='flex items-center'>
@@ -515,6 +524,14 @@ const saveResume = async () => {
           </div>
         </div>
       </div>
+
+      {/* Custom Prompt Modal */}
+      <CustomPromptModal
+        isOpen={showCustomPrompt}
+        onClose={() => setShowCustomPrompt(false)}
+        resumeData={resumeData}
+        setResumeData={setResumeData}
+      />
 
     </>
   )

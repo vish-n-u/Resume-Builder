@@ -568,3 +568,158 @@ Return the response in this exact JSON structure:
         return res.status(400).json({ message: error.message });
     }
 }
+
+// controller for handling custom user prompts
+// POST: /api/ai/custom-prompt
+export const handleCustomPrompt = async (req, res) => {
+    try {
+        const { userPrompt, currentResumeData } = req.body;
+        const userId = req.userId;
+
+        if (!userPrompt) {
+            return res.status(400).json({ message: 'Custom prompt is required' });
+        }
+
+        // Get user's detailed resume data for additional context
+        const detailedResume = await DetailedResume.findOne({ userId });
+
+        const systemPrompt = `You are an expert resume AI assistant that helps users generate resume content based on their custom requirements.
+
+PRIMARY OBJECTIVE:
+Generate resume data based on the user's custom prompt while maintaining the exact JSON structure required by the frontend application.
+
+CRITICAL RULES:
+1. Generate ONLY the sections requested in the user's prompt
+2. Use the current resume data as context to maintain consistency
+3. If the user mentions adding specific information, create content based on that information
+4. Maintain professional, ATS-friendly language
+5. Use HTML formatting sparingly (<b>, <i>, <ul>, <li>, <ol>) for better readability
+6. DO NOT modify sections that the user didn't ask to change
+7. Return ONLY the sections that need to be updated/added
+8. Ensure all data follows the correct format for the resume structure
+9. Do not fabricate unrealistic information - keep content professional and believable
+
+RESUME DATA STRUCTURE:
+- professional_summary: String (1-3 sentences)
+- skills: Array of strings
+- experience: Array of objects with {company, position, start_date, end_date, description, is_current}
+- project: Array of objects with {name, type, description}
+- education: Array of objects with {institution, degree, field, graduation_date, gpa}
+- certifications: Array of objects with {name, issuer, date, credential_id}
+- achievements: Array of objects with {title, description}
+- custom_sections: Array of objects with {section_name, content}
+
+INSTRUCTIONS:
+1. Analyze the user's prompt to understand what they want to add/modify
+2. Generate appropriate content that fits the requested section(s)
+3. If user asks to add to existing arrays (experience, projects, etc.), return ONLY the new items to add
+4. If user asks to modify existing content, return the complete updated section
+5. Keep content professional, concise, and ATS-friendly
+6. Use action verbs and quantifiable achievements where appropriate
+
+Return ONLY valid JSON with the sections to be updated. Use this structure:
+{
+  "action": "add" | "update" | "replace",
+  "sections": {
+    "professional_summary": "...",
+    "skills": [...],
+    "experience": [...],
+    "project": [...],
+    "education": [...],
+    "certifications": [...],
+    "achievements": [...],
+    "custom_sections": [...]
+  }
+}
+
+Where:
+- "add" means append new items to existing arrays
+- "update" means merge with existing data
+- "replace" means completely replace the section
+`;
+
+        const userPromptContent = `USER'S CUSTOM REQUEST:
+${userPrompt}
+
+CURRENT RESUME DATA (for context):
+${JSON.stringify(currentResumeData, null, 2)}
+
+${detailedResume ? `USER'S PROFILE DATA (additional context):
+${JSON.stringify({
+    professional_summary: detailedResume.professional_summary,
+    skills: detailedResume.skills,
+    experience: detailedResume.experience?.map(e => ({ company: e.company, position: e.position })),
+    education: detailedResume.education
+}, null, 2)}` : ''}
+
+INSTRUCTIONS:
+Based on the user's request above, generate the appropriate resume content. Return only the sections that need to be updated/added in the JSON format specified.
+
+If the user asks to:
+- Add a project → return {"action": "add", "sections": {"project": [new project object]}}
+- Add skills → return {"action": "add", "sections": {"skills": [new skills]}}
+- Update professional summary → return {"action": "update", "sections": {"professional_summary": "new summary"}}
+- Add multiple items → include all relevant sections
+
+Make the content professional, specific, and ready to use in the resume.`;
+
+        const response = await ai.chat.completions.create({
+            model: process.env.OPENAI_MODEL,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPromptContent }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.7
+        });
+
+        const generatedContent = JSON.parse(response.choices[0].message.content);
+        console.log("AI generated custom content:", generatedContent);
+
+        // Process the generated content based on the action
+        let generatedData = {};
+        const action = generatedContent.action || 'update';
+        const sections = generatedContent.sections || {};
+
+        if (action === 'add') {
+            // For 'add' action, we need to append to existing arrays
+            generatedData = { ...currentResumeData };
+
+            Object.keys(sections).forEach(key => {
+                if (Array.isArray(sections[key]) && Array.isArray(currentResumeData[key])) {
+                    generatedData[key] = [...currentResumeData[key], ...sections[key]];
+                } else if (Array.isArray(sections[key])) {
+                    generatedData[key] = sections[key];
+                } else {
+                    generatedData[key] = sections[key];
+                }
+            });
+        } else if (action === 'replace') {
+            // For 'replace' action, completely replace the sections
+            generatedData = { ...currentResumeData, ...sections };
+        } else {
+            // For 'update' action (default), merge the data
+            generatedData = { ...currentResumeData };
+
+            Object.keys(sections).forEach(key => {
+                if (Array.isArray(sections[key]) && sections[key].length > 0) {
+                    // For arrays, append new items
+                    generatedData[key] = [...(currentResumeData[key] || []), ...sections[key]];
+                } else {
+                    // For strings and other types, replace
+                    generatedData[key] = sections[key];
+                }
+            });
+        }
+
+        return res.status(200).json({
+            message: 'Content generated successfully',
+            generatedData,
+            action
+        });
+
+    } catch (error) {
+        console.error("Error handling custom prompt:", error);
+        return res.status(400).json({ message: error.message });
+    }
+}
