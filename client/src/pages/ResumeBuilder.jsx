@@ -432,19 +432,21 @@ const autoSaveResume = async () => {
           {/* Right Panel - Preview / Profile Data */}
           <div className='lg:col-span-7 max-lg:mt-6'>
               <div className='relative w-full'>
-                <div className='absolute bottom-3 left-0 right-0 flex items-center justify-between gap-2 z-10'>
-                    <button
-                      onClick={() => setShowProfileData(!showProfileData)}
-                      className={`flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-all ${
-                        showProfileData
-                          ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white shadow-md'
-                          : 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300 hover:ring'
-                      }`}
-                    >
-                      <DatabaseIcon className='size-4'/>
-                      {showProfileData ? 'Show Resume Preview' : 'Show My Profile Data'}
-                    </button>
-                    <div className='flex items-center gap-2'>
+                <div className='absolute bottom-3 left-0 right-0 flex items-center justify-between gap-2 z-50 pointer-events-none'>
+                    <div className='pointer-events-auto'>
+                      <button
+                        onClick={() => setShowProfileData(!showProfileData)}
+                        className={`flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-all ${
+                          showProfileData
+                            ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white shadow-md'
+                            : 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300 hover:ring'
+                        }`}
+                      >
+                        <DatabaseIcon className='size-4'/>
+                        {showProfileData ? 'Show Resume Preview' : 'Show My Profile Data'}
+                      </button>
+                    </div>
+                    <div className='flex items-center gap-2 pointer-events-auto'>
                     {resumeData.public && (
                       <button onClick={handleShare} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors'>
                         <Share2Icon className='size-4'/> Share
