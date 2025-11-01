@@ -580,24 +580,166 @@ export const handleCustomPrompt = async (req, res) => {
             return res.status(400).json({ message: 'Custom prompt is required' });
         }
 
+        // STEP 1: Classify the request to check if it's supported
+        const classificationPrompt = `You are a request classifier for a resume builder AI assistant.
+
+Your task is to determine if a user's request is SUPPORTED or UNSUPPORTED.
+
+SUPPORTED requests are those that ask to modify or generate CONTENT:
+- Add/modify/remove sections (experience, projects, skills, education, certifications, achievements, custom sections)
+- Generate or update text content (professional summary, descriptions, etc.)
+- Add specific information to the resume (new projects, skills, certifications, etc.)
+- Reformat existing content (add bold, italics, bullet points to TEXT content)
+- Update or improve existing content
+
+UNSUPPORTED requests are those that ask for UI/styling changes that are NOT content-related:
+- Change resume template/format (e.g., "change to modern template", "use a different layout")
+- Change colors or styling (e.g., "make it blue", "change the color scheme", "change accent color")
+- Change fonts or font sizes
+- Change page layout or structure
+- Any visual/design changes that are not about the text content itself
+
+EXAMPLES:
+
+SUPPORTED:
+- "Add a project about building an e-commerce website"
+- "Update my professional summary to emphasize leadership"
+- "Add AWS certification to my resume"
+- "Make the skills in my experience descriptions bold"
+- "Add bullet points to my project descriptions"
+- "Generate 3 achievements highlighting my teamwork"
+
+UNSUPPORTED:
+- "Change the resume template to modern"
+- "Make the resume blue"
+- "Change to a different format"
+- "Use a different layout"
+- "Change the font to Arial"
+- "Make the resume colorful"
+- "Rearrange the sections on the page"
+
+Analyze the user's request and respond with ONLY valid JSON in this exact format:
+{
+  "supported": true/false,
+  "reason": "Brief explanation of why this request is supported or unsupported",
+  "suggestion": "If unsupported, provide guidance on how to achieve what they want using the UI controls"
+}`;
+
+        const classificationResponse = await ai.chat.completions.create({
+            model: process.env.OPENAI_MODEL,
+            messages: [
+                { role: "system", content: classificationPrompt },
+                { role: "user", content: `USER REQUEST: "${userPrompt}"` }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.3
+        });
+
+        const classification = JSON.parse(classificationResponse.choices[0].message.content);
+        console.log("Request classification:", classification);
+
+        // If request is not supported, return early with explanation
+        if (!classification.supported) {
+            return res.status(200).json({
+                supported: false,
+                reason: classification.reason,
+                suggestion: classification.suggestion
+            });
+        }
+
+        // STEP 2: Understand the user's intent and create an enhanced, detailed prompt
+        const understandingPrompt = `You are an AI assistant that analyzes user requests for resume modifications and creates clearer, more detailed instructions.
+
+Your task is to:
+1. Understand what the user wants to do
+2. Identify which section(s) and items they're referring to (if applicable)
+3. Create a detailed, enhanced prompt that clarifies their intent
+
+EXAMPLES:
+
+Input: "highlight skills in my 2nd job"
+Current Resume Context: User has 3 experience entries
+Output:
+{
+  "enhanced_prompt": "In the second experience entry (the 2nd job in the experience array), identify all technical skills, programming languages, tools, and technologies mentioned in the description field, and wrap them in bold HTML tags (<b></b>) to make them stand out. Keep the rest of the description unchanged."
+}
+
+Input: "add a project about e-commerce"
+Output:
+{
+  "enhanced_prompt": "Create a new project entry about building an e-commerce website. Include relevant technologies commonly used for e-commerce (like payment integration, shopping cart, product catalog). Make it professional and realistic with a good description."
+}
+
+Input: "improve my first experience"
+Current Resume Context: User has 2 experience entries
+Output:
+{
+  "enhanced_prompt": "Take the first experience entry (index 0) and improve its description to make it more impactful and professional. Use stronger action verbs, add more specific details, and make achievements more prominent. Keep the core facts the same (company, position, dates) but enhance the description content."
+}
+
+Input: "make my projects more readable"
+Current Resume Context: User has 4 projects
+Output:
+{
+  "enhanced_prompt": "Format all project descriptions to be more readable by adding HTML structure. Use bullet points (<ul><li>) for listing features or accomplishments, and bold key technologies. Apply this formatting to all projects in the array."
+}
+
+IMPORTANT:
+- Be specific about which items to modify (e.g., "second entry", "all items", "first project")
+- Mention array positions when relevant (e.g., "index 0", "the 2nd item")
+- Describe what to change and how (formatting, content, etc.)
+- Keep instructions natural and descriptive, not rigid or rule-based
+- Focus on clarifying the user's intent in plain language
+
+Analyze this user request and respond with ONLY valid JSON:`;
+
+        const understandingResponse = await ai.chat.completions.create({
+            model: process.env.OPENAI_MODEL,
+            messages: [
+                { role: "system", content: understandingPrompt },
+                {
+                    role: "user",
+                    content: `USER REQUEST: "${userPrompt}"
+
+CURRENT RESUME STRUCTURE FOR CONTEXT:
+- Experience entries: ${currentResumeData.experience?.length || 0} items
+${currentResumeData.experience?.map((exp, i) => `  ${i + 1}. ${exp.position} at ${exp.company}`).join('\n') || ''}
+
+- Project entries: ${currentResumeData.project?.length || 0} items
+${currentResumeData.project?.map((proj, i) => `  ${i + 1}. ${proj.name}`).join('\n') || ''}
+
+- Skills: ${currentResumeData.skills?.length || 0} items
+- Education entries: ${currentResumeData.education?.length || 0} items
+- Certifications: ${currentResumeData.certifications?.length || 0} items
+- Achievements: ${currentResumeData.achievements?.length || 0} items
+
+Create an enhanced, detailed prompt that clarifies what the user wants to do.`
+                }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.3
+        });
+
+        const understanding = JSON.parse(understandingResponse.choices[0].message.content);
+        console.log("Enhanced prompt:", understanding.enhanced_prompt);
+
+        // STEP 3: If supported, proceed with content generation using the clarified instruction
         // Get user's detailed resume data for additional context
         const detailedResume = await DetailedResume.findOne({ userId });
 
-        const systemPrompt = `You are an expert resume AI assistant that helps users generate resume content based on their custom requirements.
+        const systemPrompt = `You are an expert resume AI assistant that helps users modify and enhance their resumes.
 
 PRIMARY OBJECTIVE:
-Generate resume data based on the user's custom prompt while maintaining the exact JSON structure required by the frontend application.
+Generate resume content based on the user's request while maintaining the exact JSON structure required by the frontend application.
 
 CRITICAL RULES:
-1. Generate ONLY the sections requested in the user's prompt
-2. Use the current resume data as context to maintain consistency
-3. If the user mentions adding specific information, create content based on that information
-4. Maintain professional, ATS-friendly language
-5. Use HTML formatting sparingly (<b>, <i>, <ul>, <li>, <ol>) for better readability
-6. DO NOT modify sections that the user didn't ask to change
-7. Return ONLY the sections that need to be updated/added
-8. Ensure all data follows the correct format for the resume structure
-9. Do not fabricate unrealistic information - keep content professional and believable
+1. Carefully read the user's request to understand what they want
+2. Use the current resume data as context - you'll see all existing content
+3. Maintain professional, ATS-friendly language
+4. Use HTML formatting when appropriate (<b>, <i>, <ul>, <li>, <ol>)
+5. Return ONLY the sections that need to be updated/added
+6. Do not fabricate unrealistic information - keep content professional and believable
+7. When modifying specific items, preserve the structure and other fields
 
 RESUME DATA STRUCTURE:
 - professional_summary: String (1-3 sentences)
@@ -609,34 +751,30 @@ RESUME DATA STRUCTURE:
 - achievements: Array of objects with {title, description}
 - custom_sections: Array of objects with {section_name, content}
 
-ACTION TYPE DECISION LOGIC (VERY IMPORTANT):
-Carefully analyze the user's intent to choose the correct action:
+ACTION TYPES - Choose based on what makes sense:
 
-1. Use "add" when user wants to ADD NEW items:
-   - Keywords: "add", "create", "generate new", "include a new", "insert"
-   - Examples: "add a new project", "create 3 achievements", "add AWS certification"
-   - Return: ONLY the new items to be appended
-   - DO NOT return existing items
+1. "add" - When ADDING NEW items:
+   - Use when creating new projects, skills, experiences, etc.
+   - Return ONLY the new items to append
+   - Example: Adding a new project or certification
 
-2. Use "replace" when user wants to MODIFY/UPDATE/FORMAT EXISTING items:
-   - Keywords: "update", "modify", "change", "format", "improve", "enhance existing", "rewrite", "rephrase", "make bold", "add italics", "restructure"
-   - Examples: "format experience with bold", "update all descriptions", "add bullet points to projects"
-   - Return: ALL items in the section (both modified and unmodified) with changes applied
-   - MUST include all existing items, not just modified ones
+2. "replace" - When MODIFYING EXISTING items:
+   - Use when updating, formatting, or enhancing existing content
+   - Return ALL items in the array (both changed and unchanged)
+   - The frontend will replace the entire section
+   - Example: Formatting descriptions, enhancing content, adding bold/bullets
 
-3. Use "update" for STRING fields only:
-   - Only for non-array fields like professional_summary
-   - When replacing a single string value
+3. "update" - When UPDATING a single string field:
+   - Use for professional_summary or other non-array fields
+   - Return just the new value
 
-INSTRUCTIONS:
-1. Analyze the user's prompt carefully to determine their intent
-2. Choose the appropriate action type based on the decision logic above
-3. For "replace" action: return ALL items in the array with modifications applied to relevant items
-4. For "add" action: return ONLY new items to append
-5. Keep content professional, concise, and ATS-friendly
-6. Use action verbs and quantifiable achievements where appropriate
+GUIDELINES:
+- If modifying a specific item (like "2nd job"), make sure to return all items in that array with changes applied to the target
+- If adding new content, return only the new items
+- Be smart about HTML formatting - use it to improve readability
+- Keep the original data intact unless specifically asked to change it
 
-Return ONLY valid JSON with the sections to be updated. Use this structure:
+Return ONLY valid JSON in this structure:
 {
   "action": "add" | "update" | "replace",
   "sections": {
@@ -651,13 +789,13 @@ Return ONLY valid JSON with the sections to be updated. Use this structure:
   }
 }`;
 
-        const userPromptContent = `USER'S CUSTOM REQUEST:
-${userPrompt}
+        const userPromptContent = `USER'S REQUEST (Enhanced and Clarified):
+${understanding.enhanced_prompt}
 
-CURRENT RESUME DATA (for context):
+CURRENT RESUME DATA:
 ${JSON.stringify(currentResumeData, null, 2)}
 
-${detailedResume ? `USER'S PROFILE DATA (additional context):
+${detailedResume ? `USER'S PROFILE DATA (for additional context when creating new content):
 ${JSON.stringify({
     professional_summary: detailedResume.professional_summary,
     skills: detailedResume.skills,
@@ -666,29 +804,17 @@ ${JSON.stringify({
 }, null, 2)}` : ''}
 
 INSTRUCTIONS:
-Analyze the user's request carefully to determine if they want to ADD NEW content or MODIFY EXISTING content.
+1. Read the enhanced request carefully - it clarifies what the user wants
+2. Look at the current resume data to see what exists
+3. Decide the appropriate action type (add/replace/update) based on what makes sense
+4. Generate the content following the request
+5. Return it in the proper JSON format
 
-DECISION EXAMPLES:
-
-ADD NEW (action: "add") - Return ONLY new items:
-✓ "Add a project about e-commerce website" → {"action": "add", "sections": {"project": [NEW project only]}}
-✓ "Create 3 new achievements" → {"action": "add", "sections": {"achievements": [3 NEW achievements only]}}
-✓ "Add AWS certification" → {"action": "add", "sections": {"certifications": [NEW cert only]}}
-✓ "Include skills: Python, Docker" → {"action": "add", "sections": {"skills": ["Python", "Docker"]}}
-
-MODIFY EXISTING (action: "replace") - Return ALL items with changes:
-✓ "Update all experience descriptions with bold formatting" → {"action": "replace", "sections": {"experience": [ALL experiences with bold applied]}}
-✓ "Format the experience section with bullet points" → {"action": "replace", "sections": {"experience": [ALL experiences formatted]}}
-✓ "Add italics to all project names" → {"action": "replace", "sections": {"project": [ALL projects with italics]}}
-✓ "Improve wording of existing achievements" → {"action": "replace", "sections": {"achievements": [ALL achievements improved]}}
-✓ "Make skills in experience section bold" → {"action": "replace", "sections": {"experience": [ALL experiences with skills bolded]}}
-
-UPDATE STRING (action: "update") - For single string fields:
-✓ "Rewrite my professional summary" → {"action": "update", "sections": {"professional_summary": "new summary"}}
-✓ "Improve the professional summary" → {"action": "update", "sections": {"professional_summary": "improved summary"}}
-
-Based on the user's request, determine the correct action and generate the appropriate content.
-Make the content professional, specific, and ready to use in the resume.`;
+Remember:
+- If adding new items: return only new items with action "add"
+- If modifying existing items: return ALL items in that section with action "replace" (make changes where needed)
+- If updating a string field: return the new value with action "update"
+- Be smart and flexible - use your judgment to do what the user wants`;
 
         const response = await ai.chat.completions.create({
             model: process.env.OPENAI_MODEL,
@@ -740,9 +866,13 @@ Make the content professional, specific, and ready to use in the resume.`;
         }
 
         return res.status(200).json({
+            supported: true,
             message: 'Content generated successfully',
             generatedData,
-            action
+            action,
+            understanding: {
+                enhanced_prompt: understanding.enhanced_prompt
+            } // Include the enhanced prompt for frontend display
         });
 
     } catch (error) {

@@ -1,4 +1,4 @@
-import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon } from 'lucide-react'
+import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import {useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [hasDefaultResumeData, setHasDefaultResumeData] = useState(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showAllResumes, setShowAllResumes] = useState(false)
 
   const navigate = useNavigate()
 
@@ -219,10 +220,66 @@ const Dashboard = () => {
             </button>
         </div> */}
 
-      <hr className='border-slate-300 my-6 sm:w-[305px]' />
+      <hr className='border-slate-300 my-8' />
 
-      <div className="grid grid-cols-2 sm:flex flex-wrap gap-4 ">
-        {allResumes.map((resume, index)=>{
+      {/* Saved Resumes Section */}
+      <div className='mb-6'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4'>
+          <div>
+            <h2 className='text-2xl font-bold text-slate-800'>My Resumes</h2>
+            <p className='text-sm text-slate-500 mt-1'>
+              {allResumes.length} {allResumes.length === 1 ? 'resume' : 'resumes'} saved
+            </p>
+          </div>
+          <div className='flex gap-2'>
+            <button
+              onClick={() => setShowCreateResume(true)}
+              className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md text-sm'
+            >
+              <PlusIcon className='size-4' />
+              <span className='hidden sm:inline'>Create Blank</span>
+              <span className='sm:hidden'>Blank</span>
+            </button>
+            <button
+              onClick={() => setShowUploadResume(true)}
+              className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all shadow-sm hover:shadow-md text-sm'
+            >
+              <UploadCloudIcon className='size-4' />
+              <span className='hidden sm:inline'>Upload PDF</span>
+              <span className='sm:hidden'>Upload</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {allResumes.length === 0 ? (
+        <div className='flex flex-col items-center justify-center py-16 px-4 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200'>
+          <FilePenLineIcon className='size-16 text-slate-300 mb-4' />
+          <h3 className='text-lg font-semibold text-slate-700 mb-2'>No resumes yet</h3>
+          <p className='text-sm text-slate-500 text-center max-w-md mb-6'>
+            Start by creating an AI-tailored resume using a job description, or create a blank resume to customize from scratch.
+          </p>
+          <div className='flex gap-3'>
+            <button
+              onClick={() => setShowJobDescriptionModal(true)}
+              className='flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-all shadow-md'
+            >
+              <SparklesIcon className='size-5' />
+              Create AI-Tailored Resume
+            </button>
+            <button
+              onClick={() => setShowCreateResume(true)}
+              className='flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all'
+            >
+              <PlusIcon className='size-5' />
+              Create Blank Resume
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+        <div className="grid grid-cols-2 sm:flex flex-wrap gap-4">
+          {(showAllResumes ? allResumes : allResumes.slice(0, 7)).map((resume, index)=>{
           const baseColor = colors[index % colors.length];
           return (
             <button key={index} onClick={()=> navigate(`/app/builder/${resume._id}`)} className='relative w-full sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 border group hover:shadow-lg transition-all duration-300 cursor-pointer' style={{background: `linear-gradient(135deg, ${baseColor}10, ${baseColor}40)`, borderColor: baseColor + '40'}}>
@@ -239,7 +296,31 @@ const Dashboard = () => {
             </button>
           )
         })}
-      </div>
+        </div>
+
+        {/* Show All / Show Less Button */}
+        {allResumes.length > 7 && (
+          <div className='flex justify-center mt-6'>
+            <button
+              onClick={() => setShowAllResumes(!showAllResumes)}
+              className='flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all font-medium'
+            >
+              {showAllResumes ? (
+                <>
+                  <ChevronLeft className='size-5' />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  Show All Resumes ({allResumes.length})
+                  <ChevronRight className='size-5' />
+                </>
+              )}
+            </button>
+          </div>
+        )}
+        </>
+      )}
 
         {showCreateResume && (
           <form onSubmit={createResume} onClick={()=> setShowCreateResume(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center'>

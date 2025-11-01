@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
   const [prompt, setPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [aiUnderstanding, setAiUnderstanding] = useState(null)
   const { token } = useSelector(state => state.auth)
 
   const handleGenerate = async () => {
@@ -29,12 +30,44 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
         }
       )
 
+      // Check if the request is supported
+      if (response.data.supported === false) {
+        // Show detailed error message for unsupported requests
+        const errorMessage = response.data.reason || 'This request is not supported'
+        const suggestion = response.data.suggestion
+
+        toast.error(
+          <div className="space-y-2">
+            <div className="font-semibold">Request Not Supported</div>
+            <div className="text-sm">{errorMessage}</div>
+            {suggestion && (
+              <div className="text-sm mt-2 pt-2 border-t border-gray-300">
+                <span className="font-medium">Tip: </span>{suggestion}
+              </div>
+            )}
+          </div>,
+          {
+            duration: 6000,
+            style: {
+              maxWidth: '500px'
+            }
+          }
+        )
+        return
+      }
+
+      // Show AI understanding if available
+      if (response.data.understanding) {
+        setAiUnderstanding(response.data.understanding)
+      }
+
       // Merge the AI-generated data with existing resume data
       const updatedData = { ...resumeData, ...response.data.generatedData }
       setResumeData(updatedData)
 
-      toast.success('Resume data generated successfully!')
+      toast.success('Resume updated successfully!')
       setPrompt('')
+      setAiUnderstanding(null)
       onClose()
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message || 'Failed to generate content')
@@ -72,9 +105,11 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
             <p className="text-gray-500 text-xs">
               <strong>Examples:</strong>
               <br />• "Add a project about building a mobile app with React Native"
-              <br />• "Create 3 achievements highlighting my leadership skills"
-              <br />• "Add a certification for AWS Cloud Practitioner completed in 2024"
-              <br />• "Generate a professional summary emphasizing my data science experience"
+              <br />• "Highlight skills in my 2nd job" - Adds bold to technical skills
+              <br />• "Format all project descriptions with bullet points"
+              <br />• "Improve the description of my first experience"
+              <br />• "Add AWS certification completed in 2024"
+              <br />• "Make all experience descriptions more concise"
             </p>
           </div>
 
@@ -92,9 +127,20 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
             />
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-            <p className="text-yellow-800 text-sm">
-              <strong>Note:</strong> The AI will use your existing resume data as context and maintain the correct format for the frontend. It will not fabricate information not related to your prompt.
+          {aiUnderstanding && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-green-800 text-sm font-semibold mb-2">
+                ✓ AI Understanding:
+              </p>
+              <p className="text-green-700 text-sm italic">
+                "{aiUnderstanding.enhanced_prompt}"
+              </p>
+            </div>
+          )}
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-blue-800 text-sm">
+              <strong>How it works:</strong> The AI first understands your request in detail, then generates the content. This ensures accurate modifications even for specific requests like "highlight skills in my 2nd job".
             </p>
           </div>
 

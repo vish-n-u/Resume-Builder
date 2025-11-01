@@ -100,8 +100,11 @@ export const getUserResumes = async (req, res) => {
     try {
         const userId = req.userId;
 
-        // return user resumes
-        const resumes = await DetailedResume.find({userId})
+        console.log("userId==>",userId)
+
+        // return user resumes (from Resume collection, not DetailedResume)
+        const resumes = await Resume.find({userId}).sort({ updatedAt: -1 })
+        console.log("resumes==>",resumes)
         return res.status(200).json({resumes})
     } catch (error) {
         return res.status(400).json({message: error.message})

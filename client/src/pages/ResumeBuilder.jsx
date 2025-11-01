@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { dummyResumeData } from '../assets/assets'
 import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User, Plus } from 'lucide-react'
@@ -85,6 +85,11 @@ const ResumeBuilder = () => {
   const [showProfileData, setShowProfileData] = useState(false)
   const [defaultResumeData, setDefaultResumeData] = useState(null)
   const [showCustomPrompt, setShowCustomPrompt] = useState(false)
+  const [autoSaveStatus, setAutoSaveStatus] = useState('') // '', 'saving', 'saved'
+
+  // Refs for auto-save functionality
+  const isInitialLoad = useRef(true)
+  const saveTimeoutRef = useRef(null)
 
   const sections = [
     { id: "personal", name: "Personal Info", icon: User },
@@ -105,7 +110,7 @@ const ResumeBuilder = () => {
       ...prev,
       sectionVisibility: {
         ...prev.sectionVisibility,
-        [sectionId]: !prev.sectionVisibility[sectionId]
+        [sectionId]: !prev.sectionVisibility?.[sectionId]
       }
     }))
   }
@@ -125,6 +130,37 @@ const ResumeBuilder = () => {
     loadExistingResume()
     loadDefaultResumeData()
   },[])
+
+  // Auto-save effect - saves resume data after 3 seconds of inactivity
+  useEffect(() => {
+    // Skip auto-save on initial load
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false
+      return
+    }
+
+    // Skip if resumeData doesn't have an ID yet (not loaded)
+    if (!resumeData._id) {
+      return
+    }
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Set new timeout for auto-save (3 seconds after last change)
+    saveTimeoutRef.current = setTimeout(() => {
+      autoSaveResume()
+    }, 3000)
+
+    // Cleanup function
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [resumeData]) // Trigger on any resumeData change
 
   const changeResumeVisibility = async () => {
     try {
@@ -181,6 +217,36 @@ const saveResume = async () => {
   }
 }
 
+// Auto-save function (silent, without toast notifications)
+const autoSaveResume = async () => {
+  try {
+    setAutoSaveStatus('saving')
+
+    let updatedResumeData = structuredClone(resumeData)
+
+    // remove image from updatedResumeData
+    if(typeof resumeData.personal_info.image === 'object'){
+      delete updatedResumeData.personal_info.image
+    }
+
+    const formData = new FormData();
+    formData.append("resumeId", resumeId)
+    formData.append('resumeData', JSON.stringify(updatedResumeData))
+    removeBackground && formData.append("removeBackground", "yes");
+    typeof resumeData.personal_info.image === 'object' && formData.append("image", resumeData.personal_info.image)
+
+    await api.put('/api/resumes/update', formData, {headers: { Authorization: token }})
+
+    setAutoSaveStatus('saved')
+
+    // Clear the "saved" status after 2 seconds
+    setTimeout(() => setAutoSaveStatus(''), 2000)
+  } catch (error) {
+    console.error("Error auto-saving resume:", error)
+    setAutoSaveStatus('')
+  }
+}
+
   return (
     <>
       <SEO
@@ -189,10 +255,19 @@ const saveResume = async () => {
         keywords="build resume, resume editor, professional resume builder, customize resume, resume templates"
         ogUrl="https://flowerresume.com/app/builder"
       />
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
-          <ArrowLeftIcon className="size-4"/> Back to Dashboard
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-50">
+        <div className='flex items-center gap-4'>
+          <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
+            <ArrowLeftIcon className="size-4"/> Back to Dashboard
+          </Link>
+          <button
+            onClick={() => setShowCustomPrompt(true)}
+            className='flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all text-sm font-medium shadow-lg'
+            title="Use AI to generate custom content"
+          >
+            <Sparkles className="size-4"/> AI Prompt
+          </button>
+        </div>
       </div>
 
       <div className='max-w-7xl mx-auto px-4 pb-8'>
@@ -210,16 +285,9 @@ const saveResume = async () => {
                 <div className='flex items-center gap-2'>
                   <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
                   <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
-                  <button
-                    onClick={() => setShowCustomPrompt(true)}
-                    className='flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 rounded-lg hover:from-purple-200 hover:to-purple-300 transition-all text-sm font-medium'
-                    title="Use AI to generate custom content"
-                  >
-                    <Sparkles className="size-4"/> AI Prompt
-                  </button>
                 </div>
 
-                <div className='flex items-center'>
+                <div className='flex items-center gap-2'>
                   {activeSectionIndex !== 0 && (
                     <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex === 0}>
                       <ChevronLeft className="size-4"/> Previous
@@ -242,10 +310,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Professional Summary</h3>
                         <button
                           onClick={() => toggleSectionVisibility('summary')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.summary ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.summary ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.summary ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.summary ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.summary ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.summary ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=> setResumeData(prev=> ({...prev, professional_summary: data}))} setResumeData={setResumeData}/>
@@ -257,10 +325,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Experience</h3>
                         <button
                           onClick={() => toggleSectionVisibility('experience')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.experience ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.experience ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.experience ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.experience ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.experience ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.experience ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <ExperienceForm data={resumeData.experience} onChange={(data)=> setResumeData(prev=> ({...prev, experience: data}))} jobDescription={resumeData.job_description}/>
@@ -272,10 +340,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Education</h3>
                         <button
                           onClick={() => toggleSectionVisibility('education')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.education ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.education ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.education ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.education ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.education ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.education ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <EducationForm data={resumeData.education} onChange={(data)=> setResumeData(prev=> ({...prev, education: data}))}/>
@@ -287,10 +355,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Projects</h3>
                         <button
                           onClick={() => toggleSectionVisibility('projects')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.projects ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.projects ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.projects ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.projects ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.projects ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.projects ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <ProjectForm data={resumeData.project} onChange={(data)=> setResumeData(prev=> ({...prev, project: data}))}/>
@@ -302,10 +370,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Skills</h3>
                         <button
                           onClick={() => toggleSectionVisibility('skills')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.skills ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.skills ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.skills ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.skills ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.skills ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.skills ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev=> ({...prev, skills: data}))}/>
@@ -317,10 +385,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Certifications</h3>
                         <button
                           onClick={() => toggleSectionVisibility('certifications')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.certifications ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.certifications ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.certifications ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.certifications ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.certifications ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.certifications ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <CertificationsForm data={resumeData.certifications} onChange={(data)=> setResumeData(prev=> ({...prev, certifications: data}))}/>
@@ -332,10 +400,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Achievements</h3>
                         <button
                           onClick={() => toggleSectionVisibility('achievements')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.achievements ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.achievements ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.achievements ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.achievements ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.achievements ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.achievements ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <AchievementsForm data={resumeData.achievements} onChange={(data)=> setResumeData(prev=> ({...prev, achievements: data}))}/>
@@ -347,10 +415,10 @@ const saveResume = async () => {
                         <h3 className='text-lg font-semibold text-gray-900'>Custom Sections</h3>
                         <button
                           onClick={() => toggleSectionVisibility('customSections')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility.customSections ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility.customSections ? 'Hide in preview' : 'Show in preview'}
+                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.customSections ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                          title={resumeData.sectionVisibility?.customSections ? 'Hide in preview' : 'Show in preview'}
                         >
-                          {resumeData.sectionVisibility.customSections ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
+                          {resumeData.sectionVisibility?.customSections ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
                         </button>
                       </div>
                       <CustomSectionsForm data={resumeData.custom_sections} onChange={(data)=> setResumeData(prev=> ({...prev, custom_sections: data}))}/>
@@ -358,16 +426,13 @@ const saveResume = async () => {
                   )}
 
               </div>
-              <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}} className='bg-gradient-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm'>
-                Save Changes
-              </button>
             </div>
           </div>
 
           {/* Right Panel - Preview / Profile Data */}
           <div className='lg:col-span-7 max-lg:mt-6'>
               <div className='relative w-full'>
-                <div className='absolute bottom-3 left-0 right-0 flex items-center justify-between gap-2'>
+                <div className='absolute bottom-3 left-0 right-0 flex items-center justify-between gap-2 z-10'>
                     <button
                       onClick={() => setShowProfileData(!showProfileData)}
                       className={`flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-all ${
@@ -379,7 +444,7 @@ const saveResume = async () => {
                       <DatabaseIcon className='size-4'/>
                       {showProfileData ? 'Show Resume Preview' : 'Show My Profile Data'}
                     </button>
-                    <div className='flex gap-2'>
+                    <div className='flex items-center gap-2'>
                     {resumeData.public && (
                       <button onClick={handleShare} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors'>
                         <Share2Icon className='size-4'/> Share
@@ -389,9 +454,17 @@ const saveResume = async () => {
                       {resumeData.public ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
                       {resumeData.public ? 'Public' : 'Private'}
                     </button> */}
-                    <button onClick={downloadResume} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors'>
+                    <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors'>
+                      Save Changes
+                    </button>
+                    <button onClick={downloadResume} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 rounded-lg ring-gray-300 hover:ring transition-colors'>
                       <DownloadIcon className='size-4'/> Download
                     </button>
+                    {autoSaveStatus && (
+                      <span className={`text-xs ${autoSaveStatus === 'saving' ? 'text-gray-500' : 'text-green-600'}`}>
+                        {autoSaveStatus === 'saving' ? 'Saving...' : '✓ Saved'}
+                      </span>
+                    )}
                     </div>
                 </div>
               </div>
