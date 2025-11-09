@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { ArrowLeftIcon, UserIcon, KeyIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon, Award, Trophy } from 'lucide-react'
+import { ArrowLeftIcon, UserIcon, KeyIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon, Award, Trophy, Settings } from 'lucide-react'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import { login } from '../app/features/authSlice'
@@ -56,6 +56,11 @@ const UserProfile = () => {
     certifications: [],
     achievements: [],
     custom_sections: [],
+    preferences: {
+      writing_style: 'professional',
+      tone: 'confident',
+      custom_requirements: ''
+    }
   })
 
   const [removeBackground, setRemoveBackground] = useState(false)
@@ -91,6 +96,11 @@ const UserProfile = () => {
             certifications: data.defaultResumeData.certifications || [],
             achievements: data.defaultResumeData.achievements || [],
             custom_sections: data.defaultResumeData.custom_sections || [],
+            preferences: {
+              writing_style: data.defaultResumeData.preferences?.writing_style || 'professional',
+              tone: data.defaultResumeData.preferences?.tone || 'confident',
+              custom_requirements: data.defaultResumeData.preferences?.custom_requirements || ''
+            }
           })
         }
       } catch (error) {
@@ -185,6 +195,7 @@ const UserProfile = () => {
   const tabs = [
     { id: 'account', name: 'Account Info', icon: UserIcon },
     { id: 'resume-data', name: 'Default Resume Data', icon: FileTextIcon },
+    { id: 'preferences', name: 'AI Preferences', icon: Settings },
     { id: 'security', name: 'Security', icon: KeyIcon },
   ]
 
@@ -410,6 +421,117 @@ const UserProfile = () => {
                 </div>
               </div>
               )}
+            </div>
+          )}
+
+          {/* AI Preferences Tab */}
+          {activeTab === 'preferences' && (
+            <div>
+              <div className='mb-6'>
+                <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-2'>AI Preferences</h2>
+                <p className='text-sm sm:text-base text-slate-600'>
+                  Customize how AI generates and tailors your resume content. These preferences will be used every time AI creates content for you.
+                </p>
+              </div>
+
+              <div className='space-y-6 max-w-3xl'>
+                {/* Writing Style */}
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-3'>
+                    Writing Style
+                  </label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    {['professional', 'technical', 'creative', 'casual'].map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => setDefaultResumeData(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, writing_style: style }
+                        }))}
+                        className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                          defaultResumeData.preferences.writing_style === style
+                            ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                            : 'border-gray-200 hover:border-gray-300 text-slate-600'
+                        }`}
+                      >
+                        {style.charAt(0).toUpperCase() + style.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                  <p className='text-xs text-slate-500 mt-2'>
+                    {defaultResumeData.preferences.writing_style === 'professional' && 'Formal and business-oriented language'}
+                    {defaultResumeData.preferences.writing_style === 'technical' && 'Technical jargon and specific terminology'}
+                    {defaultResumeData.preferences.writing_style === 'creative' && 'Engaging and unique expressions'}
+                    {defaultResumeData.preferences.writing_style === 'casual' && 'Conversational and approachable tone'}
+                  </p>
+                </div>
+
+                {/* Tone */}
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-3'>
+                    Tone
+                  </label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    {['confident', 'friendly', 'formal', 'enthusiastic'].map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setDefaultResumeData(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, tone: t }
+                        }))}
+                        className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                          defaultResumeData.preferences.tone === t
+                            ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                            : 'border-gray-200 hover:border-gray-300 text-slate-600'
+                        }`}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Requirements */}
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-2'>
+                    Custom Requirements
+                  </label>
+                  <textarea
+                    value={defaultResumeData.preferences.custom_requirements}
+                    onChange={(e) => setDefaultResumeData(prev => ({
+                      ...prev,
+                      preferences: { ...prev.preferences, custom_requirements: e.target.value }
+                    }))}
+                    placeholder="Any specific requirements or instructions for how AI should generate your resume content..."
+                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none text-sm'
+                    rows={5}
+                  />
+                  <p className='text-xs text-slate-500 mt-1'>Provide any custom instructions to guide the AI when creating content</p>
+                </div>
+
+                {/* Save Button */}
+                <button
+                  onClick={handleSaveDefaultResumeData}
+                  disabled={isLoading}
+                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
+                >
+                  <SaveIcon className='size-5' />
+                  {isLoading ? 'Saving...' : 'Save Preferences'}
+                </button>
+
+                {/* Info Box */}
+                <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4'>
+                  <div className='flex items-start gap-3'>
+                    <Sparkles className='size-5 text-blue-600 mt-0.5 flex-shrink-0' />
+                    <div className='text-sm text-blue-800'>
+                      <strong>How it works:</strong> These preferences guide the AI when generating or enhancing your resume content.
+                      They apply to features like "Enhance with AI", "Tailor Resume", and custom prompts.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

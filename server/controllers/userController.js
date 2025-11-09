@@ -265,7 +265,8 @@ export const updateDefaultResumeData = async (req, res) => {
                 education: parsedData.education,
                 certifications: parsedData.certifications,
                 achievements: parsedData.achievements,
-                custom_sections: parsedData.custom_sections
+                custom_sections: parsedData.custom_sections,
+                preferences: parsedData.preferences
             },
             { new: true, upsert: true }
         )

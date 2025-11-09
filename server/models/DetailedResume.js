@@ -60,6 +60,11 @@ const DetailedResumeSchema = new mongoose.Schema({
             content: { type: String },
         }
     ],
+    preferences: {
+        writing_style: { type: String, default: 'professional', enum: ['professional', 'technical', 'creative', 'casual'] },
+        tone: { type: String, default: 'confident', enum: ['confident', 'friendly', 'formal', 'enthusiastic'] },
+        custom_requirements: { type: String, default: '' }, // Free text for user to specify their requirements
+    }
 }, {timestamps: true, minimize: false})
 
 const DetailedResume = mongoose.model('DetailedResume', DetailedResumeSchema)

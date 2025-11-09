@@ -7,15 +7,27 @@ import ai from "../configs/ai.js";
 export const enhanceProfessionalSummary = async (req, res) => {
     try {
         const { userContent } = req.body;
+        const userId = req.userId;
 
         if(!userContent){
             return res.status(400).json({message: 'Missing required fields'})
         }
 
+        // Fetch user preferences
+        const detailedResume = await DetailedResume.findOne({ userId });
+        const userPreferences = detailedResume?.preferences || {};
+
+        const systemPrompt = `You are an expert in resume writing. Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentences highlighting key skills, experience, and career objectives. Make it compelling and ATS-friendly. Only return text, no options or anything else.
+
+USER PREFERENCES (Follow these when generating content):
+- Writing Style: ${userPreferences.writing_style || 'professional'}
+- Tone: ${userPreferences.tone || 'confident'}
+${userPreferences.custom_requirements ? `\nIMPORTANT - CUSTOM REQUIREMENTS FROM USER:\n${userPreferences.custom_requirements}\n` : ''}`;
+
        const response = await ai.chat.completions.create({
             model: process.env.OPENAI_MODEL,
             messages: [
-                { role: "system", content: "You are an expert in resume writing. Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentences also highlighting key skills, experience, and career objectives. Make it compelling and ATS-friendly. and only return text no options or anything else." },
+                { role: "system", content: systemPrompt },
                 {
                     role: "user",
                     content: userContent,
@@ -35,16 +47,27 @@ export const enhanceProfessionalSummary = async (req, res) => {
 export const enhanceJobDescription = async (req, res) => {
     try {
         const { userContent } = req.body;
+        const userId = req.userId;
 
         if(!userContent){
             return res.status(400).json({message: 'Missing required fields'})
         }
 
+        // Fetch user preferences
+        const detailedResume = await DetailedResume.findOne({ userId });
+        const userPreferences = detailedResume?.preferences || {};
+
+        const systemPrompt = `You are an expert in resume writing. Your task is to enhance the job description of a resume. The job description should be only in 1-2 sentences highlighting key responsibilities and achievements. Use action verbs and quantifiable results where possible. Make it ATS-friendly. Only return text, no options or anything else.
+
+USER PREFERENCES (Follow these when generating content):
+- Writing Style: ${userPreferences.writing_style || 'professional'}
+- Tone: ${userPreferences.tone || 'confident'}
+${userPreferences.custom_requirements ? `\nIMPORTANT - CUSTOM REQUIREMENTS FROM USER:\n${userPreferences.custom_requirements}\n` : ''}`;
+
        const response = await ai.chat.completions.create({
             model: process.env.OPENAI_MODEL,
             messages: [
-                { role: "system",
-                 content: "You are an expert in resume writing. Your task is to enhance the job description of a resume. The job description should be only in 1-2 sentence also highlighting key responsibilities and achievements. Use action verbs and quantifiable results where possible. Make it ATS-friendly. and only return text no options or anything else." },
+                { role: "system", content: systemPrompt },
                 {
                     role: "user",
                     content: userContent,
@@ -298,6 +321,9 @@ export const suggestJobDescription = async (req, res) => {
             });
         }
 
+        // Extract user preferences
+        const userPreferences = detailedResume?.preferences || {};
+
         // Prepare context from user's profile
         const userContext = {
             skills: detailedResume.skills,
@@ -311,6 +337,11 @@ export const suggestJobDescription = async (req, res) => {
 
         const systemPrompt = `You are an expert resume writer and career coach. Your task is to provide 5 specific, actionable suggestions for job description bullet points that align with the given job description.
 
+USER PREFERENCES (Follow these when generating suggestions):
+- Writing Style: ${userPreferences.writing_style || 'professional'}
+- Tone: ${userPreferences.tone || 'confident'}
+${userPreferences.custom_requirements ? `\nIMPORTANT - CUSTOM REQUIREMENTS FROM USER:\n${userPreferences.custom_requirements}\n` : ''}
+
 CRITICAL RULES:
 1. Analyze the job description to understand what skills and responsibilities are valued
 2. Use the user's background and skills as context to make realistic suggestions
@@ -320,6 +351,7 @@ CRITICAL RULES:
 6. Suggestions don't need to match the current description exactly - be creative and smart about what would fit the role
 7. Each suggestion should be 1-2 sentences maximum
 8. Focus on impact and results, not just responsibilities
+9. Follow the user's preferences above when crafting suggestions
 
 Return ONLY a JSON array of 5 suggestion strings, no additional text.`;
 
@@ -397,6 +429,9 @@ export const tailorResume = async (req, res) => {
             });
         }
 
+        // Extract user preferences
+        const userPreferences = detailedResume?.preferences || {};
+
         console.log("Tailoring resume for user:", userId);
 
         // Prepare user's complete profile data for AI
@@ -414,6 +449,11 @@ You are an expert resume tailoring AI that customizes resumes strictly based on 
 
 PRIMARY OBJECTIVE:
 Create a resume tailored to a job description — only by reorganizing, rewording, and emphasizing data that already exists in the user's profile.
+
+USER PREFERENCES (Follow these when tailoring content):
+- Writing Style: ${userPreferences.writing_style || 'professional'}
+- Tone: ${userPreferences.tone || 'confident'}
+${userPreferences.custom_requirements ? `\nIMPORTANT - CUSTOM REQUIREMENTS FROM USER:\n${userPreferences.custom_requirements}\n` : ''}
 
 CRITICAL RULES:
 1. DO NOT fabricate, assume, or infer information that isn't explicitly present in the user's profile.
@@ -580,6 +620,10 @@ export const handleCustomPrompt = async (req, res) => {
             return res.status(400).json({ message: 'Custom prompt is required' });
         }
 
+        // Fetch user preferences
+        const detailedResume = await DetailedResume.findOne({ userId });
+        const userPreferences = detailedResume?.preferences || {};
+
         // STEP 1: Classify the request to check if it's supported
         const classificationPrompt = `You are a request classifier for a resume builder AI assistant.
 
@@ -724,22 +768,27 @@ Create an enhanced, detailed prompt that clarifies what the user wants to do.`
         console.log("Enhanced prompt:", understanding.enhanced_prompt);
 
         // STEP 3: If supported, proceed with content generation using the clarified instruction
-        // Get user's detailed resume data for additional context
-        const detailedResume = await DetailedResume.findOne({ userId });
+        // User's detailed resume data was already fetched above as detailedResume
 
         const systemPrompt = `You are an expert resume AI assistant that helps users modify and enhance their resumes.
 
 PRIMARY OBJECTIVE:
 Generate resume content based on the user's request while maintaining the exact JSON structure required by the frontend application.
 
+USER PREFERENCES (IMPORTANT - Follow these when generating content):
+- Writing Style: ${userPreferences.writing_style || 'professional'}
+- Tone: ${userPreferences.tone || 'confident'}
+${userPreferences.custom_requirements ? `\nIMPORTANT - CUSTOM REQUIREMENTS FROM USER:\n${userPreferences.custom_requirements}\n` : ''}
+
 CRITICAL RULES:
 1. Carefully read the user's request to understand what they want
 2. Use the current resume data as context - you'll see all existing content
-3. Maintain professional, ATS-friendly language
-4. Use HTML formatting when appropriate (<b>, <i>, <ul>, <li>, <ol>)
-5. Return ONLY the sections that need to be updated/added
-6. Do not fabricate unrealistic information - keep content professional and believable
-7. When modifying specific items, preserve the structure and other fields
+3. Follow the user's preferences above when generating/modifying content
+4. Maintain professional, ATS-friendly language matching the specified style and tone
+5. Use HTML formatting when appropriate (<b>, <i>, <ul>, <li>, <ol>)
+6. Return ONLY the sections that need to be updated/added
+7. Do not fabricate unrealistic information - keep content professional and believable
+8. When modifying specific items, preserve the structure and other fields
 
 RESUME DATA STRUCTURE:
 - professional_summary: String (1-3 sentences)

@@ -258,17 +258,29 @@ const autoSaveResume = async () => {
         keywords="build resume, resume editor, professional resume builder, customize resume, resume templates"
         ogUrl="https://flowerresume.com/app/builder"
       />
-      <div className="max-w-7xl mx-auto px-4 py-6 relative z-50">
-        <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4'>
-          <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all text-sm'>
-            <ArrowLeftIcon className="size-4"/> Back to Dashboard
-          </Link>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all text-sm font-medium'>
+          <ArrowLeftIcon className="size-4"/> Back to Dashboard
+        </Link>
+      </div>
+
+      <div className='max-w-7xl mx-auto px-4 pb-4'>
+        <div className='flex flex-col sm:flex-row gap-3'>
           <button
             onClick={() => setShowCustomPrompt(true)}
-            className='flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all text-sm font-medium shadow-lg w-full sm:w-auto justify-center'
+            className='flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all text-sm font-semibold shadow-lg'
             title="Use AI to generate custom content"
           >
-            <Sparkles className="size-4"/> AI Prompt
+            <Sparkles className="size-5"/>
+            <span>AI Prompt</span>
+          </button>
+
+          <button
+            onClick={() => setIsRequirementsModalOpen(true)}
+            className='flex items-center justify-center gap-2 px-5 py-3 text-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all font-semibold'
+          >
+            <Briefcase className='size-5'/>
+            <span>What This Job Needs</span>
           </button>
         </div>
       </div>
@@ -434,53 +446,59 @@ const autoSaveResume = async () => {
 
           {/* Right Panel - Preview / Profile Data */}
           <div className='lg:col-span-7 max-lg:mt-6'>
+              {/* Action Buttons at bottom */}
               <div className='relative w-full'>
-                <div className='absolute bottom-3 left-0 right-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 z-50 pointer-events-none px-2'>
-                    <div className='pointer-events-auto flex gap-2'>
-                      <button
-                        onClick={() => setShowProfileData(!showProfileData)}
-                        className={`flex items-center justify-center gap-2 px-4 py-2 text-xs rounded-lg transition-all w-full sm:w-auto ${
-                          showProfileData
-                            ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white shadow-md'
-                            : 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300 hover:ring'
-                        }`}
-                      >
-                        <DatabaseIcon className='size-4'/>
-                        <span className="hidden sm:inline">{showProfileData ? 'Show Resume Preview' : 'Show My Profile Data'}</span>
-                        <span className="sm:hidden">{showProfileData ? 'Preview' : 'Profile Data'}</span>
-                      </button>
-                      <button
-                        onClick={() => setIsRequirementsModalOpen(true)}
-                        className='flex items-center justify-center gap-2 px-4 py-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 rounded-lg ring-blue-300 hover:ring transition-all w-full sm:w-auto'
-                      >
-                        <Briefcase className='size-4'/>
-                        <span className="hidden sm:inline">What This Job Needs</span>
-                        <span className="sm:hidden">Job Needs</span>
-                      </button>
-                    </div>
-                    <div className='flex items-center gap-2 pointer-events-auto flex-wrap'>
-                    {resumeData.public && (
-                      <button onClick={handleShare} className='flex items-center justify-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors flex-1 sm:flex-none'>
-                        <Share2Icon className='size-4'/> <span className="hidden sm:inline">Share</span>
-                      </button>
-                    )}
-                    {/* <button onClick={changeResumeVisibility} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 ring-purple-300 rounded-lg hover:ring transition-colors'>
-                      {resumeData.public ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                      {resumeData.public ? 'Public' : 'Private'}
-                    </button> */}
-                    <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}} className='flex items-center justify-center gap-2 px-4 py-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors flex-1 sm:flex-none'>
-                      <span className="hidden sm:inline">Save Changes</span>
-                      <span className="sm:hidden">Save</span>
+                <div className='absolute bottom-3 left-0 right-0 z-50 pointer-events-none px-2'>
+                  <div className='flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pointer-events-auto'>
+
+                    {/* Show Profile Data Toggle */}
+                    <button
+                      onClick={() => setShowProfileData(!showProfileData)}
+                      className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm rounded-lg transition-all font-medium shadow-lg ${
+                        showProfileData
+                          ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white'
+                          : 'bg-white text-yellow-700 border-2 border-yellow-300 hover:bg-yellow-50'
+                      }`}
+                    >
+                      <DatabaseIcon className='size-4'/>
+                      <span>{showProfileData ? 'Show Resume Preview' : 'Show Profile Data'}</span>
                     </button>
-                    <button onClick={downloadResume} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 rounded-lg ring-gray-300 hover:ring transition-colors'>
-                      <DownloadIcon className='size-4'/> Download
-                    </button>
-                    {autoSaveStatus && (
-                      <span className={`text-xs hidden sm:inline ${autoSaveStatus === 'saving' ? 'text-gray-500' : 'text-green-600'}`}>
-                        {autoSaveStatus === 'saving' ? 'Saving...' : '✓ Saved'}
-                      </span>
-                    )}
+
+                    {/* Right side actions */}
+                    <div className='flex items-center gap-2 flex-wrap'>
+                      {resumeData.public && (
+                        <button
+                          onClick={handleShare}
+                          className='flex items-center justify-center px-4 py-2.5 gap-2 text-sm bg-white text-blue-600 rounded-lg border-2 border-blue-200 hover:bg-blue-50 transition-all font-medium shadow-lg'
+                        >
+                          <Share2Icon className='size-4'/>
+                          <span>Share</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}}
+                        className='flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all font-medium'
+                      >
+                        <CheckCircle className='size-4'/>
+                        <span>Save Changes</span>
+                      </button>
+
+                      <button
+                        onClick={downloadResume}
+                        className='flex items-center gap-2 px-4 py-2.5 text-sm bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-lg shadow-lg hover:from-gray-800 hover:to-gray-900 transition-all font-medium'
+                      >
+                        <DownloadIcon className='size-4'/>
+                        <span>Download</span>
+                      </button>
+
+                      {autoSaveStatus && (
+                        <span className={`text-xs px-3 py-2.5 rounded-lg font-medium shadow-lg ${autoSaveStatus === 'saving' ? 'text-gray-700 bg-white border-2 border-gray-200' : 'text-green-700 bg-white border-2 border-green-200'}`}>
+                          {autoSaveStatus === 'saving' ? 'Saving...' : '✓ Saved'}
+                        </span>
+                      )}
                     </div>
+                  </div>
                 </div>
               </div>
 
