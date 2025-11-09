@@ -55,11 +55,11 @@ const updateAchievement = (index, field, value)=>{
 
                     <div className='grid gap-3'>
 
-                        <input value={achievement.title || ""} onChange={(e)=>updateAchievement(index, "title", e.target.value)} type="text" placeholder="Achievement Title" className="px-3 py-2 text-sm"/>
+                        <input value={achievement.title || ""} onChange={(e)=>updateAchievement(index, "title", e.target.value)} type="text" placeholder="Achievement Title" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <textarea value={achievement.description || ""} onChange={(e)=>updateAchievement(index, "description", e.target.value)} placeholder="Description of your achievement" className="px-3 py-2 text-sm resize-none" rows={3}/>
+                        <textarea value={achievement.description || ""} onChange={(e)=>updateAchievement(index, "description", e.target.value)} placeholder="Description of your achievement" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none resize-none" rows={3}/>
 
-                        <input value={achievement.date || ""} onChange={(e)=>updateAchievement(index, "date", e.target.value)} type="month" className="px-3 py-2 text-sm" placeholder="Date"/>
+                        <input value={achievement.date || ""} onChange={(e)=>updateAchievement(index, "date", e.target.value)} type="month" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Date"/>
 
                     </div>
 

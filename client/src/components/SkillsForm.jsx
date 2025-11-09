@@ -29,12 +29,12 @@ const SkillsForm = ({ data, onChange }) => {
       </div>
 
       <div className="flex gap-2">
-            <input type="text" placeholder="Enter a skill (e.g., JavaScript, Project Management)" className='flex-1 px-3 py-2 text-sm'
+            <input type="text" placeholder="Enter a skill (e.g., JavaScript, Project Management)" className='flex-1 min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none'
             onChange={(e)=>setNewSkill(e.target.value)}
             value={newSkill}
             onKeyDown={handleKeyPress}
             />
-            <button onClick={addSkill} disabled={!newSkill.trim} className='flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'>
+            <button onClick={addSkill} disabled={!newSkill.trim} className='flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap'>
                 <Plus className="size-4"/> Add
             </button>
       </div>

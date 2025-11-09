@@ -38,8 +38,10 @@ const ProfessionalSummaryForm = ({data, onChange, setResumeData}) => {
         </button>
       </div>
 
-      <div className="mt-6">
-        <QuillEditor content={data || ""} onTextChange={(value)=> onChange(value)} />
+      <div className="mt-6 max-w-full overflow-x-hidden">
+        <div className="max-w-full">
+          <QuillEditor content={data || ""} onTextChange={(value)=> onChange(value)} />
+        </div>
         <p className='text-xs text-gray-500 max-w-4/5 mx-auto text-center mt-2'>Tip: Keep it concise (3-4 sentences) and focus on your most relevant achievements and skills.</p>
       </div>
     </div>

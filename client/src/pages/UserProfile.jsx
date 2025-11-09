@@ -200,7 +200,7 @@ const UserProfile = () => {
   ]
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 overflow-x-hidden'>
       <div className='max-w-6xl mx-auto px-4 py-6 sm:py-8'>
 
         {/* Back Button */}
@@ -234,7 +234,7 @@ const UserProfile = () => {
         </div>
 
         {/* Tab Content */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8'>
+        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 overflow-x-hidden'>
 
           {/* Account Info Tab */}
           {activeTab === 'account' && (
@@ -292,9 +292,9 @@ const UserProfile = () => {
                   </div>
                 </div>
               ) : (
-              <div className='space-y-8'>
+              <div className='space-y-8 max-w-full overflow-x-hidden'>
                 {/* Personal Info Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <UserIcon className='size-5 text-yellow-600' />
                     Personal Information
@@ -308,7 +308,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Professional Summary Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <FileTextIcon className='size-5 text-yellow-600' />
                     Professional Summary
@@ -321,7 +321,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Skills Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <Sparkles className='size-5 text-yellow-600' />
                     Skills
@@ -333,7 +333,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Experience Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <Briefcase className='size-5 text-yellow-600' />
                     Work Experience
@@ -345,7 +345,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Education Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <GraduationCap className='size-5 text-yellow-600' />
                     Education
@@ -357,7 +357,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Projects Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <FolderIcon className='size-5 text-yellow-600' />
                     Projects
@@ -369,7 +369,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Certifications Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <Award className='size-5 text-yellow-600' />
                     Certifications
@@ -381,7 +381,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Achievements Section */}
-                <div className='border-b border-gray-200 pb-8'>
+                <div className='border-b border-gray-200 pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <Trophy className='size-5 text-yellow-600' />
                     Achievements
@@ -393,7 +393,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Custom Sections */}
-                <div className='pb-8'>
+                <div className='pb-8 max-w-full'>
                   <h3 className='text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2'>
                     <FileTextIcon className='size-5 text-yellow-600' />
                     Custom Sections

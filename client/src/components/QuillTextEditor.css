@@ -2,6 +2,25 @@
 .quill-editor-large .ql-editor {
   font-size: 16px;
   line-height: 1.6;
+  max-width: 100%;
+  overflow-x: auto;
+  word-wrap: break-word;
+}
+
+/* Ensure Quill container respects width constraints */
+.quill-editor-large {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.quill-editor-large .ql-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.quill-editor-large .ql-toolbar {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* Also increase font size for toolbar */

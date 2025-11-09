@@ -155,13 +155,13 @@ const updateExperience = (index, field, value)=>{
 
                     <div className='grid md:grid-cols-2 gap-3'>
 
-                        <input value={experience.company || ""} onChange={(e)=>updateExperience(index, "company", e.target.value)} type="text" placeholder="Company Name" className="px-3 py-2 text-sm rounded-lg"/>
+                        <input value={experience.company || ""} onChange={(e)=>updateExperience(index, "company", e.target.value)} type="text" placeholder="Company Name" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <input value={experience.position || ""} onChange={(e)=>updateExperience(index, "position", e.target.value)} type="text" placeholder="Job Title" className="px-3 py-2 text-sm rounded-lg"/>
+                        <input value={experience.position || ""} onChange={(e)=>updateExperience(index, "position", e.target.value)} type="text" placeholder="Job Title" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <input value={experience.start_date || ""} onChange={(e)=>updateExperience(index, "start_date", e.target.value)} type="month" className="px-3 py-2 text-sm rounded-lg"/>
+                        <input value={experience.start_date || ""} onChange={(e)=>updateExperience(index, "start_date", e.target.value)} type="month" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <input value={experience.end_date || ""} onChange={(e)=>updateExperience(index, "end_date", e.target.value)} type="month" disabled={experience.is_current} className="px-3 py-2 text-sm rounded-lg disabled:bg-gray-100"/>
+                        <input value={experience.end_date || ""} onChange={(e)=>updateExperience(index, "end_date", e.target.value)} type="month" disabled={experience.is_current} className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100"/>
                     </div>
 
                     <label className='flex items-center gap-2'>
@@ -223,7 +223,9 @@ const updateExperience = (index, field, value)=>{
                             </div>
                         )}
 
-                        <QuillEditor content={experience.description || ""} onTextChange={(value)=> updateExperience(index, "description", value)} rows={4} className="w-full text-sm px-3 py-2 rounded-lg resize-none" readOnly={true}/>
+                        <div className="max-w-full overflow-x-hidden">
+                            <QuillEditor content={experience.description || ""} onTextChange={(value)=> updateExperience(index, "description", value)} rows={4} className="w-full text-sm px-3 py-2 rounded-lg resize-none" readOnly={true}/>
+                        </div>
                     </div>
                 </div>
             ))}

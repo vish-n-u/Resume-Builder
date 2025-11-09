@@ -31,8 +31,8 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
     }
 
   return (
-    <div className='w-full bg-gray-100 print:bg-white print:m-0 print:p-0'>
-      <div id="resume-preview" className={"border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 " + classes}>
+    <div className='w-full bg-gray-100 print:bg-white print:m-0 print:p-0 overflow-hidden'>
+      <div id="resume-preview" className={"border border-gray-200 print:shadow-none print:border-none print:m-0 print:p-0 max-w-full overflow-hidden " + classes}>
         {renderTemplate()}
       </div>
 
@@ -42,6 +42,14 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
           size: letter;
           margin: 0;
         }
+
+        /* Mobile scaling for resume */
+        @media (max-width: 640px) {
+          #resume-preview {
+            transform-origin: top left;
+          }
+        }
+
         @media print {
           * {
             -webkit-print-color-adjust: exact !important;

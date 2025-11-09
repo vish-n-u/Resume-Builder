@@ -82,15 +82,17 @@ const moveProjectDown = (index) => {
 
                     <div className='grid gap-3'>
 
-                        <input value={project.name || ""} onChange={(e)=>updateProject(index, "name", e.target.value)} type="text" placeholder="Project Name" className="px-3 py-2 text-sm rounded-lg"/>
+                        <input value={project.name || ""} onChange={(e)=>updateProject(index, "name", e.target.value)} type="text" placeholder="Project Name" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <input value={project.type || ""} onChange={(e)=>updateProject(index, "type", e.target.value)} type="text" placeholder="Project Type" className="px-3 py-2 text-sm rounded-lg"/>
+                        <input value={project.type || ""} onChange={(e)=>updateProject(index, "type", e.target.value)} type="text" placeholder="Project Type" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
                         <div className="space-y-2">
                             <label className='text-sm font-medium text-gray-700'>Project Description</label>
-                            <QuillEditor content={project.description || ""} onTextChange={(value)=> updateProject(index, "description", value)} />
+                            <div className="max-w-full overflow-x-hidden">
+                                <QuillEditor content={project.description || ""} onTextChange={(value)=> updateProject(index, "description", value)} />
+                            </div>
                         </div>
-            
+
                     </div>
 
 

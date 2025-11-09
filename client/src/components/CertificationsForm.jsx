@@ -56,13 +56,13 @@ const updateCertification = (index, field, value)=>{
 
                     <div className='grid md:grid-cols-2 gap-3'>
 
-                        <input value={certification.name || ""} onChange={(e)=>updateCertification(index, "name", e.target.value)} type="text" placeholder="Certification Name" className="px-3 py-2 text-sm"/>
+                        <input value={certification.name || ""} onChange={(e)=>updateCertification(index, "name", e.target.value)} type="text" placeholder="Certification Name" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <input value={certification.issuer || ""} onChange={(e)=>updateCertification(index, "issuer", e.target.value)} type="text" placeholder="Issuing Organization" className="px-3 py-2 text-sm"/>
+                        <input value={certification.issuer || ""} onChange={(e)=>updateCertification(index, "issuer", e.target.value)} type="text" placeholder="Issuing Organization" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
-                        <input value={certification.date || ""} onChange={(e)=>updateCertification(index, "date", e.target.value)} type="month" className="px-3 py-2 text-sm" placeholder="Issue Date"/>
+                        <input value={certification.date || ""} onChange={(e)=>updateCertification(index, "date", e.target.value)} type="month" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Issue Date"/>
 
-                        <input value={certification.credential_id || ""} onChange={(e)=>updateCertification(index, "credential_id", e.target.value)} type="text" className="px-3 py-2 text-sm" placeholder="Credential ID (optional)"/>
+                        <input value={certification.credential_id || ""} onChange={(e)=>updateCertification(index, "credential_id", e.target.value)} type="text" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Credential ID (optional)"/>
                     </div>
 
                 </div>
