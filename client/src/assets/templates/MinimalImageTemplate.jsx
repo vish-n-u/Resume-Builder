@@ -44,7 +44,7 @@ const MinimalImageTemplate = ({ data, accentColor, sectionVisibility }) => {
 
 
                     {/* Contact */}
-                    <section className="mb-8">
+                    <section className="mb-6 sm:mb-8">
                         <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                             CONTACT
                         </h2>
@@ -72,7 +72,7 @@ const MinimalImageTemplate = ({ data, accentColor, sectionVisibility }) => {
 
                     {/* Education */}
                     {sectionVisibility?.education && data.education && data.education.length > 0 && (
-                        <section className="mb-8">
+                        <section className="mb-6 sm:mb-8">
                             <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                                 EDUCATION
                             </h2>
@@ -92,7 +92,7 @@ const MinimalImageTemplate = ({ data, accentColor, sectionVisibility }) => {
 
                     {/* Skills */}
                     {sectionVisibility?.skills && data.skills && data.skills.length > 0 && (
-                        <section className="mb-8">
+                        <section className="mb-6 sm:mb-8">
                             <h2 className="text-sm font-semibold tracking-widest text-zinc-600 mb-3">
                                 SKILLS
                             </h2>
@@ -130,7 +130,7 @@ const MinimalImageTemplate = ({ data, accentColor, sectionVisibility }) => {
 
                     {/* Summary */}
                     {sectionVisibility?.summary && data.professional_summary && (
-                        <section className="mb-8">
+                        <section className="mb-6 sm:mb-8">
                             <h2 className="text-sm font-semibold tracking-widest mb-3" style={{ color: accentColor }} >
                                 SUMMARY
                             </h2>
@@ -176,7 +176,7 @@ const MinimalImageTemplate = ({ data, accentColor, sectionVisibility }) => {
 
                     {/* Projects */}
                     {sectionVisibility?.projects && data.project && data.project.length > 0 && (
-                        <section className="mb-8">
+                        <section className="mb-6 sm:mb-8">
                             <h2 className="text-sm uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
                                 PROJECTS
                             </h2>

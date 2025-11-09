@@ -13,12 +13,12 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 	return (
 		<div className="max-w-4xl mx-auto bg-white text-gray-800">
 			{/* Header */}
-			<header className="p-8 text-white" style={{ backgroundColor: accentColor }}>
-				<h1 className="text-4xl font-light mb-3">
+			<header className="p-4 sm:p-6 lg:p-8 text-white print:p-8" style={{ backgroundColor: accentColor }}>
+				<h1 className="text-2xl sm:text-3xl lg:text-4xl font-light mb-3">
 					{data.personal_info?.full_name || "Your Name"}
 				</h1>
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ">
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
 					{data.personal_info?.email && (
 						<div className="flex items-center gap-2">
 							<Mail className="size-4" />
@@ -52,39 +52,39 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 				</div>
 			</header>
 
-			<div className="p-8">
+			<div className="p-4 sm:p-6 lg:p-8 print:p-8">
 				{/* Professional Summary */}
 				{sectionVisibility?.summary && data.professional_summary && (
-					<section className="mb-8">
-						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+					<section className="mb-6 sm:mb-8">
+						<h2 className="text-xl sm:text-2xl font-light mb-3 sm:mb-4 pb-2 border-b border-gray-200">
 							Professional Summary
 						</h2>
-						<p className="text-gray-700 ">{data.professional_summary}</p>
+						<p className="text-sm sm:text-base text-gray-700">{data.professional_summary}</p>
 					</section>
 				)}
 
 				{/* Experience */}
 				{sectionVisibility?.experience && data.experience && data.experience.length > 0 && (
-					<section className="mb-8">
-						<h2 className="text-2xl font-light mb-6 pb-2 border-b border-gray-200">
+					<section className="mb-6 sm:mb-8">
+						<h2 className="text-xl sm:text-2xl font-light mb-4 sm:mb-6 pb-2 border-b border-gray-200">
 							Experience
 						</h2>
 
-						<div className="space-y-6">
+						<div className="space-y-4 sm:space-y-6">
 							{data.experience.map((exp, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200">
+								<div key={index} className="relative pl-4 sm:pl-6 border-l border-gray-200">
 
-									<div className="flex justify-between items-start mb-2">
-										<div>
-											<h3 className="text-xl font-medium text-gray-900">{exp.position}</h3>
-											<p className="font-medium" style={{ color: accentColor }}>{exp.company}</p>
+									<div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1 sm:gap-0">
+										<div className="flex-1">
+											<h3 className="text-lg sm:text-xl font-medium text-gray-900">{exp.position}</h3>
+											<p className="font-medium text-sm sm:text-base" style={{ color: accentColor }}>{exp.company}</p>
 										</div>
-										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
+										<div className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 rounded w-fit">
 											{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
 										</div>
 									</div>
 									{exp.description && (
-										<div className="text-gray-700 leading-relaxed mt-3 whitespace-pre-line">
+										<div className="text-xs sm:text-sm text-gray-700 leading-relaxed mt-3 whitespace-pre-line">
 											{exp.description}
 										</div>
 									)}
@@ -96,14 +96,14 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 
 				{/* Projects */}
 				{sectionVisibility?.projects && data.project && data.project.length > 0 && (
-					<section className="mb-8">
-						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+					<section className="mb-6 sm:mb-8">
+						<h2 className="text-xl sm:text-2xl font-light mb-3 sm:mb-4 pb-2 border-b border-gray-200">
 							Projects
 						</h2>
 
-						<div className="space-y-6">
+						<div className="space-y-4 sm:space-y-6">
 							{data.project.map((p, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
+								<div key={index} className="relative pl-4 sm:pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
 
 
 									<div className="flex justify-between items-start">
@@ -122,11 +122,11 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 					</section>
 				)}
 
-				<div className="grid sm:grid-cols-2 gap-8">
+				<div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
 					{/* Education */}
 					{sectionVisibility?.education && data.education && data.education.length > 0 && (
 						<section>
-							<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+							<h2 className="text-xl sm:text-2xl font-light mb-3 sm:mb-4 pb-2 border-b border-gray-200">
 								Education
 							</h2>
 
@@ -150,7 +150,7 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 					{/* Skills */}
 					{sectionVisibility?.skills && data.skills && data.skills.length > 0 && (
 						<section>
-							<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+							<h2 className="text-xl sm:text-2xl font-light mb-3 sm:mb-4 pb-2 border-b border-gray-200">
 								Skills
 							</h2>
 
@@ -158,7 +158,7 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 								{data.skills.map((skill, index) => (
 									<span
 										key={index}
-										className="px-3 py-1 text-sm text-white rounded-full"
+										className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-white rounded-full"
 										style={{ backgroundColor: accentColor }}
 									>
 										{skill}
@@ -172,20 +172,20 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 				{/* Certifications */}
 				{sectionVisibility?.certifications && data.certifications && data.certifications.length > 0 && (
 					<section className="mt-8">
-						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+						<h2 className="text-xl sm:text-2xl font-light mb-3 sm:mb-4 pb-2 border-b border-gray-200">
 							Certifications
 						</h2>
 
 						<div className="space-y-4">
 							{data.certifications.map((cert, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200">
-									<div className="flex justify-between items-start">
-										<div>
-											<h3 className="font-semibold text-gray-900">{cert.name}</h3>
-											<p style={{ color: accentColor }}>{cert.issuer}</p>
-											{cert.credential_id && <p className="text-sm text-gray-600">ID: {cert.credential_id}</p>}
+								<div key={index} className="relative pl-4 sm:pl-6 border-l border-gray-200">
+									<div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
+										<div className="flex-1">
+											<h3 className="font-semibold text-gray-900 text-sm sm:text-base">{cert.name}</h3>
+											<p style={{ color: accentColor }} className="text-sm sm:text-base">{cert.issuer}</p>
+											{cert.credential_id && <p className="text-xs sm:text-sm text-gray-600">ID: {cert.credential_id}</p>}
 										</div>
-										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
+										<div className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 rounded w-fit flex-shrink-0">
 											{formatDate(cert.date)}
 										</div>
 									</div>
@@ -198,21 +198,21 @@ const ModernTemplate = ({ data, accentColor, sectionVisibility }) => {
 				{/* Achievements */}
 				{sectionVisibility?.achievements && data.achievements && data.achievements.length > 0 && (
 					<section className="mt-8">
-						<h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+						<h2 className="text-xl sm:text-2xl font-light mb-3 sm:mb-4 pb-2 border-b border-gray-200">
 							Achievements
 						</h2>
 
 						<div className="space-y-4">
 							{data.achievements.map((achievement, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
-									<div className="flex justify-between items-start mb-1">
-										<h3 className="font-semibold text-gray-900">{achievement.title}</h3>
-										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
+								<div key={index} className="relative pl-4 sm:pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
+									<div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1 gap-1 sm:gap-0">
+										<h3 className="font-semibold text-gray-900 text-sm sm:text-base flex-1">{achievement.title}</h3>
+										<div className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 rounded w-fit flex-shrink-0">
 											{formatDate(achievement.date)}
 										</div>
 									</div>
 									{achievement.description && (
-										<p className="text-gray-700 leading-relaxed">{achievement.description}</p>
+										<p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{achievement.description}</p>
 									)}
 								</div>
 							))}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { dummyResumeData } from '../assets/assets'
-import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User, Plus } from 'lucide-react'
+import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User, Plus, AlertCircle, CheckCircle, XIcon } from 'lucide-react'
 import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
 import TemplateSelector from '../components/TemplateSelector'
@@ -15,6 +15,7 @@ import CertificationsForm from '../components/CertificationsForm'
 import AchievementsForm from '../components/AchievementsForm'
 import CustomSectionsForm from '../components/CustomSectionsForm'
 import CustomPromptModal from '../components/CustomPromptModal'
+import JobRequirementsModal from '../components/JobRequirementsModal'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
@@ -86,6 +87,8 @@ const ResumeBuilder = () => {
   const [defaultResumeData, setDefaultResumeData] = useState(null)
   const [showCustomPrompt, setShowCustomPrompt] = useState(false)
   const [autoSaveStatus, setAutoSaveStatus] = useState('') // '', 'saving', 'saved'
+  const [showMissingModal, setShowMissingModal] = useState(false)
+  const [isRequirementsModalOpen, setIsRequirementsModalOpen] = useState(false)
 
   // Refs for auto-save functionality
   const isInitialLoad = useRef(true)
@@ -256,13 +259,13 @@ const autoSaveResume = async () => {
         ogUrl="https://flowerresume.com/app/builder"
       />
       <div className="max-w-7xl mx-auto px-4 py-6 relative z-50">
-        <div className='flex items-center gap-4'>
-          <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4'>
+          <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all text-sm'>
             <ArrowLeftIcon className="size-4"/> Back to Dashboard
           </Link>
           <button
             onClick={() => setShowCustomPrompt(true)}
-            className='flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all text-sm font-medium shadow-lg'
+            className='flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all text-sm font-medium shadow-lg w-full sm:w-auto justify-center'
             title="Use AI to generate custom content"
           >
             <Sparkles className="size-4"/> AI Prompt
@@ -280,21 +283,21 @@ const autoSaveResume = async () => {
               <hr className="absolute top-0 left-0  h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-2000" style={{width: `${activeSectionIndex * 100 / (sections.length - 1)}%`}}/>
 
               {/* Section Navigation */}
-              <div className="flex justify-between items-center mb-6 border-b border-gray-300 py-1">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-300 py-1 gap-3">
 
                 <div className='flex items-center gap-2'>
                   <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
                   <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
                 </div>
 
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start'>
                   {activeSectionIndex !== 0 && (
-                    <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex === 0}>
-                      <ChevronLeft className="size-4"/> Previous
+                    <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 px-3 py-2 sm:p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex === 0}>
+                      <ChevronLeft className="size-4"/> <span className="sm:inline">Previous</span>
                     </button>
                   )}
-                  <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.min(prevIndex + 1, sections.length - 1))} className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 && 'opacity-50'}`} disabled={activeSectionIndex === sections.length - 1}>
-                      Next <ChevronRight className="size-4"/>
+                  <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.min(prevIndex + 1, sections.length - 1))} className={`flex items-center gap-1 px-3 py-2 sm:p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 && 'opacity-50'}`} disabled={activeSectionIndex === sections.length - 1}>
+                      <span className="sm:inline">Next</span> <ChevronRight className="size-4"/>
                     </button>
                 </div>
               </div>
@@ -432,38 +435,48 @@ const autoSaveResume = async () => {
           {/* Right Panel - Preview / Profile Data */}
           <div className='lg:col-span-7 max-lg:mt-6'>
               <div className='relative w-full'>
-                <div className='absolute bottom-3 left-0 right-0 flex items-center justify-between gap-2 z-50 pointer-events-none'>
-                    <div className='pointer-events-auto'>
+                <div className='absolute bottom-3 left-0 right-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 z-50 pointer-events-none px-2'>
+                    <div className='pointer-events-auto flex gap-2'>
                       <button
                         onClick={() => setShowProfileData(!showProfileData)}
-                        className={`flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-all ${
+                        className={`flex items-center justify-center gap-2 px-4 py-2 text-xs rounded-lg transition-all w-full sm:w-auto ${
                           showProfileData
                             ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white shadow-md'
                             : 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 ring-yellow-300 hover:ring'
                         }`}
                       >
                         <DatabaseIcon className='size-4'/>
-                        {showProfileData ? 'Show Resume Preview' : 'Show My Profile Data'}
+                        <span className="hidden sm:inline">{showProfileData ? 'Show Resume Preview' : 'Show My Profile Data'}</span>
+                        <span className="sm:hidden">{showProfileData ? 'Preview' : 'Profile Data'}</span>
+                      </button>
+                      <button
+                        onClick={() => setIsRequirementsModalOpen(true)}
+                        className='flex items-center justify-center gap-2 px-4 py-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 rounded-lg ring-blue-300 hover:ring transition-all w-full sm:w-auto'
+                      >
+                        <Briefcase className='size-4'/>
+                        <span className="hidden sm:inline">What This Job Needs</span>
+                        <span className="sm:hidden">Job Needs</span>
                       </button>
                     </div>
-                    <div className='flex items-center gap-2 pointer-events-auto'>
+                    <div className='flex items-center gap-2 pointer-events-auto flex-wrap'>
                     {resumeData.public && (
-                      <button onClick={handleShare} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors'>
-                        <Share2Icon className='size-4'/> Share
+                      <button onClick={handleShare} className='flex items-center justify-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors flex-1 sm:flex-none'>
+                        <Share2Icon className='size-4'/> <span className="hidden sm:inline">Share</span>
                       </button>
                     )}
                     {/* <button onClick={changeResumeVisibility} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 ring-purple-300 rounded-lg hover:ring transition-colors'>
                       {resumeData.public ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
                       {resumeData.public ? 'Public' : 'Private'}
                     </button> */}
-                    <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors'>
-                      Save Changes
+                    <button onClick={()=> {toast.promise(saveResume, {loading: 'Saving...'})}} className='flex items-center justify-center gap-2 px-4 py-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors flex-1 sm:flex-none'>
+                      <span className="hidden sm:inline">Save Changes</span>
+                      <span className="sm:hidden">Save</span>
                     </button>
                     <button onClick={downloadResume} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 rounded-lg ring-gray-300 hover:ring transition-colors'>
                       <DownloadIcon className='size-4'/> Download
                     </button>
                     {autoSaveStatus && (
-                      <span className={`text-xs ${autoSaveStatus === 'saving' ? 'text-gray-500' : 'text-green-600'}`}>
+                      <span className={`text-xs hidden sm:inline ${autoSaveStatus === 'saving' ? 'text-gray-500' : 'text-green-600'}`}>
                         {autoSaveStatus === 'saving' ? 'Saving...' : '✓ Saved'}
                       </span>
                     )}
@@ -606,6 +619,13 @@ const autoSaveResume = async () => {
         onClose={() => setShowCustomPrompt(false)}
         resumeData={resumeData}
         setResumeData={setResumeData}
+      />
+
+      {/* Job Requirements Modal */}
+      <JobRequirementsModal
+        isOpen={isRequirementsModalOpen}
+        onClose={() => setIsRequirementsModalOpen(false)}
+        jobDescription={resumeData.job_description}
       />
 
     </>

@@ -46,7 +46,7 @@ const MinimalTemplate = ({ data, accentColor, sectionVisibility }) => {
                         Experience
                     </h2>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                         {data.experience.map((exp, index) => (
                             <div key={index}>
                                 <div className="flex justify-between items-baseline mb-1">

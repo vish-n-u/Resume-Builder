@@ -880,3 +880,64 @@ Remember:
         return res.status(400).json({ message: error.message });
     }
 }
+
+// controller for extracting job requirements from job description
+// POST: /api/ai/extract-job-requirements
+export const extractJobRequirements = async (req, res) => {
+    try {
+        const { jobDescription } = req.body;
+
+        if(!jobDescription || jobDescription.trim() === ''){
+            return res.status(400).json({message: 'Job description is required'})
+        }
+
+        const systemPrompt = `You are an expert AI Agent specialized in analyzing job descriptions and extracting key requirements. Extract the following information from the job description and provide it in a structured JSON format.`;
+
+        const userPrompt = `Analyze this job description and extract the following information:
+
+Job Description:
+${jobDescription}
+
+Extract and provide the data in the following JSON format with no additional text before or after:
+
+{
+  "workplaceLocation": "string - the location of the job (include if remote/hybrid/on-site if mentioned)",
+  "applicationType": "string - 'email' or 'portal' or 'both' based on how to apply",
+  "applicationEmail": "string - email address if mentioned for applications",
+  "portalUrl": "string - application portal URL if mentioned",
+  "requiredCertifications": "string - list of required certifications, each on a new line",
+  "requiredSkills": "string - list of required technical and soft skills, each on a new line",
+  "experience": "string - years or type of experience required (e.g., '3-5 years in software development')",
+  "education": "string - educational requirements (e.g., 'Bachelor's in Computer Science')",
+  "additionalRequirements": "string - any other requirements, preferences, or nice-to-haves"
+}
+
+Instructions:
+1. Extract information only if explicitly mentioned or clearly implied in the job description
+2. Use empty string "" if information is not found
+3. For skills and certifications, list each on a new line
+4. Be thorough and extract all relevant details
+5. Ensure the response is valid JSON with no additional commentary`;
+
+       const response = await ai.chat.completions.create({
+            model: process.env.OPENAI_MODEL,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.3
+        });
+
+        const extractedRequirements = JSON.parse(response.choices[0].message.content);
+
+        return res.status(200).json({
+            success: true,
+            requirements: extractedRequirements
+        });
+
+    } catch (error) {
+        console.error("Error extracting job requirements:", error);
+        return res.status(400).json({message: error.message})
+    }
+}

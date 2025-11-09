@@ -190,74 +190,74 @@ const UserProfile = () => {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <div className='max-w-6xl mx-auto px-4 py-8'>
+      <div className='max-w-6xl mx-auto px-4 py-6 sm:py-8'>
 
         {/* Back Button */}
-        <Link to='/app' className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all mb-6'>
+        <Link to='/app' className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all mb-6 text-sm'>
           <ArrowLeftIcon className="size-4" /> Back to Dashboard
         </Link>
 
         {/* Page Title */}
-        <h1 className='text-3xl font-bold text-slate-800 mb-2'>Profile Settings</h1>
-        <p className='text-slate-600 mb-8'>Manage your account and set default resume information</p>
+        <h1 className='text-2xl sm:text-3xl font-bold text-slate-800 mb-2'>Profile Settings</h1>
+        <p className='text-sm sm:text-base text-slate-600 mb-6 sm:mb-8'>Manage your account and set default resume information</p>
 
         {/* Tabs */}
-        <div className='flex gap-2 mb-6 border-b border-gray-200'>
+        <div className='flex gap-1 sm:gap-2 mb-6 border-b border-gray-200 overflow-x-auto'>
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 sm:px-6 py-3 font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'text-yellow-600 border-b-2 border-yellow-600'
                     : 'text-slate-600 hover:text-slate-800'
                 }`}
               >
-                <Icon className='size-5' />
-                <span className='max-sm:hidden'>{tab.name}</span>
+                <Icon className='size-4 sm:size-5' />
+                <span className='max-sm:hidden text-sm sm:text-base'>{tab.name}</span>
               </button>
             )
           })}
         </div>
 
         {/* Tab Content */}
-        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-8'>
+        <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8'>
 
           {/* Account Info Tab */}
           {activeTab === 'account' && (
             <div>
-              <h2 className='text-2xl font-semibold text-slate-800 mb-6'>Account Information</h2>
+              <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-4 sm:mb-6'>Account Information</h2>
               <form onSubmit={handleUpdateAccount} className='space-y-4 max-w-2xl'>
                 <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
+                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
                     Full Name
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
                     required
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
+                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
                     required
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base'
                 >
                   {isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -268,16 +268,16 @@ const UserProfile = () => {
           {/* Default Resume Data Tab */}
           {activeTab === 'resume-data' && (
             <div>
-              <div className='mb-6'>
-                <h2 className='text-2xl font-semibold text-slate-800 mb-2'>Default Resume Data</h2>
-                <p className='text-slate-600'>This information will be used to auto-fill new resumes you create</p>
+              <div className='mb-4 sm:mb-6'>
+                <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-2'>Default Resume Data</h2>
+                <p className='text-sm sm:text-base text-slate-600'>This information will be used to auto-fill new resumes you create</p>
               </div>
 
               {isDataLoading ? (
                 <div className='flex items-center justify-center py-12'>
                   <div className='text-center'>
                     <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4'></div>
-                    <p className='text-slate-600'>Loading your data...</p>
+                    <p className='text-sm sm:text-base text-slate-600'>Loading your data...</p>
                   </div>
                 </div>
               ) : (
@@ -398,12 +398,13 @@ const UserProfile = () => {
                   <button
                     onClick={() => toast.promise(handleSaveDefaultResumeData(), { loading: 'Saving...' })}
                     disabled={isLoading}
-                    className='flex items-center gap-2 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='flex items-center justify-center gap-2 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto'
                   >
-                    <SaveIcon className='size-5' />
-                    Save Default Resume Data
+                    <SaveIcon className='size-4 sm:size-5' />
+                    <span className="hidden sm:inline">Save Default Resume Data</span>
+                    <span className="sm:hidden">Save Data</span>
                   </button>
-                  <p className='text-sm text-slate-500 mt-3'>
+                  <p className='text-xs sm:text-sm text-slate-500 mt-3'>
                     💡 Tip: Fill out your information here once, and it will automatically populate when you create new resumes!
                   </p>
                 </div>
@@ -415,43 +416,43 @@ const UserProfile = () => {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <div>
-              <h2 className='text-2xl font-semibold text-slate-800 mb-6'>Change Password</h2>
+              <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-4 sm:mb-6'>Change Password</h2>
               <form onSubmit={handleChangePassword} className='space-y-4 max-w-2xl'>
                 <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
+                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
                     Current Password
                   </label>
                   <input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
                     required
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
+                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
                     New Password
                   </label>
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
                     required
                     minLength={6}
                   />
-                  <p className='text-sm text-slate-500 mt-1'>Must be at least 6 characters</p>
+                  <p className='text-xs sm:text-sm text-slate-500 mt-1'>Must be at least 6 characters</p>
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-2'>
+                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
                     Confirm New Password
                   </label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
                     required
                     minLength={6}
                   />
@@ -459,7 +460,7 @@ const UserProfile = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base'
                 >
                   {isLoading ? 'Updating...' : 'Update Password'}
                 </button>
