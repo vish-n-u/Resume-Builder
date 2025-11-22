@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import Resume from "../models/Resume.js";
 import DetailedResume from "../models/DetailedResume.js";
-
+import fs from 'fs';
 
 const generateToken = (userId)=>{
     const token = jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: '7d'})
@@ -237,11 +237,12 @@ export const updateDefaultResumeData = async (req, res) => {
 
         // Handle image upload if present
         if(req.file){
+            console.log("req",req.file,req.body)
             const imageKit = (await import('../configs/imageKit.js')).default;
-            const imageBuffer = req.file.buffer;
+               const imageBufferData = fs.createReadStream(req.file.path)
 
-            const uploadResult = await imageKit.upload({
-                file: imageBuffer,
+            const uploadResult = await imageKit.files.upload({
+                file: imageBufferData,
                 fileName: req.file.originalname,
                 transformation: req.body.removeBackground === 'yes'
                     ? [{ pre: 'l-image,i-remove_bg_shadow,bg-FFFFFF' }]
