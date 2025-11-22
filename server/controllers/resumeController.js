@@ -8,7 +8,6 @@ import fs from 'fs';
 // POST: /api/resumes/create
 export const createResume = async (req, res) => {
     try {
-        console.log("req==>",req)
         const userId = req.userId;
         const {title} = req.body;
 
@@ -26,10 +25,12 @@ export const createResume = async (req, res) => {
             personal_info: defaultData.personal_info || {},
             experience: defaultData.experience || [],
             project: defaultData.project || [],
-            education: defaultData.education || []
+            education: defaultData.education || [],
+            certifications: defaultData.certifications || [],
+            achievements: defaultData.achievements || [],
+            custom_sections: defaultData.custom_sections || [],
+            preferences: defaultData.preferences || {}
         })
-
-        console.log("Created new resume with default data from DetailedResume collection")
 
         // return success message
         return res.status(201).json({message: 'Resume created successfully', resume: newResume})

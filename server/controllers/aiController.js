@@ -436,8 +436,13 @@ export const tailorResume = async (req, res) => {
             skills: detailedResume.skills,
             experience: detailedResume.experience,
             education: detailedResume.education,
-            project: detailedResume.project
+            project: detailedResume.project,
+            certifications:detailedResume.certifications,
+            achievements:detailedResume.achievements,
+            custom_sections:detailedResume.custom_sections
         };
+
+        console.log("userProfileData==>",userProfileData)
 
         const systemPrompt = `
 You are an expert resume tailoring AI that customizes resumes strictly based on verified user data.
@@ -460,6 +465,7 @@ CRITICAL RULES:
 7. NEVER generate content that would make the resume factually inaccurate.
 8. PRESERVE ALL LINKS: Do not remove or modify any HTML links (<a href>) in project descriptions, including demo links, live site links, GitHub links, or any other URLs.
 9. Always Add All of the experience
+10. Include ALL sections in the JSON response (experience, projects, education, certifications, achievements, custom_sections) even if some are empty arrays
 
 MINIMUM CONTENT REQUIREMENT:
 - The tailored resume MUST contain at least 350 words across all sections (professional summary, experience descriptions, and project descriptions).
@@ -469,11 +475,18 @@ MINIMUM CONTENT REQUIREMENT:
 - Prioritize JD-matching content first, but ensure the word count is met through Experience expansion when possible.
 
 ALLOWED FLEXIBILITY:
-- You may reorder experience or projects for better relevance.
+- You may reorder experience, projects, certifications, achievements, or custom sections for better relevance to the job.
 - You may slightly rephrase text for clarity or alignment with the JD (only if true to the user's background).
 - You may include *closely related skills* if they are implied by the user's actual tools or technologies (e.g., user lists "fetch API" → "Axios" is acceptable; "Drupal" is not).
 - You may mention soft skills (communication, teamwork, etc.) only if they naturally fit with the user's history.
 - You may expand existing descriptions with more detail while remaining factual.
+- You may select the most relevant certifications, achievements, and custom sections for the specific job.
+
+OPTIONAL SECTIONS (Include ONLY if relevant to the job):
+- Certifications: Include ONLY if the user has relevant certifications AND they add value for this specific job. Otherwise return empty array [].
+- Achievements: Include ONLY if the user has relevant achievements AND they strengthen the application for this job. Otherwise return empty array [].
+- Custom Sections: Include ONLY if the user has custom sections AND they are highly relevant to this specific job. Otherwise return empty array [].
+- These sections should enhance the resume, not clutter it. When in doubt, leave them empty.
 
 FORMATTING FOR READABILITY:
 - Format key skills and technologies in BOLD (<b>tag</b>) for emphasis and easy scanning.
@@ -506,11 +519,13 @@ Select and reorder the most relevant items — do not invent or assume.
 CRITICAL:
 - Do not modify factual details like names, titles, dates, institutions, or degrees.
 - Do not fabricate achievements, results, or metrics.
-- Use only projects, experiences, and education that exist in the user's data.
+- Use only projects, experiences, education, certifications, achievements, and custom sections that exist in the user's data.
 - When incorporating soft skills, only include those that can logically fit with the user's real experience.
 - Use HTML formatting for better readability: Use <b> for key skills/technologies/metrics, <ul><li> or <ol><li> for lists of accomplishments.
 - FORMAT KEY AREAS: Make skills, technologies, and achievements stand out with BOLD formatting. Structure descriptions with bullet points for easy scanning.
 - PRESERVE ALL LINKS: Keep all HTML anchor tags (<a href>) intact in project descriptions. Do not remove demo links, live site links, GitHub links, or any other URLs.
+- IMPORTANT: You MUST return valid JSON with ALL sections included.
+- For optional sections (certifications, achievements, custom_sections): Return empty arrays [] if they are NOT highly relevant to this specific job. Only include content if it meaningfully strengthens the application.
 
 MINIMUM 350-WORD REQUIREMENT:
 - The resume MUST contain at least 350 words total across professional_summary, experience descriptions, and project descriptions.
@@ -521,7 +536,7 @@ MINIMUM 350-WORD REQUIREMENT:
 
 If certain JD requirements don't match any part of the user's data, simply omit them.
 
-Return the response in this exact JSON structure:
+Return the response in this exact JSON structure (include ALL sections even if empty):
 {
   "professional_summary": "2–3 sentence factual summary using only the user's actual experience, tailored for this job.",
   "skills": [],
@@ -560,36 +575,106 @@ Return the response in this exact JSON structure:
       "graduation_date": "EXACT graduation_date from user's data",
       "gpa": "EXACT gpa from user's data"
     }
+  ],
+  "certifications": [
+    {
+      "name": "EXACT name from user's data",
+      "issuer": "EXACT issuer from user's data",
+      "date": "EXACT date from user's data",
+      "credential_id": "EXACT credential_id from user's data"
+    }
+  ],
+  "achievements": [
+    {
+      "title": "EXACT title from user's data",
+      "description": "Only rephrased if needed for relevance"
+    }
+  ],
+  "custom_sections": [
+    {
+      "section_name": "EXACT section_name from user's data",
+      "content": "Only rephrased for clarity or relevance"
+    }
   ]
+
+NOTE: The certifications, achievements, and custom_sections arrays should be EMPTY [] unless they add significant value for THIS SPECIFIC JOB. Quality over quantity.
 }
 `;
 
 
-        const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userPrompt }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.5
-        });
+        let tailoredData;
+        let retryCount = 0;
+        const maxRetries = 2;
 
-        const tailoredData = JSON.parse(response.choices[0].message.content);
-        console.log("AI tailored resume data:", tailoredData);
+        // Try to get valid JSON response with retry mechanism
+        while (retryCount <= maxRetries) {
+            try {
+                const response = await ai.chat.completions.create({
+                    model: process.env.OPENAI_MODEL,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ],
+                    response_format: { type: 'json_object' },
+                    temperature: 0.5
+                });
 
-        // Create new resume with tailored data
-        const newResume = await Resume.create({
+                const responseContent = response.choices[0].message.content;
+                console.log("AI response (attempt " + (retryCount + 1) + "):", responseContent);
+
+                // Try to parse the JSON
+                tailoredData = JSON.parse(responseContent);
+
+                // Validate that we have at least basic structure
+                if (!tailoredData.professional_summary && !tailoredData.skills) {
+                    throw new Error("Invalid response structure");
+                }
+
+                console.log("AI tailored resume data:", tailoredData);
+                break; // Success, exit retry loop
+
+            } catch (parseError) {
+                retryCount++;
+                console.error(`JSON parse error (attempt ${retryCount}):`, parseError.message);
+
+                if (retryCount > maxRetries) {
+                    throw new Error("Failed to generate valid resume data after multiple attempts. Please try again.");
+                }
+
+                // Wait a bit before retrying
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        // Remove empty optional fields (certifications, achievements, custom_sections)
+        // These should only be included if AI deemed them relevant for the job
+        const cleanedData = {
             userId,
             title,
             job_description: jobDescription,
-            professional_summary: tailoredData.professional_summary,
-            skills: tailoredData.skills,
-            personal_info: tailoredData.personal_info,
-            experience: tailoredData.experience,
-            project: tailoredData.project,
-            education: tailoredData.education
-        });
+            professional_summary: tailoredData.professional_summary || '',
+            skills: tailoredData.skills || [],
+            personal_info: tailoredData.personal_info || {},
+            experience: tailoredData.experience || [],
+            project: tailoredData.project || [],
+            education: tailoredData.education || []
+        };
+
+        // Only add optional sections if they have content
+        if (tailoredData.certifications && tailoredData.certifications.length > 0) {
+            cleanedData.certifications = tailoredData.certifications;
+        }
+        if (tailoredData.achievements && tailoredData.achievements.length > 0) {
+            cleanedData.achievements = tailoredData.achievements;
+        }
+        if (tailoredData.custom_sections && tailoredData.custom_sections.length > 0) {
+            cleanedData.custom_sections = tailoredData.custom_sections;
+        }
+
+        console.log("Cleaned data (removed empty optional fields):", Object.keys(cleanedData));
+
+        // Create new resume with tailored data
+        const newResume = await Resume.create(cleanedData);
 
         console.log("Tailored resume created successfully:", newResume._id);
 
