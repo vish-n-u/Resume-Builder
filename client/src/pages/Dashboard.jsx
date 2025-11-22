@@ -1,4 +1,4 @@
-import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon, ChevronLeft, ChevronRight, SettingsIcon, UserIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import {useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -183,7 +183,7 @@ const Dashboard = () => {
         <p className='text-xl sm:text-2xl font-medium mb-6 bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden'>Welcome, {user?.name}</p>
 
         {/* AI-Powered Job Description Feature - Main Feature */}
-        <div className='bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-4 sm:p-6 mb-8 shadow-sm'>
+        <div className='bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl p-4 sm:p-6 mb-6 shadow-sm'>
           <div className='flex flex-col sm:flex-row items-start gap-4'>
             <div className='p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg'>
               <SparklesIcon className='size-6 sm:size-8 text-white' />
@@ -204,6 +204,32 @@ const Dashboard = () => {
                 Create AI-Tailored Resume
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Profile Settings Quick Access */}
+        <div className='bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-6 mb-8 shadow-sm'>
+          <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+            <div className='flex items-start gap-4'>
+              <div className='p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg'>
+                <UserIcon className='size-6 sm:size-8 text-white' />
+              </div>
+              <div className='flex-1'>
+                <h2 className='text-lg sm:text-xl font-bold text-slate-800 mb-2'>
+                  Manage Your Profile
+                </h2>
+                <p className='text-sm sm:text-base text-slate-600'>
+                  Update your default resume information, AI preferences, and account settings. Keep your profile up-to-date for better AI-tailored resumes.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/app/profile')}
+              className='flex items-center justify-center gap-2 bg-white border-2 border-blue-300 text-slate-700 px-6 py-3 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all active:scale-95 shadow-sm hover:shadow-md font-medium text-sm sm:text-base w-full sm:w-auto whitespace-nowrap'
+            >
+              <SettingsIcon className='size-5' />
+              Go to Settings
+            </button>
           </div>
         </div>
 

@@ -26,7 +26,7 @@ const Preview = () => {
       setCurrentTemplate(data.resume.template || 'classic')
       setCurrentAccentColor(data.resume.accent_color || '#000000')
     } catch (error) {
-      console.log(error.message);
+      // Error loading resume
     }finally{
       setIsLoading(false)
     }

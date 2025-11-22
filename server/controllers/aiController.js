@@ -172,10 +172,8 @@ export const uploadResumeToProfile = async (req, res) => {
         })
 
         const extractedData = response.choices[0].message.content;
-        console.log("extractedData==>",extractedData)
 
         const parsedData = JSON.parse(extractedData)
-        console.log("data parsed")
 
         // Save to DetailedResume (default resume data) instead of creating a resume
         const detailedResume = await DetailedResume.findOneAndUpdate(
@@ -194,7 +192,6 @@ export const uploadResumeToProfile = async (req, res) => {
             },
             { new: true, upsert: true }
         )
-        console.log("default resume data saved")
 
         res.json({message: 'Resume data saved to profile successfully'})
     } catch (error) {
@@ -280,10 +277,8 @@ export const uploadResume = async (req, res) => {
 
 
         const extractedData = response.choices[0].message.content;
-        console.log("extractedData==>",extractedData)
 
         const parsedData = JSON.parse(extractedData)
-        console.log("data parsed")
         let newResume
         try{
          newResume = await Resume.create({userId, title, ...parsedData})

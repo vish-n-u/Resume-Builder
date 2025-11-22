@@ -4,7 +4,6 @@ import 'react-quill-new/dist/quill.snow.css';
 import './QuillTextEditor.css';
 
 const QuillEditor = ({ content, onTextChange, onSelectionChange, readOnly }) => {
-  console.log("content==>",content)
   const [value,setValue] = useState(content)
 
   // Sync internal state with content prop when it changes externally

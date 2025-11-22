@@ -9,7 +9,6 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 			month: "short"
 		});
 	};
-	console.log("sectionVisibility==>",sectionVisibility)
 
 	return (
 		<div className="max-w-4xl mx-auto bg-white text-gray-800 text-sm">

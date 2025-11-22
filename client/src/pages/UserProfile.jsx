@@ -73,8 +73,6 @@ const UserProfile = () => {
         setIsDataLoading(true)
         const { data } = await api.get('/api/users/default-resume-data', { headers: { Authorization: token } })
 
-        console.log('Loaded default resume data:', data.defaultResumeData)
-
         if (data.defaultResumeData && Object.keys(data.defaultResumeData).length > 0) {
           // Merge with default structure to ensure all fields exist
           setDefaultResumeData({
@@ -161,8 +159,6 @@ const UserProfile = () => {
   const handleSaveDefaultResumeData = async () => {
     setIsLoading(true)
     try {
-      console.log('Saving default resume data:', defaultResumeData)
-
       let updatedResumeData = structuredClone(defaultResumeData)
 
       // Check if image needs upload
@@ -177,16 +173,14 @@ const UserProfile = () => {
 
       const { data } = await api.put('/api/users/update-default-resume-data', formData, { headers: { Authorization: token } })
 
-      console.log('Saved data response:', data.defaultResumeData)
-
       // Update local state with saved data (including image URL if uploaded)
       if (data.defaultResumeData) {
         setDefaultResumeData(data.defaultResumeData)
       }
 
-      toast.success('Default resume data saved successfully!')
+      toast.success('Your resume data saved successfully!')
     } catch (error) {
-      console.error('Error saving default resume data:', error)
+      console.error('Error saving your resume data:', error)
       toast.error(error?.response?.data?.message || error.message)
     }
     setIsLoading(false)
@@ -194,7 +188,7 @@ const UserProfile = () => {
 
   const tabs = [
     { id: 'account', name: 'Account Info', icon: UserIcon },
-    { id: 'resume-data', name: 'Default Resume Data', icon: FileTextIcon },
+    { id: 'resume-data', name: 'Your Resume Data', icon: FileTextIcon },
     { id: 'preferences', name: 'AI Preferences', icon: Settings },
     { id: 'security', name: 'Security', icon: KeyIcon },
   ]
@@ -280,7 +274,7 @@ const UserProfile = () => {
           {activeTab === 'resume-data' && (
             <div>
               <div className='mb-4 sm:mb-6'>
-                <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-2'>Default Resume Data</h2>
+                <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-2'>Your Resume Data</h2>
                 <p className='text-sm sm:text-base text-slate-600'>This information will be used to auto-fill new resumes you create</p>
               </div>
 
@@ -292,6 +286,7 @@ const UserProfile = () => {
                   </div>
                 </div>
               ) : (
+              <>
               <div className='space-y-8 max-w-full overflow-x-hidden'>
                 {/* Personal Info Section */}
                 <div className='border-b border-gray-200 pb-8 max-w-full'>
@@ -404,22 +399,28 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {/* Save Button */}
-                <div className='pt-4 border-t border-gray-200'>
+                {/* Spacer for sticky button */}
+                <div className='h-20'></div>
+              </div>
+
+              {/* Sticky Save Button */}
+              <div className='fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg z-50 px-4 py-4'>
+                <div className='max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3'>
+                  <p className='text-xs sm:text-sm text-slate-600 text-center sm:text-left'>
+                    💡 Tip: Fill out your information here once, and it will automatically populate when you create new resumes!
+                  </p>
                   <button
                     onClick={() => toast.promise(handleSaveDefaultResumeData(), { loading: 'Saving...' })}
                     disabled={isLoading}
-                    className='flex items-center justify-center gap-2 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto'
+                    className='flex items-center justify-center gap-2 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto shadow-lg flex-shrink-0'
                   >
                     <SaveIcon className='size-4 sm:size-5' />
-                    <span className="hidden sm:inline">Save Default Resume Data</span>
+                    <span className="hidden sm:inline">Save Your Resume Data</span>
                     <span className="sm:hidden">Save Data</span>
                   </button>
-                  <p className='text-xs sm:text-sm text-slate-500 mt-3'>
-                    💡 Tip: Fill out your information here once, and it will automatically populate when you create new resumes!
-                  </p>
                 </div>
               </div>
+              </>
               )}
             </div>
           )}
