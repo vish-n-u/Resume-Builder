@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { ArrowLeftIcon, UserIcon, KeyIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon, Award, Trophy, Settings } from 'lucide-react'
+import { ArrowLeftIcon, UserIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon, Award, Trophy, Settings } from 'lucide-react'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import { login } from '../app/features/authSlice'
@@ -24,17 +24,12 @@ const UserProfile = () => {
   const params = new URLSearchParams(window.location.search)
   const fromOnboarding = params.get('onboarding') === 'true'
 
-  const [activeTab, setActiveTab] = useState(fromOnboarding ? 'resume-data' : 'account') // account, resume-data, security
+  const [activeTab, setActiveTab] = useState(fromOnboarding ? 'resume-data' : 'account') // account, resume-data, preferences
   const [isLoading, setIsLoading] = useState(false)
 
   // Account fields
   const [name, setName] = useState(user?.name || '')
   const [email, setEmail] = useState(user?.email || '')
-
-  // Security fields
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
 
   // Default Resume Data fields
   const [defaultResumeData, setDefaultResumeData] = useState({
@@ -125,36 +120,6 @@ const UserProfile = () => {
     setIsLoading(false)
   }
 
-  // Change password
-  const handleChangePassword = async (e) => {
-    e.preventDefault()
-
-    if (newPassword !== confirmPassword) {
-      toast.error('New passwords do not match!')
-      return
-    }
-
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters!')
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      await api.put('/api/users/change-password',
-        { currentPassword, newPassword },
-        { headers: { Authorization: token } }
-      )
-      toast.success('Password changed successfully!')
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-    } catch (error) {
-      toast.error(error?.response?.data?.message || error.message)
-    }
-    setIsLoading(false)
-  }
-
   // Save default resume data
   const handleSaveDefaultResumeData = async () => {
     setIsLoading(true)
@@ -190,7 +155,6 @@ const UserProfile = () => {
     { id: 'account', name: 'Account Info', icon: UserIcon },
     { id: 'resume-data', name: 'Your Resume Data', icon: FileTextIcon },
     { id: 'preferences', name: 'AI Preferences', icon: Settings },
-    { id: 'security', name: 'Security', icon: KeyIcon },
   ]
 
   return (
@@ -204,7 +168,7 @@ const UserProfile = () => {
 
         {/* Page Title */}
         <h1 className='text-2xl sm:text-3xl font-bold text-slate-800 mb-2'>Profile Settings</h1>
-        <p className='text-sm sm:text-base text-slate-600 mb-6 sm:mb-8'>Manage your account and set default resume information</p>
+        <p className='text-sm sm:text-base text-slate-600 mb-6 sm:mb-8'>Manage your account and set your resume information</p>
 
         {/* Tabs */}
         <div className='flex gap-1 sm:gap-2 mb-6 border-b border-gray-200 overflow-x-auto'>
@@ -512,18 +476,8 @@ const UserProfile = () => {
                   <p className='text-xs text-slate-500 mt-1'>Provide any custom instructions to guide the AI when creating content</p>
                 </div>
 
-                {/* Save Button */}
-                <button
-                  onClick={handleSaveDefaultResumeData}
-                  disabled={isLoading}
-                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-8 py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
-                >
-                  <SaveIcon className='size-5' />
-                  {isLoading ? 'Saving...' : 'Save Preferences'}
-                </button>
-
                 {/* Info Box */}
-                <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4'>
+                <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
                   <div className='flex items-start gap-3'>
                     <Sparkles className='size-5 text-blue-600 mt-0.5 flex-shrink-0' />
                     <div className='text-sm text-blue-800'>
@@ -532,62 +486,28 @@ const UserProfile = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* Security Tab */}
-          {activeTab === 'security' && (
-            <div>
-              <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-4 sm:mb-6'>Change Password</h2>
-              <form onSubmit={handleChangePassword} className='space-y-4 max-w-2xl'>
-                <div>
-                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
-                    required
-                  />
+                {/* Spacer for sticky button */}
+                <div className='h-20'></div>
+              </div>
+
+              {/* Sticky Save Button */}
+              <div className='fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg z-50 px-4 py-4'>
+                <div className='max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3'>
+                  <p className='text-xs sm:text-sm text-slate-600 text-center sm:text-left'>
+                    💡 Tip: These preferences will be applied whenever AI generates or enhances your resume content!
+                  </p>
+                  <button
+                    onClick={() => toast.promise(handleSaveDefaultResumeData(), { loading: 'Saving...' })}
+                    disabled={isLoading}
+                    className='flex items-center justify-center gap-2 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto shadow-lg flex-shrink-0'
+                  >
+                    <SaveIcon className='size-4 sm:size-5' />
+                    <span className="hidden sm:inline">Save AI Preferences</span>
+                    <span className="sm:hidden">Save</span>
+                  </button>
                 </div>
-                <div>
-                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
-                    required
-                    minLength={6}
-                  />
-                  <p className='text-xs sm:text-sm text-slate-500 mt-1'>Must be at least 6 characters</p>
-                </div>
-                <div>
-                  <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className='w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base'
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className='bg-gradient-to-br from-yellow-500 to-yellow-600 text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base'
-                >
-                  {isLoading ? 'Updating...' : 'Update Password'}
-                </button>
-              </form>
+              </div>
             </div>
           )}
 

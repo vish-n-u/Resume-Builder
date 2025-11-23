@@ -219,7 +219,7 @@ const Dashboard = () => {
                   Manage Your Profile
                 </h2>
                 <p className='text-sm sm:text-base text-slate-600'>
-                  Update your default resume information, AI preferences, and account settings. Keep your profile up-to-date for better AI-tailored resumes.
+                  Update your resume information, AI preferences, and account settings. Keep your profile up-to-date for better AI-tailored resumes.
                 </p>
               </div>
             </div>
