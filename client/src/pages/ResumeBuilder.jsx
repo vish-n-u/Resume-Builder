@@ -406,9 +406,9 @@ const autoSaveResume = async () => {
           {/* Main FAB Button */}
           <button
             onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-            className={`bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-full p-3.5 shadow-xl hover:shadow-purple-500/50 transition-all ${isFabMenuOpen ? 'rotate-45' : ''}`}
+            className={`bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-full p-3.5 shadow-xl hover:shadow-purple-500/50 transition-all ${isFabMenuOpen ? 'rotate-180 scale-110' : ''}`}
           >
-            <Settings className='size-5' />
+            <Sparkles className='size-5' />
           </button>
         </div>
 
@@ -452,120 +452,256 @@ const autoSaveResume = async () => {
                   )}
                   {activeSection.id === 'summary' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Professional Summary</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('summary')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.summary ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.summary ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.summary ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('summary')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.summary
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.summary ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.summary ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=> setResumeData(prev=> ({...prev, professional_summary: data}))} setResumeData={setResumeData}/>
                     </div>
                   )}
                   {activeSection.id === 'experience' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Experience</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('experience')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.experience ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.experience ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.experience ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('experience')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.experience
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.experience ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.experience ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <ExperienceForm data={resumeData.experience} onChange={(data)=> setResumeData(prev=> ({...prev, experience: data}))} jobDescription={resumeData.job_description}/>
                     </div>
                   )}
                   {activeSection.id === 'education' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Education</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('education')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.education ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.education ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.education ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('education')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.education
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.education ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.education ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <EducationForm data={resumeData.education} onChange={(data)=> setResumeData(prev=> ({...prev, education: data}))}/>
                     </div>
                   )}
                   {activeSection.id === 'projects' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Projects</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('projects')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.projects ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.projects ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.projects ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('projects')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.projects
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.projects ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.projects ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <ProjectForm data={resumeData.project} onChange={(data)=> setResumeData(prev=> ({...prev, project: data}))}/>
                     </div>
                   )}
                   {activeSection.id === 'skills' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Skills</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('skills')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.skills ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.skills ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.skills ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('skills')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.skills
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.skills ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.skills ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev=> ({...prev, skills: data}))}/>
                     </div>
                   )}
                   {activeSection.id === 'certifications' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Certifications</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('certifications')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.certifications ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.certifications ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.certifications ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('certifications')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.certifications
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.certifications ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.certifications ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <CertificationsForm data={resumeData.certifications} onChange={(data)=> setResumeData(prev=> ({...prev, certifications: data}))}/>
                     </div>
                   )}
                   {activeSection.id === 'achievements' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Achievements</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('achievements')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.achievements ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.achievements ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.achievements ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('achievements')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.achievements
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.achievements ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.achievements ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <AchievementsForm data={resumeData.achievements} onChange={(data)=> setResumeData(prev=> ({...prev, achievements: data}))}/>
                     </div>
                   )}
                   {activeSection.id === 'customSections' && (
                     <div>
-                      <div className='flex items-center justify-between mb-4'>
+                      <div className='flex items-center justify-between mb-2'>
                         <h3 className='text-lg font-semibold text-gray-900'>Custom Sections</h3>
-                        <button
-                          onClick={() => toggleSectionVisibility('customSections')}
-                          className={`p-2 rounded-lg transition-colors ${resumeData.sectionVisibility?.customSections ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                          title={resumeData.sectionVisibility?.customSections ? 'Hide in preview' : 'Show in preview'}
-                        >
-                          {resumeData.sectionVisibility?.customSections ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
-                        </button>
+                        <div className='flex flex-col items-end gap-1'>
+                          <button
+                            onClick={() => toggleSectionVisibility('customSections')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium text-xs ${
+                              resumeData.sectionVisibility?.customSections
+                                ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                            }`}
+                            title={resumeData.sectionVisibility?.customSections ? 'Click to hide this section in resume preview' : 'Click to show this section in resume preview'}
+                          >
+                            {resumeData.sectionVisibility?.customSections ? (
+                              <>
+                                <EyeIcon className="size-4"/>
+                                <span>Visible</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOffIcon className="size-4"/>
+                                <span>Hidden</span>
+                              </>
+                            )}
+                          </button>
+                          <p className='text-[10px] text-gray-500'>Toggle section's visibility</p>
+                        </div>
                       </div>
                       <CustomSectionsForm data={resumeData.custom_sections} onChange={(data)=> setResumeData(prev=> ({...prev, custom_sections: data}))}/>
                     </div>
@@ -930,25 +1066,6 @@ const autoSaveResume = async () => {
             {/* Drawer Content - Form Panel */}
             <div className='flex-1 overflow-y-auto overflow-x-hidden overscroll-contain'>
               <div className='p-3 pb-6 max-w-full'>
-                {/* AI Features Buttons */}
-                <div className='grid grid-cols-2 gap-2 mb-3'>
-                  <button
-                    onClick={() => {setShowCustomPrompt(true); setIsMobileDrawerOpen(false)}}
-                    className='flex items-center justify-center gap-1.5 px-2 py-2.5 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all text-xs font-semibold shadow-md'
-                  >
-                    <Sparkles className="size-3.5"/>
-                    <span>AI Prompt</span>
-                  </button>
-
-                  <button
-                    onClick={() => {setIsRequirementsModalOpen(true); setIsMobileDrawerOpen(false)}}
-                    className='flex items-center justify-center gap-1.5 px-2 py-2.5 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all font-semibold text-xs'
-                  >
-                    <Briefcase className='size-3.5'/>
-                    <span>Job Needs</span>
-                  </button>
-                </div>
-
                 <div className='bg-gray-50 rounded-lg border border-gray-200 p-3 w-full overflow-hidden'>
                   {/* progress bar using activeSectionIndex */}
                   <div className='relative mb-3 w-full'>
@@ -962,15 +1079,6 @@ const autoSaveResume = async () => {
                     <div className='w-full'>
                       <p className='text-[10px] text-gray-500 mb-0.5'>Editing Section</p>
                       <p className='text-base font-semibold text-gray-900'>{activeSection.name}</p>
-                    </div>
-
-                    {/* Customization Options */}
-                    <div className='w-full'>
-                      <p className='text-[10px] text-gray-500 mb-1.5 font-medium'>Customize Resume</p>
-                      <div className='flex items-center gap-2 w-full'>
-                        <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
-                        <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
-                      </div>
                     </div>
 
                     {/* Navigation */}
@@ -1001,13 +1109,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Professional Summary</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('summary')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.summary ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.summary ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.summary ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('summary')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.summary
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.summary ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.summary ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <ProfessionalSummaryForm data={resumeData.professional_summary} onChange={(data)=> setResumeData(prev=> ({...prev, professional_summary: data}))} setResumeData={setResumeData}/>
                       </div>
@@ -1016,13 +1141,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Experience</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('experience')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.experience ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.experience ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.experience ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('experience')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.experience
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.experience ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.experience ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <ExperienceForm data={resumeData.experience} onChange={(data)=> setResumeData(prev=> ({...prev, experience: data}))} jobDescription={resumeData.job_description}/>
                       </div>
@@ -1031,13 +1173,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Education</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('education')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.education ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.education ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.education ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('education')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.education
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.education ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.education ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <EducationForm data={resumeData.education} onChange={(data)=> setResumeData(prev=> ({...prev, education: data}))}/>
                       </div>
@@ -1046,13 +1205,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Projects</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('projects')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.projects ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.projects ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.projects ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('projects')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.projects
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.projects ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.projects ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <ProjectForm data={resumeData.project} onChange={(data)=> setResumeData(prev=> ({...prev, project: data}))}/>
                       </div>
@@ -1061,13 +1237,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Skills</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('skills')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.skills ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.skills ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.skills ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('skills')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.skills
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.skills ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.skills ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <SkillsForm data={resumeData.skills} onChange={(data)=> setResumeData(prev=> ({...prev, skills: data}))}/>
                       </div>
@@ -1076,13 +1269,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Certifications</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('certifications')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.certifications ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.certifications ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.certifications ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('certifications')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.certifications
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.certifications ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.certifications ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <CertificationsForm data={resumeData.certifications} onChange={(data)=> setResumeData(prev=> ({...prev, certifications: data}))}/>
                       </div>
@@ -1091,13 +1301,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Achievements</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('achievements')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.achievements ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.achievements ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.achievements ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('achievements')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.achievements
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.achievements ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.achievements ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <AchievementsForm data={resumeData.achievements} onChange={(data)=> setResumeData(prev=> ({...prev, achievements: data}))}/>
                       </div>
@@ -1106,13 +1333,30 @@ const autoSaveResume = async () => {
                       <div>
                         <div className='flex items-center justify-between mb-3'>
                           <h3 className='text-sm font-semibold text-gray-900'>Custom Sections</h3>
-                          <button
-                            onClick={() => toggleSectionVisibility('customSections')}
-                            className={`p-1.5 rounded-lg transition-colors ${resumeData.sectionVisibility?.customSections ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
-                            title={resumeData.sectionVisibility?.customSections ? 'Hide in preview' : 'Show in preview'}
-                          >
-                            {resumeData.sectionVisibility?.customSections ? <EyeIcon className="size-4"/> : <EyeOffIcon className="size-4"/>}
-                          </button>
+                          <div className='flex flex-col items-end gap-0.5'>
+                            <button
+                              onClick={() => toggleSectionVisibility('customSections')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all font-medium text-xs ${
+                                resumeData.sectionVisibility?.customSections
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                              }`}
+                              title={resumeData.sectionVisibility?.customSections ? 'Click to hide in preview' : 'Click to show in preview'}
+                            >
+                              {resumeData.sectionVisibility?.customSections ? (
+                                <>
+                                  <EyeIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOffIcon className="size-3.5"/>
+                                  <span className="text-[10px]">Hidden</span>
+                                </>
+                              )}
+                            </button>
+                            <p className='text-[9px] text-gray-500'>Toggle visibility</p>
+                          </div>
                         </div>
                         <CustomSectionsForm data={resumeData.custom_sections} onChange={(data)=> setResumeData(prev=> ({...prev, custom_sections: data}))}/>
                       </div>
