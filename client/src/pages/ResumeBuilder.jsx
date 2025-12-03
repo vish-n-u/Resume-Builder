@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { dummyResumeData } from '../assets/assets'
-import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User, Plus, AlertCircle, CheckCircle, XIcon, Menu, X } from 'lucide-react'
+import { ArrowLeftIcon, Award, Briefcase, ChevronLeft, ChevronRight, CopyIcon, DatabaseIcon, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, Trophy, User, Plus, AlertCircle, CheckCircle, XIcon, Menu, X, Settings, Palette, Edit3 } from 'lucide-react'
 import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
 import TemplateSelector from '../components/TemplateSelector'
@@ -92,6 +92,9 @@ const ResumeBuilder = () => {
   const [showMissingModal, setShowMissingModal] = useState(false)
   const [isRequirementsModalOpen, setIsRequirementsModalOpen] = useState(false)
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false)
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const [showColorPicker, setShowColorPicker] = useState(false)
 
   // Refs for auto-save functionality
   const isInitialLoad = useRef(true)
@@ -299,13 +302,114 @@ const autoSaveResume = async () => {
       </div>
 
       <div className='max-w-7xl  mx-auto px-3 sm:px-4 pb-6 lg:pb-8 overflow-hidden'>
-        {/* Mobile Edit Button - Fixed at bottom right on mobile */}
-        <button
-          onClick={() => setIsMobileDrawerOpen(true)}
-          className='lg:hidden fixed  bottom-5 right-4 z-30 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-full p-3.5 shadow-xl hover:shadow-purple-500/50 transition-all active:scale-95'
-        >
-          <Menu className='size-5' />
-        </button>
+        {/* FAB Menu - Fixed at bottom right on mobile */}
+        <div className='lg:hidden fixed bottom-5 right-4 z-30'>
+          {/* FAB Menu Options */}
+          {isFabMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <div
+                className='fixed inset-0 bg-black/20 -z-10'
+                onClick={() => setIsFabMenuOpen(false)}
+              />
+
+              {/* Menu Items */}
+              <div className='absolute bottom-16 right-0 flex flex-col gap-3 mb-2'>
+                {/* Edit Resume */}
+                <button
+                  onClick={() => {
+                    setIsMobileDrawerOpen(true)
+                    setIsFabMenuOpen(false)
+                  }}
+                  className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
+                >
+                  <div className='bg-purple-100 text-purple-600 rounded-full p-2'>
+                    <Edit3 className='size-4' />
+                  </div>
+                  <span className='text-sm font-medium whitespace-nowrap'>Edit Resume</span>
+                </button>
+
+                {/* AI Prompt */}
+                <button
+                  onClick={() => {
+                    setShowCustomPrompt(true)
+                    setIsFabMenuOpen(false)
+                  }}
+                  className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
+                >
+                  <div className='bg-purple-100 text-purple-600 rounded-full p-2'>
+                    <Sparkles className='size-4' />
+                  </div>
+                  <span className='text-sm font-medium whitespace-nowrap'>AI Prompt</span>
+                </button>
+
+                {/* Job Needs */}
+                <button
+                  onClick={() => {
+                    setIsRequirementsModalOpen(true)
+                    setIsFabMenuOpen(false)
+                  }}
+                  className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
+                >
+                  <div className='bg-blue-100 text-blue-600 rounded-full p-2'>
+                    <Briefcase className='size-4' />
+                  </div>
+                  <span className='text-sm font-medium whitespace-nowrap'>Job Needs</span>
+                </button>
+
+                {/* Template */}
+                <button
+                  onClick={() => {
+                    setShowTemplateSelector(true)
+                    setIsFabMenuOpen(false)
+                  }}
+                  className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
+                >
+                  <div className='bg-green-100 text-green-600 rounded-full p-2'>
+                    <FileText className='size-4' />
+                  </div>
+                  <span className='text-sm font-medium whitespace-nowrap'>Template</span>
+                </button>
+
+                {/* Colour */}
+                <button
+                  onClick={() => {
+                    setShowColorPicker(true)
+                    setIsFabMenuOpen(false)
+                  }}
+                  className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
+                >
+                  <div className='bg-pink-100 text-pink-600 rounded-full p-2'>
+                    <Palette className='size-4' />
+                  </div>
+                  <span className='text-sm font-medium whitespace-nowrap'>Colour</span>
+                </button>
+
+                {/* Profile Data */}
+                <button
+                  onClick={() => {
+                    setShowProfileData(!showProfileData)
+                    setIsFabMenuOpen(false)
+                  }}
+                  className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
+                >
+                  <div className='bg-yellow-100 text-yellow-600 rounded-full p-2'>
+                    <DatabaseIcon className='size-4' />
+                  </div>
+                  <span className='text-sm font-medium whitespace-nowrap'>Profile Data</span>
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Main FAB Button */}
+          <button
+            onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+            className={`bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-full p-3.5 shadow-xl hover:shadow-purple-500/50 transition-all ${isFabMenuOpen ? 'rotate-45' : ''}`}
+          >
+            <Settings className='size-5' />
+          </button>
+        </div>
 
         <div className='grid lg:grid-cols-12 gap-8 w-full'>
           {/* Left Panel - Form (Hidden on mobile, shown in drawer) */}
@@ -671,6 +775,66 @@ const autoSaveResume = async () => {
         onClose={() => setIsRequirementsModalOpen(false)}
         jobDescription={resumeData.job_description}
       />
+
+      {/* Template Selector Modal */}
+      {showTemplateSelector && (
+        <>
+          <div
+            className='fixed inset-0 bg-black/50 z-40 transition-opacity'
+            onClick={() => setShowTemplateSelector(false)}
+          />
+          <div className='fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 bg-white z-50 shadow-2xl rounded-t-2xl sm:rounded-2xl'>
+            <div className='flex items-center justify-between p-4 border-b border-gray-200'>
+              <h2 className='text-lg font-semibold text-gray-900'>Select Template</h2>
+              <button
+                onClick={() => setShowTemplateSelector(false)}
+                className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <X className='size-5' />
+              </button>
+            </div>
+            <div className='p-4'>
+              <TemplateSelector
+                selectedTemplate={resumeData.template}
+                onChange={(template) => {
+                  setResumeData(prev => ({...prev, template}))
+                  setShowTemplateSelector(false)
+                }}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Color Picker Modal */}
+      {showColorPicker && (
+        <>
+          <div
+            className='fixed inset-0 bg-black/50 z-40 transition-opacity'
+            onClick={() => setShowColorPicker(false)}
+          />
+          <div className='fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 bg-white z-50 shadow-2xl rounded-t-2xl sm:rounded-2xl'>
+            <div className='flex items-center justify-between p-4 border-b border-gray-200'>
+              <h2 className='text-lg font-semibold text-gray-900'>Select Accent Color</h2>
+              <button
+                onClick={() => setShowColorPicker(false)}
+                className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <X className='size-5' />
+              </button>
+            </div>
+            <div className='p-4'>
+              <ColorPicker
+                selectedColor={resumeData.accent_color}
+                onChange={(color) => {
+                  setResumeData(prev => ({...prev, accent_color: color}))
+                  setShowColorPicker(false)
+                }}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Mobile Drawer for Editing */}
       {isMobileDrawerOpen && (
