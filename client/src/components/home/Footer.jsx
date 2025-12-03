@@ -4,11 +4,11 @@ const Footer = () => {
   return (
     <>
 
-<footer className="flex flex-wrap justify-center lg:justify-between overflow-hidden gap-10 md:gap-20 py-16 px-6 md:px-16 lg:px-24 xl:px-32 text-[13px] text-gray-500 bg-gradient-to-r from-white via-yellow-100/60 to-white mt-40">
-        <div className="flex flex-wrap items-start gap-10 md:gap-[60px] xl:gap-[140px]">
-            <a href="/" className="flex items-center gap-2">
-                <span className="text-2xl">🌻</span>
-                <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
+<footer className="flex flex-wrap justify-center lg:justify-between overflow-hidden gap-8 md:gap-10 lg:gap-20 py-12 sm:py-16 px-4 sm:px-6 md:px-16 lg:px-24 xl:px-32 text-xs sm:text-[13px] text-gray-500 bg-gradient-to-r from-white via-yellow-100/60 to-white mt-24 sm:mt-32 md:mt-40">
+        <div className="flex flex-wrap items-start gap-8 sm:gap-10 md:gap-[60px] xl:gap-[140px]">
+            <a href="/" className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xl sm:text-2xl">🌻</span>
+                <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
             </a>
             <div>
                 <p className="text-slate-800 font-semibold">Product</p>

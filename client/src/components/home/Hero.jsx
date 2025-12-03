@@ -20,10 +20,10 @@ const Hero = () => {
     <>
     <div className="min-h-screen pb-20">
         {/* Navbar */}
-        <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm">
-            <a href="/" className="flex items-center gap-2">
-                <span className="text-2xl">🌻</span>
-                <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
+        <nav className="z-50 flex items-center justify-between w-full py-3 px-4 sm:px-6 md:px-16 lg:px-24 xl:px-40 text-sm">
+            <a href="/" className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xl sm:text-2xl">🌻</span>
+                <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
             </a>
 
             <div className="hidden md:flex items-center gap-8 transition duration-500 text-slate-800">
@@ -73,7 +73,7 @@ const Hero = () => {
             <div className="absolute top-28 xl:top-10 -z-10 left-1/4 size-72 sm:size-96 xl:size-120 2xl:size-132 bg-yellow-300 blur-[100px] opacity-30" aria-hidden="true"></div>
 
             {/* Avatars + Stars */}
-            <div className="flex items-center mt-24" role="presentation">
+            <div className="flex items-center mt-16 sm:mt-20 md:mt-24" role="presentation">
                 <div className="flex -space-x-3 pr-3">
                     {/* <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" alt="Happy Flower Resume user - testimonial" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-[1]" loading="lazy" />
                     <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200" alt="Professional using Flower Resume" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-2" loading="lazy" />
@@ -85,17 +85,17 @@ const Hero = () => {
             </div>
 
             {/* Headline + CTA */}
-            <h1 className="text-5xl md:text-6xl font-semibold max-w-5xl text-center mt-4 md:leading-[70px]">
-                Your details. Their requirements. <span className="bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent text-nowrap">Perfect resume. </span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold max-w-5xl text-center mt-4 leading-tight sm:leading-snug md:leading-[70px] px-2">
+                Your details. Their requirements. <span className="bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent whitespace-nowrap">Perfect resume. </span>
             </h1>
 
-            <p className="max-w-2xl text-center text-base my-7">Just provide your detailed professional information and paste any job description. Our AI crafts a tailored resume that matches exactly what employers are looking for.</p>
+            <p className="max-w-2xl text-center text-sm sm:text-base my-5 sm:my-7 px-4">Just provide your detailed professional information and paste any job description. Our AI crafts a tailored resume that matches exactly what employers are looking for.</p>
 
             {/* CTA Buttons */}
-            <div className="flex items-center gap-4 ">
-                <Link to='/app' className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full px-9 h-12 m-1 ring-offset-2 ring-1 ring-yellow-400 flex items-center transition-colors" aria-label="Get started with Flower Resume">
+            <div className="flex items-center gap-3 sm:gap-4 px-4">
+                <Link to='/app' className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full px-6 sm:px-9 h-10 sm:h-12 m-1 ring-offset-2 ring-1 ring-yellow-400 flex items-center transition-colors text-sm sm:text-base" aria-label="Get started with Flower Resume">
                     Get started
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right ml-1 size-4" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right ml-1 size-3.5 sm:size-4" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                 </Link>
                 {/* <button className="flex items-center gap-2 border border-slate-400 hover:bg-yellow-50 transition rounded-full px-7 h-12 text-slate-700" aria-label="Watch demo video">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-video size-5" aria-hidden="true"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>

@@ -95,6 +95,7 @@ const ResumeBuilder = () => {
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [isProfileDataDrawerOpen, setIsProfileDataDrawerOpen] = useState(false)
 
   // Refs for auto-save functionality
   const isInitialLoad = useRef(true)
@@ -388,7 +389,7 @@ const autoSaveResume = async () => {
                 {/* Profile Data */}
                 <button
                   onClick={() => {
-                    setShowProfileData(!showProfileData)
+                    setIsProfileDataDrawerOpen(true)
                     setIsFabMenuOpen(false)
                   }}
                   className='flex items-center gap-3 bg-white text-gray-700 rounded-full pl-4 pr-5 py-3 shadow-lg hover:shadow-xl transition-all group'
@@ -783,7 +784,7 @@ const autoSaveResume = async () => {
             className='fixed inset-0 bg-black/50 z-40 transition-opacity'
             onClick={() => setShowTemplateSelector(false)}
           />
-          <div className='fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 bg-white z-50 shadow-2xl rounded-t-2xl sm:rounded-2xl'>
+          <div className='fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 bg-white z-50 shadow-2xl rounded-t-2xl sm:rounded-2xl max-h-[80vh] overflow-hidden flex flex-col'>
             <div className='flex items-center justify-between p-4 border-b border-gray-200'>
               <h2 className='text-lg font-semibold text-gray-900'>Select Template</h2>
               <button
@@ -793,14 +794,54 @@ const autoSaveResume = async () => {
                 <X className='size-5' />
               </button>
             </div>
-            <div className='p-4'>
-              <TemplateSelector
-                selectedTemplate={resumeData.template}
-                onChange={(template) => {
-                  setResumeData(prev => ({...prev, template}))
-                  setShowTemplateSelector(false)
-                }}
-              />
+            <div className='p-4 space-y-3 overflow-y-auto'>
+              {[
+                {
+                  id: "classic",
+                  name: "Classic",
+                  preview: "A clean, traditional resume format with clear sections and professional typography"
+                },
+                {
+                  id: "modern",
+                  name: "Modern",
+                  preview: "Sleek design with strategic use of color and modern font choices"
+                },
+                {
+                  id: "minimal-image",
+                  name: "Minimal Image",
+                  preview: "Minimal design with a single image and clean typography"
+                },
+                {
+                  id: "minimal",
+                  name: "Minimal",
+                  preview: "Ultra-clean design that puts your content front and center"
+                },
+              ].map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => {
+                    setResumeData(prev => ({...prev, template: template.id}))
+                    setShowTemplateSelector(false)
+                  }}
+                  className={`relative p-3 border rounded-md cursor-pointer transition-all ${
+                    resumeData.template === template.id
+                      ? "border-blue-400 bg-blue-50"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  }`}
+                >
+                  {resumeData.template === template.id && (
+                    <div className="absolute top-2 right-2">
+                      <div className='size-5 bg-blue-500 rounded-full flex items-center justify-center'>
+                        <CheckCircle className="w-3 h-3 text-white" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <h4 className='font-medium text-gray-800'>{template.name}</h4>
+                    <div className='mt-2 p-2 bg-blue-50 rounded text-xs text-gray-600'>{template.preview}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </>
@@ -824,13 +865,41 @@ const autoSaveResume = async () => {
               </button>
             </div>
             <div className='p-4'>
-              <ColorPicker
-                selectedColor={resumeData.accent_color}
-                onChange={(color) => {
-                  setResumeData(prev => ({...prev, accent_color: color}))
-                  setShowColorPicker(false)
-                }}
-              />
+              <div className='grid grid-cols-4 gap-3'>
+                {[
+                  { name: "Black", value: "#000000" },
+                  { name: "Blue", value: "#3B82F6" },
+                  { name: "Indigo", value: "#6366F1" },
+                  { name: "Purple", value: "#8B5CF6" },
+                  { name: "Green", value: "#10B981" },
+                  { name: "Red", value: "#EF4444" },
+                  { name: "Orange", value: "#F97316" },
+                  { name: "Teal", value: "#14B8A6" },
+                  { name: "Pink", value: "#EC4899" },
+                  { name: "Gray", value: "#6B7280" }
+                ].map((color) => (
+                  <div
+                    key={color.value}
+                    className='relative cursor-pointer group flex flex-col items-center'
+                    onClick={() => {
+                      setResumeData(prev => ({...prev, accent_color: color.value}))
+                      setShowColorPicker(false)
+                    }}
+                  >
+                    <div
+                      className="w-14 h-14 rounded-full border-2 border-transparent group-hover:border-gray-400 transition-all"
+                      style={{backgroundColor: color.value}}
+                    >
+                      {resumeData.accent_color === color.value && (
+                        <div className='w-full h-full flex items-center justify-center'>
+                          <CheckCircle className="size-6 text-white drop-shadow-md" />
+                        </div>
+                      )}
+                    </div>
+                    <p className='text-xs text-center mt-1.5 text-gray-600 font-medium'>{color.name}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </>
@@ -1050,6 +1119,153 @@ const autoSaveResume = async () => {
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Profile Data Drawer */}
+      {isProfileDataDrawerOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className='fixed inset-0 bg-black/60 z-40 lg:hidden'
+            onClick={() => setIsProfileDataDrawerOpen(false)}
+          />
+
+          {/* Drawer - slides from bottom on mobile */}
+          <div className='fixed inset-x-0 bottom-0 bg-white z-50 lg:hidden overflow-hidden flex flex-col rounded-t-2xl shadow-2xl' style={{height: '92vh', maxHeight: '92vh'}}>
+            {/* Drawer Header */}
+            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0'>
+              <div>
+                <h2 className='text-base font-semibold text-gray-900 flex items-center gap-2'>
+                  <DatabaseIcon className='size-5 text-yellow-600'/>
+                  My Profile Data
+                </h2>
+                <p className='text-gray-500 text-xs mt-0.5'>Reference and copy content to use in your resume</p>
+              </div>
+              <button
+                onClick={() => setIsProfileDataDrawerOpen(false)}
+                className='p-1.5 hover:bg-gray-100 rounded-lg transition-colors'
+              >
+                <X className='size-5' />
+              </button>
+            </div>
+
+            {/* Drawer Content */}
+            <div className='flex-1 overflow-y-auto overflow-x-hidden overscroll-contain'>
+              <div className='p-4 pb-6 max-w-full'>
+                {!defaultResumeData ? (
+                  <div className='text-center py-12'>
+                    <DatabaseIcon className='size-16 mx-auto text-gray-300 mb-4'/>
+                    <p className='text-gray-500 text-base'>No profile data found</p>
+                    <Link to='/app/profile' className='text-yellow-600 hover:underline mt-2 inline-block text-sm'>
+                      Go to Profile to add your data
+                    </Link>
+                  </div>
+                ) : (
+                  <div className='space-y-4'>
+                    {/* Professional Summary */}
+                    {defaultResumeData.professional_summary && (
+                      <DataSection
+                        title="Professional Summary"
+                        icon={FileText}
+                        content={defaultResumeData.professional_summary}
+                      />
+                    )}
+
+                    {/* Skills */}
+                    {defaultResumeData.skills && defaultResumeData.skills.length > 0 && (
+                      <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                        <h3 className='font-semibold text-gray-800 flex items-center gap-2 mb-3 text-sm'>
+                          <Sparkles className='size-4 text-yellow-600'/>
+                          Skills
+                        </h3>
+                        <div className='flex flex-wrap gap-2'>
+                          {defaultResumeData.skills.map((skill, index) => (
+                            <CopyableChip key={index} text={skill} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Experience */}
+                    {defaultResumeData.experience && defaultResumeData.experience.length > 0 && (
+                      <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                        <h3 className='font-semibold text-gray-800 flex items-center gap-2 mb-3 text-sm'>
+                          <Briefcase className='size-4 text-yellow-600'/>
+                          Experience
+                        </h3>
+                        <div className='space-y-3'>
+                          {defaultResumeData.experience.map((exp, index) => (
+                            <ExperienceCard key={index} experience={exp} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Education */}
+                    {defaultResumeData.education && defaultResumeData.education.length > 0 && (
+                      <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                        <h3 className='font-semibold text-gray-800 flex items-center gap-2 mb-3 text-sm'>
+                          <GraduationCap className='size-4 text-yellow-600'/>
+                          Education
+                        </h3>
+                        <div className='space-y-3'>
+                          {defaultResumeData.education.map((edu, index) => (
+                            <EducationCard key={index} education={edu} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Projects */}
+                    {defaultResumeData.project && defaultResumeData.project.length > 0 && (
+                      <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                        <h3 className='font-semibold text-gray-800 flex items-center gap-2 mb-3 text-sm'>
+                          <FolderIcon className='size-4 text-yellow-600'/>
+                          Projects
+                        </h3>
+                        <div className='space-y-3'>
+                          {defaultResumeData.project.map((proj, index) => (
+                            <ProjectCard key={index} project={proj} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Certifications */}
+                    {defaultResumeData.certifications && defaultResumeData.certifications.length > 0 && (
+                      <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                        <h3 className='font-semibold text-gray-800 flex items-center gap-2 mb-3 text-sm'>
+                          <Award className='size-4 text-yellow-600'/>
+                          Certifications
+                        </h3>
+                        <div className='space-y-2'>
+                          {defaultResumeData.certifications.map((cert, index) => (
+                            <CertificationCard key={index} certification={cert} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Achievements */}
+                    {defaultResumeData.achievements && defaultResumeData.achievements.length > 0 && (
+                      <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                        <h3 className='font-semibold text-gray-800 flex items-center gap-2 mb-3 text-sm'>
+                          <Trophy className='size-4 text-yellow-600'/>
+                          Achievements
+                        </h3>
+                        <div className='space-y-2'>
+                          {defaultResumeData.achievements.map((ach, index) => (
+                            <AchievementCard key={index} achievement={ach} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
