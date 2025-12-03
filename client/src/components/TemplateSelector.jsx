@@ -27,12 +27,18 @@ const TemplateSelector = ({ selectedTemplate, onChange }) => {
         },
     ]
   return (
-    <div className='relative'>
-      <button onClick={()=> setIsOpen(!isOpen)} className='flex items-center gap-1 text-sm text-blue-600 bg-gradient-to-br from-blue-50 to-blue-100 ring-blue-300 hover:ring transition-all px-3 py-2 rounded-lg'>
-        <Layout size={14} /> <span className='max-sm:hidden'>Template</span>
+    <div className='relative flex-1 sm:flex-initial'>
+      <button onClick={()=> setIsOpen(!isOpen)} className='flex items-center justify-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 active:scale-95 transition-all px-3 py-2 rounded-lg group w-full sm:w-auto' title='Change resume template'>
+        <Layout size={16} className='group-hover:rotate-12 transition-transform' /> <span>Template</span>
       </button>
       {isOpen && (
-        <div className='absolute top-full w-xs p-3 mt-2 space-y-3 z-10 bg-white rounded-md border border-gray-200 shadow-sm'>
+        <>
+        <div className='fixed inset-0 z-40' onClick={() => setIsOpen(false)}></div>
+        <div className='absolute top-full w-72 p-4 mt-2 space-y-3 z-50 bg-white rounded-lg border border-blue-200 shadow-xl'>
+            <div className='mb-3 pb-3 border-b border-gray-200'>
+                <h3 className='text-sm font-bold text-gray-800 mb-1'>Choose Resume Template</h3>
+                <p className='text-xs text-gray-500'>Select a layout style for your resume</p>
+            </div>
             {templates.map((template)=>(
                 <div key={template.id} onClick={()=> {onChange(template.id); setIsOpen(false)}} className={`relative p-3 border rounded-md cursor-pointer transition-all ${selectedTemplate === template.id ?
                     "border-blue-400 bg-blue-100"
@@ -53,6 +59,7 @@ const TemplateSelector = ({ selectedTemplate, onChange }) => {
                 </div>
             ))}
         </div>
+        </>
       )}
     </div>
   )

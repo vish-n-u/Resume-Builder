@@ -362,54 +362,250 @@ Process:
 - **Purpose**: Live preview of resume with selected template
 - **Features**: Template switching, color theming
 
+#### CustomPromptModal (client/src/components/CustomPromptModal.jsx)
+- **Props**: `isOpen`, `onClose`, `resumeData`, `setResumeData`
+- **Purpose**: AI-powered custom prompt interface for resume modifications
+- **Features**:
+  - Natural language prompts for resume edits
+  - Two-step AI process: understanding → generation
+  - Supports various operations: add, modify, format, highlight
+  - Example prompts: "Add a project about...", "Highlight skills in my 2nd job", "Make descriptions more concise"
+  - Validation for unsupported requests with helpful suggestions
+  - Shows AI understanding before applying changes
+  - Real-time resume data updates
+  - Error handling with user-friendly messages
+
+**API Endpoint**: `POST /api/ai/custom-prompt`
+- Sends: `userPrompt`, `currentResumeData`
+- Returns: `supported`, `understanding`, `generatedData`, `reason`, `suggestion`
+
+#### JobRequirementsModal (client/src/components/JobRequirementsModal.jsx)
+- **Props**: `isOpen`, `onClose`, `jobDescription`
+- **Purpose**: Extract and display job requirements from job description
+- **Features**:
+  - Auto-extracts requirements on modal open
+  - Checklist interface to track requirement coverage
+  - Color-coded requirement categories
+  - Re-analyze option for updated extraction
+
+**Extracted Requirements**:
+- Workplace Location (remote, hybrid, on-site)
+- Application Email/Portal (highlighted in yellow)
+- Required Skills (with checklist)
+- Required Certifications (with checklist)
+- Experience Required (years, level)
+- Education Required (degree, field)
+- Additional Requirements (other important details)
+
+**API Endpoint**: `POST /api/ai/extract-job-requirements`
+- Sends: `jobDescription`
+- Returns: `success`, `requirements` object
+
+**UI Features**:
+- Color-coded sections (blue, green, purple, orange, indigo)
+- Checkbox to mark requirements as "Covered"
+- Line-through styling for completed items
+- Loading state with spinner
+- Error state with retry button
+- Empty state for missing JD
+
 ### 3. Page Components
 
-#### Dashboard (client/src/pages/Dashboard.jsx:96-194)
+#### Dashboard (client/src/pages/Dashboard.jsx)
 **Responsibilities**:
 - Display all user resumes in grid layout
 - Create new blank resume
-- Upload existing PDF resume
+- Upload existing PDF resume (onboarding or regular)
+- AI-Tailored Resume Creation (primary feature)
 - Edit resume titles
 - Delete resumes
 - Navigate to resume builder
+- Onboarding modal for new users
+- Show All/Show Less for resume pagination
 
 **Key Functions**:
 - `loadAllResumes()`: Fetch user's resumes from API
+- `checkDefaultResumeData()`: Check if user has profile data, show onboarding if not
 - `createResume()`: Create blank resume, navigate to builder
-- `uploadResume()`: Extract text from PDF, send to AI, create resume
+- `uploadResume()`: Extract text from PDF, send to AI; if no profile data → save to profile, else → create resume
 - `editTitle()`: Update resume title
 - `deleteResume()`: Delete resume with confirmation
+- `createTailoredResume()`: Create AI-tailored resume from job description
 
-#### ResumeBuilder (client/src/pages/ResumeBuilder.jsx:122-213)
+**UI Features**:
+- AI-Tailored Resume Creation: Prominent feature card with job description modal
+- Onboarding Modal: Guides new users to upload resume or enter data manually
+- Color-coded resume cards with gradient backgrounds
+- Resume count and last updated date display
+- Empty state with call-to-action
+- Mobile-responsive design with smaller buttons and text
+- Show All button appears when more than 7 resumes exist
+
+#### ResumeBuilder (client/src/pages/ResumeBuilder.jsx)
 **Responsibilities**:
-- Multi-step resume editing interface
-- Real-time preview
+- Multi-step resume editing interface with 9 sections
+- Real-time preview with dual-panel layout
 - Template and color customization
-- Save functionality
+- Auto-save functionality (3 seconds after inactivity)
+- Manual save functionality
 - Share and download features
+- Profile data viewer (reference mode)
+- Section visibility toggles
+- Mobile-responsive drawer interface
+- AI features: Custom Prompt & Job Requirements modals
 
 **Key Functions**:
-- `loadExistingResume()`: Load resume data by ID
-- `saveResume()`: Save changes to database
+- `loadExistingResume()`: Load resume data by ID with sectionVisibility defaults
+- `loadDefaultResumeData()`: Load user's profile data for reference
+- `saveResume()`: Manual save with toast notification
+- `autoSaveResume()`: Silent auto-save after 3 seconds of inactivity
 - `changeResumeVisibility()`: Toggle public/private
 - `handleShare()`: Share resume using Web Share API
 - `downloadResume()`: Trigger print dialog
+- `toggleSectionVisibility()`: Show/hide sections in preview
 
 **State Management**:
-- `resumeData`: Complete resume object
-- `activeSectionIndex`: Current form section (0-5)
+- `resumeData`: Complete resume object with sectionVisibility
+- `activeSectionIndex`: Current form section (0-8)
 - `removeBackground`: Background removal flag
+- `showProfileData`: Toggle between resume preview and profile data
+- `defaultResumeData`: User's profile data for reference
+- `showCustomPrompt`: Custom AI prompt modal state
+- `autoSaveStatus`: '', 'saving', or 'saved'
+- `isRequirementsModalOpen`: Job requirements modal state
+- `isMobileDrawerOpen`: Mobile editing drawer state
 
-**Sections**:
-1. Personal Info
-2. Professional Summary
-3. Experience
-4. Education
-5. Projects
-6. Skills
-7. Certifications
-8. Achievements
-9. Custom Sections
+**Sections** (9 total):
+1. Personal Info - Contact details and photo
+2. Professional Summary - Career summary with AI enhancement
+3. Experience - Work history with job description suggestions
+4. Education - Academic background
+5. Projects - Portfolio projects
+6. Skills - Technical and soft skills
+7. Certifications - Professional certifications
+8. Achievements - Notable accomplishments
+9. Custom Sections - User-defined sections
+
+**Desktop Layout**:
+- Left Panel (5/12): Form editor with section navigation
+- Right Panel (7/12): Live preview or profile data viewer
+- Top Actions: Profile Data toggle, Share, Save, Download, Auto-save status
+- Section visibility toggles with eye icons
+
+**Mobile Layout**:
+- Full-width preview visible on main screen
+- Bottom drawer for editing (slides up, 92vh height)
+- Drawer contains all form sections and navigation
+- AI feature buttons in drawer header
+
+#### UserProfile (client/src/pages/UserProfile.jsx)
+**Responsibilities**:
+- Manage user account information
+- Store and edit default resume data (profile)
+- Configure AI preferences for content generation
+- Onboarding support for new users
+
+**Tabs** (3 total):
+1. **Account Info**: Edit name and email
+2. **Your Resume Data**: Master resume data used for AI tailoring
+3. **AI Preferences**: Configure AI writing style and tone
+
+**Key Functions**:
+- `loadDefaultResumeData()`: Load user's profile data
+- `handleUpdateAccount()`: Update name and email
+- `handleSaveDefaultResumeData()`: Save profile data with image upload
+
+**Resume Data Tab Features**:
+- All 9 resume sections editable
+- Personal Info with image upload
+- Professional Summary
+- Skills management
+- Work Experience entries
+- Education history
+- Projects portfolio
+- Certifications list
+- Achievements list
+- Custom Sections
+- Sticky save button at bottom
+- Mobile-responsive forms
+
+**AI Preferences Tab**:
+- **Writing Style**: Professional, Technical, Creative, Casual
+- **Tone**: Confident, Friendly, Formal, Enthusiastic
+- **Custom Requirements**: Free-text instructions for AI
+- Applied to all AI features (enhance, tailor, custom prompts)
+- Sticky save button at bottom
+
+**Onboarding Flow**:
+- Auto-opens "Your Resume Data" tab when `?onboarding=true` query param present
+- Helps new users set up their profile before creating resumes
+
+#### Preview (client/src/pages/Preview.jsx)
+**Responsibilities**:
+- Public resume viewing without authentication
+- Real-time template and color customization
+- Job requirements extraction from job description
+- Mobile-responsive FAB menu for customization
+
+**Key Functions**:
+- `loadResume()`: Load public resume by ID (no auth required)
+- Auto-loads template and accent color from resume data
+
+**FAB Menu Features** (Floating Action Button):
+- **AI Prompt**: Custom AI prompt (placeholder)
+- **Job Needs**: Extract and display job requirements from JD
+- **Template**: Switch resume template in real-time
+- **Colour**: Change accent color in real-time
+- **Profile Data**: View profile data (placeholder)
+
+**Mobile Features**:
+- Bottom-sheet drawers for each FAB menu option
+- Backdrop overlay when menu open
+- Smooth transitions and animations
+- Touch-friendly interface
+
+**Desktop Features**:
+- Side drawers (right side, 384px width)
+- Full-screen overlay backdrop
+
+#### Home (client/src/pages/Home.jsx)
+**Responsibilities**:
+- Landing page with marketing content
+- SEO optimization for main site
+
+**Components**:
+- Banner: Top announcement or hero banner
+- Hero: Main value proposition
+- Features: Feature cards
+- CallToAction: CTA section
+- Footer: Site footer with links
+
+#### Login (client/src/pages/Login.jsx)
+**Responsibilities**:
+- User authentication (login/register)
+- Toggle between login and register modes
+- State parameter from URL for default mode
+
+**Features**:
+- Shared form for login and register
+- Conditional name field for registration
+- URL query parameter `?state=register` for direct registration
+- Form validation
+- Toast notifications
+- Auto-redirect on success
+
+#### Layout (client/src/pages/Layout.jsx)
+**Responsibilities**:
+- Protected route wrapper
+- Authentication guard
+- Common navigation
+
+**Features**:
+- Checks user authentication state
+- Shows Loader during auth check
+- Redirects to Login if not authenticated
+- Renders Navbar for authenticated users
+- Uses Outlet for nested routes
 
 ---
 
@@ -598,6 +794,8 @@ Purpose:
 | POST | `/upload-resume` | Yes | Upload and parse PDF resume (creates new resume) |
 | POST | `/upload-resume-to-profile` | Yes | Upload and parse PDF to default resume data |
 | POST | `/tailor-resume` | Yes | Create tailored resume from job description |
+| POST | `/custom-prompt` | Yes | Process custom natural language prompts for resume modifications |
+| POST | `/extract-job-requirements` | Yes | Extract structured requirements from job description |
 
 ### Request/Response Examples
 
@@ -714,6 +912,67 @@ Response:
 {
   "message": "Tailored resume created successfully",
   "resumeId": "507f1f77bcf86cd799439012"
+}
+```
+
+#### Custom Prompt
+```http
+POST /api/ai/custom-prompt
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "userPrompt": "Add a project about building a mobile app with React Native",
+  "currentResumeData": { ... }
+}
+
+Response (Supported):
+{
+  "supported": true,
+  "understanding": {
+    "enhanced_prompt": "Add a new project entry for a React Native mobile application...",
+    "action": "add",
+    "target_section": "project"
+  },
+  "generatedData": {
+    "project": [
+      { "name": "Mobile App", "type": "React Native", "description": "..." },
+      ...existing projects
+    ]
+  }
+}
+
+Response (Unsupported):
+{
+  "supported": false,
+  "reason": "This feature is not supported through custom prompts",
+  "suggestion": "Please use the [Feature Name] button to accomplish this"
+}
+```
+
+#### Extract Job Requirements
+```http
+POST /api/ai/extract-job-requirements
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "jobDescription": "We are seeking a Senior Software Engineer with 5+ years experience in React, Node.js, AWS. Must have Bachelor's degree in Computer Science..."
+}
+
+Response:
+{
+  "success": true,
+  "requirements": {
+    "workplaceLocation": "Remote, USA",
+    "applicationEmail": "jobs@company.com",
+    "portalUrl": "https://company.com/careers",
+    "requiredSkills": "React\nNode.js\nAWS\nMongoDB",
+    "requiredCertifications": "AWS Certified Solutions Architect",
+    "experience": "5+ years of professional software development",
+    "education": "Bachelor's degree in Computer Science or related field",
+    "additionalRequirements": "Strong communication skills\nExperience with agile methodologies"
+  }
 }
 ```
 
@@ -1168,35 +1427,55 @@ Route Hierarchy:
 /
 ├── / (Home)
 │
-├── /app (Protected Layout)
+├── /app (Protected Layout with authentication guard)
 │   ├── /app (Dashboard - index)
 │   ├── /app/builder/:resumeId (Resume Builder)
 │   └── /app/profile (User Profile)
 │
-└── /view/:resumeId (Public Preview)
+└── /view/:resumeId (Public Preview - no auth required)
 
 Protected Routes:
 - Wrapped in <Layout> component
-- Requires authentication token
-- Redirects to login if not authenticated
+- Requires authentication token in Redux state
+- Shows Loader during auth check
+- Redirects to Login component if not authenticated
+- Includes Navbar for authenticated users
 ```
 
 ### Route Components
 
-| Path | Component | Auth Required | Description |
-|------|-----------|---------------|-------------|
-| `/` | Home.jsx | No | Landing page |
-| `/app` | Layout.jsx → Dashboard.jsx | Yes | User dashboard |
-| `/app/builder/:resumeId` | Layout.jsx → ResumeBuilder.jsx | Yes | Resume editor |
-| `/app/profile` | Layout.jsx → UserProfile.jsx | Yes | User profile & default resume data |
-| `/view/:resumeId` | Preview.jsx | No | Public resume view |
+| Path | Component | Auth Required | Description | Query Params |
+|------|-----------|---------------|-------------|--------------|
+| `/` | Home.jsx | No | Landing page with SEO | - |
+| `/app` | Layout.jsx → Dashboard.jsx | Yes | User dashboard with AI-tailored resume creation | - |
+| `/app/builder/:resumeId` | Layout.jsx → ResumeBuilder.jsx | Yes | Multi-section resume editor with auto-save | - |
+| `/app/profile` | Layout.jsx → UserProfile.jsx | Yes | User profile with 3 tabs | `?onboarding=true` |
+| `/view/:resumeId` | Preview.jsx | No | Public resume view with FAB customization | - |
+| `/?state=register` | Login.jsx | No | Authentication (login/register toggle) | `?state=login|register` |
 
 ### Layout Component Pattern
 ```javascript
 // Layout.jsx provides:
-- Authentication check
-- Common navigation (Navbar)
-- Nested route rendering via <Outlet />
+- Authentication check via Redux auth state
+- Loading state during authentication
+- Conditional rendering: authenticated → Navbar + Outlet, not authenticated → Login
+- Common navigation (Navbar) for all protected routes
+- Nested route rendering via <Outlet /> from react-router-dom
+```
+
+### Authentication Flow
+```javascript
+// App.jsx on mount:
+1. Check localStorage for token
+2. If token exists, fetch user data from API
+3. Dispatch login action with user data
+4. Set loading to false
+
+// Layout.jsx:
+1. Read user and loading from Redux auth state
+2. If loading, show Loader component
+3. If user exists, show Navbar + protected routes
+4. If no user, show Login component
 ```
 
 ---
@@ -1465,72 +1744,166 @@ export default imageKit
 
 ## Recent Feature Additions (2025)
 
-Based on recent commits, the following features have been added:
+Based on recent commits and current codebase analysis, the following features have been added:
 
-1. **SEO Optimization** (commit: ee378a5)
+### Major Features
+
+1. **AI Custom Prompt System** (Latest)
+   - Natural language interface for resume modifications
+   - Two-step AI process: understanding → generation
+   - Supports add, modify, format, highlight operations
+   - Validation for unsupported requests with suggestions
+   - Examples: "Add a project about...", "Highlight skills in my 2nd job"
+
+2. **Job Requirements Extraction** (Latest)
+   - Automatically extracts structured requirements from job descriptions
+   - Checklist interface to track requirement coverage
+   - Color-coded categories: location, skills, certifications, experience, education
+   - Re-analyze functionality
+   - Application email/portal highlighting
+
+3. **AI Preferences Configuration** (Latest)
+   - Writing Style: Professional, Technical, Creative, Casual
+   - Tone: Confident, Friendly, Formal, Enthusiastic
+   - Custom Requirements: Free-text AI instructions
+   - Applied across all AI features
+
+4. **Auto-Save Functionality** (Latest)
+   - Saves resume after 3 seconds of inactivity
+   - Silent auto-save without notifications
+   - Visual status indicator (Saving... / ✓ Saved)
+   - Prevents data loss during editing
+
+5. **Profile Data Viewer in Resume Builder** (Latest)
+   - Toggle between resume preview and profile data
+   - Reference mode for copying content
+   - Copyable chips for skills
+   - Copy buttons for descriptions
+   - Organized by section with icons
+
+6. **Mobile-Responsive Editing Drawer** (Latest)
+   - Bottom drawer interface for mobile devices (92vh height)
+   - Full editing capabilities on mobile
+   - Touch-friendly navigation
+   - AI features accessible from drawer
+
+7. **Onboarding Flow for New Users** (Latest)
+   - Detects first-time users without profile data
+   - Modal with two options: Upload Resume or Enter Manually
+   - Guides to profile setup before resume creation
+   - Explains AI tailoring benefits
+
+8. **FAB Menu on Preview Page** (Latest)
+   - Floating Action Button with 5 customization options
+   - AI Prompt, Job Needs, Template, Colour, Profile Data
+   - Mobile bottom sheets and desktop side drawers
+   - Real-time template and color switching without auth
+
+### Previous Features
+
+9. **SEO Optimization** (commit: ee378a5)
    - React Helmet Async integration
    - Dynamic meta tags for public resumes
    - OpenGraph tags for social sharing
    - Structured data for search engines
 
-2. **Custom Sections** (commit: ee378a5)
+10. **Custom Sections** (commit: ee378a5)
    - User-defined resume sections
    - Rich text editor support
    - Reorderable sections
    - Flexible content formatting
 
-3. **Project Sequencing** (commit: 972e21e)
-   - Ability to reorder projects
-   - Drag-and-drop functionality
-   - Custom ordering persistence
-
-4. **Hide Sections Feature** (commit: 82b7571)
-   - Toggle visibility of resume sections
+11. **Section Visibility Toggles** (commit: 82b7571)
+   - Eye icons to show/hide sections in preview
    - Conditional rendering in templates
-   - User control over what to display
+   - Per-section control (summary, experience, education, etc.)
 
-5. **AI Suggestion System** (commit: 2c51282)
+12. **AI Suggestion System** (commit: 2c51282)
    - Job description-based suggestions
    - Context-aware recommendations
    - 5 bullet point suggestions per request
+   - Uses user's default resume data as context
 
-6. **Certifications Section** (commit: 2c51282)
-   - Dedicated certifications form
-   - Fields: name, issuer, date, credential ID
+13. **Certifications & Achievements Sections** (commit: 2c51282)
+   - Dedicated certifications form (name, issuer, date, credential ID)
+   - Achievements form (title, description)
    - AI extraction from uploaded resumes
 
-7. **Rich Text Editor** (commit: 65a5400)
+14. **Rich Text Editor** (commit: 65a5400)
    - Quill-based text editor
    - HTML formatting support
    - Toolbar for text styling
    - Used in custom sections and descriptions
 
-8. **Resume Tailoring** (Latest)
+15. **Resume Tailoring** (Previous)
    - AI-powered job-specific resume creation
    - Uses DetailedResume as source data
    - Maintains factual accuracy
    - 350+ word minimum content requirement
 
+### UI/UX Improvements
+
+- **Mobile-First Design**: Responsive layouts across all pages
+- **Color-Coded Resume Cards**: Gradient backgrounds on dashboard
+- **Sticky Save Buttons**: Fixed at bottom on profile page
+- **Loading States**: Spinners and skeleton screens
+- **Empty States**: Helpful prompts when no data exists
+- **Toast Notifications**: Success/error feedback
+- **Progressive Disclosure**: Show All/Show Less for long lists
+- **Backdrop Overlays**: Modal and drawer implementations
+- **Touch-Friendly**: Large tap targets for mobile
+- **Accessibility**: Semantic HTML and ARIA labels
+
 ---
 
 ## Conclusion
 
-This Resume Builder application demonstrates a sophisticated full-stack architecture with cutting-edge AI integration. The application goes beyond basic CRUD operations to offer intelligent features like AI-powered resume tailoring, contextual job description suggestions, and comprehensive resume data management through a two-tier data architecture.
+This Resume Builder application demonstrates a sophisticated full-stack architecture with cutting-edge AI integration. The application goes beyond basic CRUD operations to offer intelligent features like AI-powered resume tailoring, contextual job description suggestions, custom natural language prompts, and comprehensive resume data management through a two-tier data architecture.
 
 **Key Innovations**:
 - **AI-Driven Customization**: Tailors resumes based on job descriptions while maintaining factual accuracy
-- **Intelligent Suggestions**: Provides context-aware content recommendations
-- **Flexible Content Management**: Rich text editing, custom sections, reorderable components
+- **Natural Language Interface**: Custom prompt system for intuitive resume modifications
+- **Intelligent Job Analysis**: Extracts and displays structured requirements from job descriptions
+- **Context-Aware AI**: Uses user's profile data and preferences for personalized suggestions
+- **Auto-Save Technology**: Prevents data loss with intelligent 3-second delay auto-save
+- **Mobile-First Design**: Fully responsive with drawer-based editing on mobile devices
+- **Profile Data Management**: Two-tier system (DetailedResume + Resume) for optimal workflow
+- **Flexible Content Management**: Rich text editing, custom sections, section visibility toggles
 - **SEO Optimization**: Public resumes optimized for search engines
-- **Modern Tech Stack**: React 19, OpenAI 6.5.0, latest tooling
+- **Modern Tech Stack**: React 19, OpenAI 6.5.0, TailwindCSS 4.1.13, latest tooling
+
+**User Experience Excellence**:
+- **Onboarding Flow**: Guides new users to set up profile before creating resumes
+- **Reference Mode**: Profile data viewer in builder for easy content copying
+- **FAB Menu**: Quick access to customization options on public resume view
+- **Real-Time Preview**: See changes immediately across all sections
+- **AI Preferences**: Customizable writing style and tone for all AI features
 
 The application successfully integrates multiple external services (MongoDB Atlas, OpenAI API, ImageKit) into a cohesive, user-friendly experience. The modular architecture, combined with Redux state management and React best practices, ensures maintainability and scalability.
 
-**Real-World Impact**: This application solves genuine user problems by automating resume optimization, reducing time spent customizing resumes for different job applications, and providing AI-powered insights for better content.
+**Real-World Impact**: This application solves genuine user problems by:
+- Automating resume optimization for specific job applications
+- Reducing time spent customizing resumes (manual hours → minutes with AI)
+- Providing AI-powered insights for better content and keyword optimization
+- Helping users never miss important job requirements
+- Offering a professional, ATS-friendly resume output
+
+**Mobile Experience**: Recognizing that many users work on-the-go, the application provides a full-featured mobile experience with drawer-based editing, touch-optimized controls, and responsive layouts that work seamlessly on phones and tablets.
+
+**Accessibility & Usability**: The application prioritizes user experience with progressive disclosure, helpful empty states, loading indicators, toast notifications, and intuitive navigation that makes resume building simple even for non-technical users.
 
 ---
 
-**Document Version**: 2.0
-**Last Updated**: January 2025
+**Document Version**: 3.0
+**Last Updated**: December 2025 (Current Analysis)
 **Maintained By**: Development Team
-**Major Updates**: Added AI tailoring, job suggestions, custom sections, SEO optimization, rich text editing, certifications, achievements, and default resume data management
+**Major Updates (v3.0)**:
+- Comprehensive page-by-page analysis
+- Documented all 7 pages with detailed functionality
+- Added CustomPromptModal and JobRequirementsModal documentation
+- Updated routing structure with query parameters
+- Added new AI endpoints (custom-prompt, extract-job-requirements)
+- Documented mobile-responsive features (drawers, FAB menu)
+- Added onboarding flow documentation
+- Updated Recent Feature Additions with 15+ features
+- Expanded UI/UX improvements section

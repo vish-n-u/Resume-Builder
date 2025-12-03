@@ -26,6 +26,8 @@ const ResumeBuilder = () => {
   const { resumeId } = useParams()
   const {token} = useSelector(state => state.auth)
 
+  console.log("resume builder")
+
   const [resumeData, setResumeData] = useState({
     _id: '',
     title: '',
@@ -296,11 +298,11 @@ const autoSaveResume = async () => {
         </div>
       </div>
 
-      <div className='max-w-7xl mx-auto px-3 sm:px-4 pb-6 lg:pb-8 overflow-hidden'>
+      <div className='max-w-7xl  mx-auto px-3 sm:px-4 pb-6 lg:pb-8 overflow-hidden'>
         {/* Mobile Edit Button - Fixed at bottom right on mobile */}
         <button
           onClick={() => setIsMobileDrawerOpen(true)}
-          className='lg:hidden fixed bottom-5 right-4 z-30 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-full p-3.5 shadow-xl hover:shadow-purple-500/50 transition-all active:scale-95'
+          className='lg:hidden fixed  bottom-5 right-4 z-30 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-full p-3.5 shadow-xl hover:shadow-purple-500/50 transition-all active:scale-95'
         >
           <Menu className='size-5' />
         </button>
@@ -314,22 +316,27 @@ const autoSaveResume = async () => {
               <hr className="absolute top-0 left-0  h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-2000" style={{width: `${activeSectionIndex * 100 / (sections.length - 1)}%`}}/>
 
               {/* Section Navigation */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-300 py-1 gap-3">
-
-                <div className='flex items-center gap-2'>
-                  <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
-                  <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
-                </div>
-
-                <div className='flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start'>
-                  {activeSectionIndex !== 0 && (
-                    <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 px-3 py-2 sm:p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex === 0}>
-                      <ChevronLeft className="size-4"/> <span className="sm:inline">Previous</span>
+              <div className="flex flex-col gap-3 mb-6 border-b border-gray-300 py-3">
+                {/* Top Row: Navigation */}
+                <div className='flex items-center justify-between w-full'>
+                  <div className='flex items-center gap-2'>
+                    {activeSectionIndex !== 0 && (
+                      <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex === 0}>
+                        <ChevronLeft className="size-4"/> <span>Previous</span>
+                      </button>
+                    )}
+                    <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.min(prevIndex + 1, sections.length - 1))} className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 && 'opacity-50'}`} disabled={activeSectionIndex === sections.length - 1}>
+                      <span>Next</span> <ChevronRight className="size-4"/>
                     </button>
-                  )}
-                  <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.min(prevIndex + 1, sections.length - 1))} className={`flex items-center gap-1 px-3 py-2 sm:p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 && 'opacity-50'}`} disabled={activeSectionIndex === sections.length - 1}>
-                      <span className="sm:inline">Next</span> <ChevronRight className="size-4"/>
-                    </button>
+                  </div>
+
+                  <div className='flex flex-col items-end'>
+                    <p className='text-[10px] text-gray-500 mb-1 font-medium'>Customize</p>
+                    <div className='flex items-center gap-2'>
+                      <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
+                      <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -717,18 +724,23 @@ const autoSaveResume = async () => {
                   </div>
 
                   {/* Section Navigation */}
-                  <div className="flex flex-col justify-between items-start mb-3 border-b border-gray-300 pb-3 gap-2 w-full">
+                  <div className="flex flex-col justify-between items-start mb-3 border-b border-gray-300 pb-3 gap-3 w-full">
                     {/* Current Section Display */}
                     <div className='w-full'>
                       <p className='text-[10px] text-gray-500 mb-0.5'>Editing Section</p>
                       <p className='text-base font-semibold text-gray-900'>{activeSection.name}</p>
                     </div>
 
-                    <div className='flex items-center gap-2 w-full'>
-                      <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
-                      <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
+                    {/* Customization Options */}
+                    <div className='w-full'>
+                      <p className='text-[10px] text-gray-500 mb-1.5 font-medium'>Customize Resume</p>
+                      <div className='flex items-center gap-2 w-full'>
+                        <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
+                        <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
+                      </div>
                     </div>
 
+                    {/* Navigation */}
                     <div className='flex items-center gap-2 w-full justify-between'>
                       <button
                         onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))}
