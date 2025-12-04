@@ -1522,15 +1522,6 @@ const autoSaveResume = async () => {
 
 // Helper Components for Drawer
 const DataSection = ({ title, icon: Icon, content }) => {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(content)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-    toast.success('Copied to clipboard!')
-  }
-
   return (
     <div className='bg-gray-50 rounded-lg p-5 border border-gray-200'>
       <div className='flex items-center justify-between mb-3'>
@@ -1538,13 +1529,6 @@ const DataSection = ({ title, icon: Icon, content }) => {
           <Icon className='size-5 text-yellow-600'/>
           {title}
         </h3>
-        <button
-          onClick={handleCopy}
-          className='flex items-center gap-1 px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-md text-xs transition-colors'
-        >
-          <CopyIcon className='size-3'/>
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
       </div>
       <div className='text-gray-700 text-sm leading-relaxed' dangerouslySetInnerHTML={{ __html: content }} />
     </div>
@@ -1572,15 +1556,6 @@ const CopyableChip = ({ text }) => {
 }
 
 const ExperienceCard = ({ experience }) => {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(experience.description)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-    toast.success('Description copied!')
-  }
-
   return (
     <div className='bg-white p-4 rounded-lg border border-gray-200'>
       <div className='flex justify-between items-start mb-2'>
@@ -1591,13 +1566,6 @@ const ExperienceCard = ({ experience }) => {
             {experience.start_date} - {experience.is_current ? 'Present' : experience.end_date}
           </p>
         </div>
-        <button
-          onClick={handleCopy}
-          className='flex items-center gap-1 px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded text-xs transition-colors'
-        >
-          <CopyIcon className='size-3'/>
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
       </div>
       <div className='text-sm text-gray-700 mt-2' dangerouslySetInnerHTML={{ __html: experience.description }} />
     </div>
@@ -1618,15 +1586,6 @@ const EducationCard = ({ education }) => {
 }
 
 const ProjectCard = ({ project }) => {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(project.description)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-    toast.success('Description copied!')
-  }
-
   return (
     <div className='bg-white p-4 rounded-lg border border-gray-200'>
       <div className='flex justify-between items-start mb-2'>
@@ -1634,13 +1593,6 @@ const ProjectCard = ({ project }) => {
           <h4 className='font-semibold text-gray-800'>{project.name}</h4>
           {project.type && <p className='text-sm text-gray-600'>{project.type}</p>}
         </div>
-        <button
-          onClick={handleCopy}
-          className='flex items-center gap-1 px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded text-xs transition-colors'
-        >
-          <CopyIcon className='size-3'/>
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
       </div>
       <div className='text-sm text-gray-700 mt-2' dangerouslySetInnerHTML={{ __html: project.description }} />
     </div>
@@ -1661,26 +1613,10 @@ const CertificationCard = ({ certification }) => {
 }
 
 const AchievementCard = ({ achievement }) => {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(achievement.description)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-    toast.success('Description copied!')
-  }
-
   return (
     <div className='bg-white p-3 rounded-lg border border-gray-200'>
       <div className='flex justify-between items-start'>
         <h4 className='font-semibold text-gray-800 text-sm'>{achievement.title}</h4>
-        <button
-          onClick={handleCopy}
-          className='flex items-center gap-1 px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded text-xs transition-colors'
-        >
-          <CopyIcon className='size-3'/>
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
       </div>
       <div className='text-sm text-gray-700 mt-1' dangerouslySetInnerHTML={{ __html: achievement.description }} />
     </div>
