@@ -84,7 +84,6 @@ const ResumeBuilder = () => {
   }
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0)
-  const [removeBackground, setRemoveBackground] = useState(false)
   const [showProfileData, setShowProfileData] = useState(false)
   const [defaultResumeData, setDefaultResumeData] = useState(null)
   const [showCustomPrompt, setShowCustomPrompt] = useState(false)
@@ -215,7 +214,6 @@ const saveResume = async () => {
     const formData = new FormData();
     formData.append("resumeId", resumeId)
     formData.append('resumeData', JSON.stringify(updatedResumeData))
-    removeBackground && formData.append("removeBackground", "yes");
     typeof resumeData.personal_info.image === 'object' && formData.append("image", resumeData.personal_info.image)
 
     const { data } = await api.put('/api/resumes/update', formData, {headers: { Authorization: token }})
@@ -242,7 +240,6 @@ const autoSaveResume = async () => {
     const formData = new FormData();
     formData.append("resumeId", resumeId)
     formData.append('resumeData', JSON.stringify(updatedResumeData))
-    removeBackground && formData.append("removeBackground", "yes");
     typeof resumeData.personal_info.image === 'object' && formData.append("image", resumeData.personal_info.image)
 
     await api.put('/api/resumes/update', formData, {headers: { Authorization: token }})
@@ -424,6 +421,14 @@ const autoSaveResume = async () => {
               <div className="flex flex-col gap-3 mb-6 border-b border-gray-300 py-3">
                 {/* Top Row: Navigation */}
                 <div className='flex items-center justify-between w-full'>
+                  <div className='flex flex-col items-start'>
+                    <p className='text-[10px] text-gray-500 mb-1 font-medium'>Customize</p>
+                    <div className='flex items-center gap-2'>
+                      <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
+                      <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
+                    </div>
+                  </div>
+
                   <div className='flex items-center gap-2'>
                     {activeSectionIndex !== 0 && (
                       <button onClick={()=> setActiveSectionIndex((prevIndex)=> Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex === 0}>
@@ -434,21 +439,13 @@ const autoSaveResume = async () => {
                       <span>Next</span> <ChevronRight className="size-4"/>
                     </button>
                   </div>
-
-                  <div className='flex flex-col items-end'>
-                    <p className='text-[10px] text-gray-500 mb-1 font-medium'>Customize</p>
-                    <div className='flex items-center gap-2'>
-                      <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=> setResumeData(prev => ({...prev, template}))}/>
-                      <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev, accent_color: color}))}/>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               {/* Form Content */}
               <div className='space-y-6'>
                   {activeSection.id === 'personal' && (
-                    <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev => ({...prev, personal_info: data }))} removeBackground={removeBackground} setRemoveBackground={setRemoveBackground} />
+                    <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev => ({...prev, personal_info: data }))} />
                   )}
                   {activeSection.id === 'summary' && (
                     <div>
@@ -1112,7 +1109,7 @@ const autoSaveResume = async () => {
                   {/* Form Content */}
                   <div className='space-y-4 w-full overflow-hidden'>
                     {activeSection.id === 'personal' && (
-                      <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev => ({...prev, personal_info: data }))} removeBackground={removeBackground} setRemoveBackground={setRemoveBackground} />
+                      <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev => ({...prev, personal_info: data }))} />
                     )}
                     {activeSection.id === 'summary' && (
                       <div>

@@ -1,4 +1,4 @@
-import { Lock, Mail, User2Icon } from 'lucide-react'
+import { Lock, Mail, User2Icon, Loader2 } from 'lucide-react'
 import React from 'react'
 import api from '../configs/api'
 import { useDispatch } from 'react-redux'
@@ -11,6 +11,8 @@ const Login = () => {
   const query = new URLSearchParams(window.location.search)
   const urlState = query.get('state')
   const [state, setState] = React.useState(urlState || "login")
+    const [isLoading, setIsLoading] = React.useState(false)
+    const [isGuestLoading, setIsGuestLoading] = React.useState(false)
 
     const [formData, setFormData] = React.useState({
         name: '',
@@ -20,6 +22,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setIsLoading(true)
         try {
             const { data } = await api.post(`/api/users/${state}`, formData)
             dispatch(login(data))
@@ -27,12 +30,33 @@ const Login = () => {
             toast.success(data.message)
         } catch (error) {
             toast(error?.response?.data?.message || error.message)
+        } finally {
+            setIsLoading(false)
         }
     }
 
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleGuestLogin = async (e) => {
+        e.preventDefault()
+        setIsGuestLoading(true)
+        const guestCredentials = {
+            email: 'guest@gmail.com',
+            password: 'abcd1234'
+        }
+        try {
+            const { data } = await api.post('/api/users/login', guestCredentials)
+            dispatch(login(data))
+            localStorage.setItem('token', data.token)
+            toast.success(data.message)
+        } catch (error) {
+            toast(error?.response?.data?.message || error.message)
+        } finally {
+            setIsGuestLoading(false)
+        }
     }
   return (
     <div className='flex items-center justify-center min-h-screen bg-gray-50 px-4 py-8'>
@@ -56,9 +80,16 @@ const Login = () => {
                 <div className="mt-4 text-left text-yellow-600">
                     <button className="text-xs sm:text-sm" type="reset">Forget password?</button>
                 </div>
-                <button type="submit" className="mt-2 w-full h-10 sm:h-11 rounded-full text-white bg-yellow-500 hover:bg-yellow-600 transition-colors text-sm sm:text-base active:scale-95">
+                <button type="submit" disabled={isLoading || isGuestLoading} className="mt-2 w-full h-10 sm:h-11 rounded-full text-white bg-yellow-500 hover:bg-yellow-600 transition-colors text-sm sm:text-base active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    {isLoading && <Loader2 className="size-4 animate-spin" />}
                     {state === "login" ? "Login" : "Sign up"}
                 </button>
+                {state === "login" && (
+                    <button type="button" onClick={handleGuestLogin} disabled={isLoading || isGuestLoading} className="mt-3 w-full h-10 sm:h-11 rounded-full text-yellow-600 bg-white border-2 border-yellow-500 hover:bg-yellow-50 transition-colors text-sm sm:text-base active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        {isGuestLoading && <Loader2 className="size-4 animate-spin" />}
+                        Login as Guest
+                    </button>
+                )}
                 <p onClick={() => setState(prev => prev === "login" ? "register" : "login")} className="text-gray-500 text-xs sm:text-sm mt-3 mb-8 sm:mb-11 cursor-pointer">{state === "login" ? "Don't have an account?" : "Already have an account?"} <a href="#" className="text-yellow-600 hover:underline">click here</a></p>
             </form>
     </div>
