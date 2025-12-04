@@ -717,10 +717,19 @@ const autoSaveResume = async () => {
               <div className='w-full mb-3'>
                 <div className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between max-w-full'>
 
-                  {/* Show Profile Data Toggle */}
+                  {/* Edit Resume Button (Mobile) */}
+                  <button
+                    onClick={() => setIsMobileDrawerOpen(true)}
+                    className='lg:hidden flex items-center justify-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 lg:py-2.5 text-xs lg:text-sm rounded-lg transition-all font-medium shadow-md lg:shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700'
+                  >
+                    <Edit3 className='size-3.5 lg:size-4'/>
+                    <span className='whitespace-nowrap'>Edit Resume</span>
+                  </button>
+
+                  {/* Show Profile Data Toggle (Desktop) */}
                   <button
                     onClick={() => setShowProfileData(!showProfileData)}
-                    className={`flex items-center justify-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 lg:py-2.5 text-xs lg:text-sm rounded-lg transition-all font-medium shadow-md lg:shadow-lg ${
+                    className={`hidden lg:flex items-center justify-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 lg:py-2.5 text-xs lg:text-sm rounded-lg transition-all font-medium shadow-md lg:shadow-lg ${
                       showProfileData
                         ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white'
                         : 'bg-white text-yellow-700 border border-yellow-300 lg:border-2 hover:bg-yellow-50'
