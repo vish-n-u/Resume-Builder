@@ -13,7 +13,6 @@ const Dashboard = () => {
 
   const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"]
   const [allResumes, setAllResumes] = useState([])
-  const [showCreateResume, setShowCreateResume] = useState(false)
   const [showUploadResume, setShowUploadResume] = useState(false)
   const [showJobDescriptionModal, setShowJobDescriptionModal] = useState(false)
   const [title, setTitle] = useState('')
@@ -59,19 +58,6 @@ const Dashboard = () => {
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message)
     }
-  }
-
-  const createResume = async (event) => {
-   try {
-    event.preventDefault()
-    const { data } = await api.post('/api/resumes/create', {title}, {headers: { Authorization: token }})
-    setAllResumes([...allResumes, data.resume])
-    setTitle('')
-    setShowCreateResume(false)
-    navigate(`/app/builder/${data.resume._id}`)
-   } catch (error) {
-    toast.error(error?.response?.data?.message || error.message)
-   }
   }
 
   const uploadResume = async (event) => {
@@ -231,24 +217,14 @@ const Dashboard = () => {
               {allResumes.length} {allResumes.length === 1 ? 'resume' : 'resumes'} saved
             </p>
           </div>
-          <div className='flex gap-2'>
-            <button
-              onClick={() => setShowCreateResume(true)}
-              className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md text-sm'
-            >
-              <PlusIcon className='size-4' />
-              <span className='hidden sm:inline'>Create Blank</span>
-              <span className='sm:hidden'>Blank</span>
-            </button>
-            <button
-              onClick={() => setShowUploadResume(true)}
-              className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all shadow-sm hover:shadow-md text-sm'
-            >
-              <UploadCloudIcon className='size-4' />
-              <span className='hidden sm:inline'>Upload PDF</span>
-              <span className='sm:hidden'>Upload</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setShowUploadResume(true)}
+            className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all shadow-sm hover:shadow-md text-sm'
+          >
+            <UploadCloudIcon className='size-4' />
+            <span className='hidden sm:inline'>Upload PDF</span>
+            <span className='sm:hidden'>Upload</span>
+          </button>
         </div>
       </div>
 
@@ -257,24 +233,15 @@ const Dashboard = () => {
           <FilePenLineIcon className='size-12 sm:size-16 text-slate-300 mb-4' />
           <h3 className='text-base sm:text-lg font-semibold text-slate-700 mb-2'>No resumes yet</h3>
           <p className='text-xs sm:text-sm text-slate-500 text-center max-w-md mb-6'>
-            Start by creating an AI-tailored resume using a job description, or create a blank resume to customize from scratch.
+            Start by creating an AI-tailored resume using a job description.
           </p>
-          <div className='flex flex-col sm:flex-row gap-3 w-full sm:w-auto'>
-            <button
-              onClick={() => setShowJobDescriptionModal(true)}
-              className='flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-all shadow-md text-sm'
-            >
-              <SparklesIcon className='size-5' />
-              Create AI-Tailored Resume
-            </button>
-            <button
-              onClick={() => setShowCreateResume(true)}
-              className='flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all text-sm'
-            >
-              <PlusIcon className='size-5' />
-              Create Blank Resume
-            </button>
-          </div>
+          <button
+            onClick={() => setShowJobDescriptionModal(true)}
+            className='flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-all shadow-md text-sm'
+          >
+            <SparklesIcon className='size-5' />
+            Create AI-Tailored Resume
+          </button>
         </div>
       ) : (
         <>
@@ -321,19 +288,6 @@ const Dashboard = () => {
         )}
         </>
       )}
-
-        {showCreateResume && (
-          <form onSubmit={createResume} onClick={()=> setShowCreateResume(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center p-4'>
-            <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-sm p-6'>
-              <h2 className='text-lg sm:text-xl font-bold mb-4'>Create a Resume</h2>
-              <input onChange={(e)=>setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-yellow-600 ring-yellow-600 text-sm sm:text-base' required/>
-
-              <button className='w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors text-sm sm:text-base'>Create Resume</button>
-              <XIcon className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors' onClick={()=> {setShowCreateResume(false); setTitle('')}}/>
-            </div>
-          </form>
-        )
-        }
 
         {showUploadResume && (
           <form onSubmit={uploadResume} onClick={()=> setShowUploadResume(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center p-4'>
