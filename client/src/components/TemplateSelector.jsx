@@ -25,6 +25,11 @@ const TemplateSelector = ({ selectedTemplate, onChange }) => {
             name: "Minimal",
             preview: "Ultra-clean design that puts your content front and center"
         },
+        {
+            id: "compact",
+            name: "Compact",
+            preview: "Space-efficient two-column layout perfect for fitting more content on one page"
+        },
     ]
   return (
     <div className='relative flex-1 sm:flex-initial'>
