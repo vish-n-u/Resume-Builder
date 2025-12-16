@@ -10,9 +10,9 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-8 bg-white text-gray-900 font-light text-sm">
+        <div className="max-w-4xl mx-auto px-8 pt-6 pb-4 bg-white text-gray-900 font-light text-sm">
             {/* Header */}
-            <header className="mb-10">
+            <header className="mb-2">
                 <h1 className="text-5xl font-thin mb-4 tracking-wide">
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>
@@ -32,7 +32,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Professional Summary */}
             {data.professional_summary && sectionVisibility.summary && (
-                <section className="mb-10">
+                <section className="mb-2">
                     <div
                         className="text-sm text-gray-700 quill-content"
                         dangerouslySetInnerHTML={{ __html: data.professional_summary }}
@@ -42,12 +42,12 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Experience */}
             {data.experience && data.experience.length > 0 && sectionVisibility.experience && (
-                <section className="mb-10">
-                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                <section className="mb-2">
+                    <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                         Experience
                     </h2>
 
-                    <div className="space-y-6">
+                    <div className="space-y-2">
                         {data.experience.map((exp, index) => (
                             <div key={index} className="experience-item">
                                 <div className="flex justify-between items-baseline mb-1">
@@ -59,7 +59,7 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                                 <p className="text-sm text-gray-600 mb-2">{exp.company}</p>
                                 {exp.description && (
                                     <div
-                                        className="text-sm text-gray-700 leading-relaxed quill-content"
+                                        className="text-sm text-gray-700 leading-snug quill-content"
                                         dangerouslySetInnerHTML={{ __html: exp.description }}
                                     />
                                 )}
@@ -71,12 +71,12 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Projects */}
             {data.project && data.project.length > 0 && sectionVisibility.projects && (
-                <section className="mb-10">
-                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                <section className="mb-2">
+                    <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                         Projects
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         {data.project.map((proj, index) => (
                             <div key={index} className="project-item flex flex-col gap-2 justify-between items-baseline">
                                 <h3 className="text-base font-medium ">{proj.name}</h3>
@@ -92,12 +92,12 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Education */}
             {data.education && data.education.length > 0 && sectionVisibility.education && (
-                <section className="mb-10">
-                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                <section className="mb-2">
+                    <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                         Education
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         {data.education.map((edu, index) => (
                             <div key={index} className="education-item flex justify-between items-baseline">
                                 <div>
@@ -118,8 +118,8 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Skills */}
             {data.skills && data.skills.length > 0 && sectionVisibility.skills && (
-                <section className="mb-10">
-                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                <section className="mb-2">
+                    <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                         Skills
                     </h2>
 
@@ -131,12 +131,12 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Certifications */}
             {data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
-                <section className="mb-10">
-                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                <section className="mb-2">
+                    <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                         Certifications
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         {data.certifications.map((cert, index) => (
                             <div key={index}>
                                 <h3 className="text-base font-medium">{cert.name}</h3>
@@ -150,8 +150,8 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
 
             {/* Achievements */}
             {data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
-                <section className="mb-10">
-                    <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                <section className="mb-2">
+                    <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                         Achievements
                     </h2>
 
@@ -170,12 +170,12 @@ const MinimalTemplate = ({ data, accentColor,sectionVisibility }) => {
                 <>
                     {data.custom_sections.map((section, index) => (
                         section.section_name && section.content && (
-                            <section key={index} className="mb-10">
-                                <h2 className="text-base uppercase tracking-widest mb-6 font-medium" style={{ color: accentColor }}>
+                            <section key={index} className="mb-2">
+                                <h2 className="text-base uppercase tracking-widest mb-2 font-medium" style={{ color: accentColor }}>
                                     {section.section_name}
                                 </h2>
                                 <div
-                                    className="text-sm text-gray-700 leading-relaxed quill-content"
+                                    className="text-sm text-gray-700 leading-snug quill-content"
                                     dangerouslySetInnerHTML={{ __html: section.content }}
                                 />
                             </section>

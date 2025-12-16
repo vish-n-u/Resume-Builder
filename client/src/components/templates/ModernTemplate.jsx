@@ -13,7 +13,7 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 	return (
 		<div className="max-w-4xl mx-auto bg-white text-gray-800 text-sm">
 			{/* Header */}
-			<header className="p-8 text-white" style={{ backgroundColor: accentColor }}>
+			<header className="px-8 pt-6 pb-4 text-white" style={{ backgroundColor: accentColor }}>
 				<h1 className="text-5xl font-light mb-3">
 					{data.personal_info?.full_name || "Your Name"}
 				</h1>
@@ -52,12 +52,12 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 				</div>
 			</header>
 
-			<div className="p-8">
+			<div className="px-8 py-4">
 				{/* Professional Summary */}
 				{data.professional_summary && sectionVisibility.summary  && (
-					<section className="mb-8">
-						<h2 className="text-base font-light mb-4 pb-2 border-b border-gray-200">
-							Professional Summary
+					<section className="mb-2">
+						<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
+							Summary
 						</h2>
 						<div
 							className="text-sm text-gray-700 quill-content"
@@ -68,12 +68,12 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 
 				{/* Experience */}
 				{data.experience &&   sectionVisibility.experience && data.experience.length > 0 && (
-					<section className="mb-8">
-						<h2 className="text-base font-light mb-6 pb-2 border-b border-gray-200">
+					<section className="mb-2">
+						<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 							Experience
 						</h2>
 
-						<div className="space-y-6">
+						<div className="space-y-2">
 							{data.experience.map((exp, index) => (
 								<div key={index} className="experience-item relative pl-6 border-l border-gray-200">
 
@@ -88,7 +88,7 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 									</div>
 									{exp.description && (
 										<div
-											className="text-sm text-gray-700 leading-relaxed mt-3 quill-content"
+											className="text-sm text-gray-700 leading-snug mt-3 quill-content"
 											dangerouslySetInnerHTML={{ __html: exp.description }}
 										/>
 									)}
@@ -100,12 +100,12 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 
 				{/* Projects */}
 				{data.project && data.project.length > 0 &&sectionVisibility.projects && (
-					<section className="mb-8">
-						<h2 className="text-base font-light mb-4 pb-2 border-b border-gray-200">
+					<section className="mb-2">
+						<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 							Projects
 						</h2>
 
-						<div className="space-y-6">
+						<div className="space-y-2">
 							{data.project.map((p, index) => (
 								<div key={index} className="project-item relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
 
@@ -117,7 +117,7 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 									</div>
 									{p.description && (
 										<div
-											className="text-sm text-gray-700 leading-relaxed mt-3 quill-content"
+											className="text-sm text-gray-700 leading-snug mt-3 quill-content"
 											dangerouslySetInnerHTML={{ __html: p.description }}
 										/>
 									)}
@@ -131,11 +131,11 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 					{/* Education */}
 					{data.education && data.education.length > 0 && sectionVisibility.education && (
 						<section>
-							<h2 className="text-base font-light mb-4 pb-2 border-b border-gray-200">
+							<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 								Education
 							</h2>
 
-							<div className="space-y-4">
+							<div className="space-y-2">
 								{data.education.map((edu, index) => (
 									<div key={index} className="education-item">
 										<h3 className="text-base font-semibold text-gray-900">
@@ -155,7 +155,7 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 					{/* Skills */}
 					{data.skills && data.skills.length > 0 &&sectionVisibility.skills&& (
 						<section>
-							<h2 className="text-base font-light mb-4 pb-2 border-b border-gray-200">
+							<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 								Skills
 							</h2>
 
@@ -176,12 +176,12 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 
 				{/* Certifications */}
 				{data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
-					<section className="mb-8 mt-8">
-						<h2 className="text-base font-light mb-6 pb-2 border-b border-gray-200">
+					<section className="mb-2 mt-4">
+						<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 							Certifications
 						</h2>
 
-						<div className="space-y-4">
+						<div className="space-y-2">
 							{data.certifications.map((cert, index) => (
 								<div key={index} className="relative pl-6 border-l border-gray-200">
 									<h3 className="text-base font-medium text-gray-900">{cert.name}</h3>
@@ -195,8 +195,8 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 
 				{/* Achievements */}
 				{data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
-					<section className="mb-8">
-						<h2 className="text-base font-light mb-6 pb-2 border-b border-gray-200">
+					<section className="mb-2">
+						<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 							Achievements
 						</h2>
 
@@ -215,12 +215,12 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 					<>
 						{data.custom_sections.map((section, index) => (
 							section.section_name && section.content && (
-								<section key={index} className="mb-8">
-									<h2 className="text-base font-light mb-6 pb-2 border-b border-gray-200">
+								<section key={index} className="mb-2">
+									<h2 className="text-base font-light mb-2 pb-2 border-b border-gray-200">
 										{section.section_name}
 									</h2>
 									<div
-										className="text-sm text-gray-700 leading-relaxed quill-content"
+										className="text-sm text-gray-700 leading-snug quill-content"
 										dangerouslySetInnerHTML={{ __html: section.content }}
 									/>
 								</section>

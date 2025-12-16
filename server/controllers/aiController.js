@@ -709,38 +709,61 @@ export const handleCustomPrompt = async (req, res) => {
 
 Your task is to determine if a user's request is SUPPORTED or UNSUPPORTED.
 
-SUPPORTED requests are those that ask to modify or generate CONTENT:
-- Add/modify/remove sections (experience, projects, skills, education, certifications, achievements, custom sections)
-- Generate or update text content (professional summary, descriptions, etc.)
-- Add specific information to the resume (new projects, skills, certifications, etc.)
-- Reformat existing content (add bold, italics, bullet points to TEXT content)
-- Update or improve existing content
+IMPORTANT: Be LIBERAL in classifying requests as SUPPORTED. Default to SUPPORTED unless the request EXPLICITLY asks for template/UI changes.
 
-UNSUPPORTED requests are those that ask for UI/styling changes that are NOT content-related:
-- Change resume template/format (e.g., "change to modern template", "use a different layout")
-- Change colors or styling (e.g., "make it blue", "change the color scheme", "change accent color")
-- Change fonts or font sizes
-- Change page layout or structure
-- Any visual/design changes that are not about the text content itself
+SUPPORTED requests include ANY content-related modifications:
+- Add/modify/remove/update ANY content sections (experience, projects, skills, education, certifications, achievements, custom sections, etc.)
+- Generate, update, improve, enhance, or rewrite ANY text content (professional summary, descriptions, bullet points, etc.)
+- Add specific information to the resume (new projects, skills, certifications, experiences, etc.)
+- Reformat or restructure TEXT content (add/modify bold, italics, bullet points, numbering, etc.)
+- Update, improve, enhance, or modify existing content in any way
+- Change wording, tone, style, or language of content
+- Make content more concise, detailed, professional, or impactful
+- Add achievements, metrics, or quantifiable results
+- Reorganize content WITHIN sections (e.g., reorder bullet points)
+- Fix grammar, spelling, or formatting issues in text
+- Translate content to different languages
+- ANY request about what the resume says or how it reads
 
-EXAMPLES:
+UNSUPPORTED requests are ONLY those that EXPLICITLY ask for UI/visual/template changes:
+- EXPLICITLY requesting to "change the template" or "use a different template/layout"
+- EXPLICITLY requesting color changes (e.g., "make it blue", "change the color scheme", "change accent color")
+- EXPLICITLY requesting font or font size changes
+- EXPLICITLY requesting changes to the visual page layout or design structure
 
-SUPPORTED:
+CRITICAL RULES:
+1. If a request mentions updating, improving, or changing CONTENT without explicitly mentioning template/colors/fonts, classify as SUPPORTED
+2. If a request is ambiguous, classify as SUPPORTED
+3. If a request could be interpreted as either content OR template, classify as SUPPORTED
+4. ONLY classify as UNSUPPORTED if the user EXPLICITLY uses words like "template", "color", "font", or "layout"
+5. Requests to make content "better", "more professional", "clearer", etc. are ALWAYS SUPPORTED
+
+EXAMPLES OF SUPPORTED REQUESTS:
 - "Add a project about building an e-commerce website"
 - "Update my professional summary to emphasize leadership"
 - "Add AWS certification to my resume"
 - "Make the skills in my experience descriptions bold"
 - "Add bullet points to my project descriptions"
 - "Generate 3 achievements highlighting my teamwork"
+- "Make my resume more professional"
+- "Improve the content"
+- "Update my experience section"
+- "Make it better"
+- "Add more details to my projects"
+- "Rewrite my summary"
+- "Make the descriptions more impactful"
+- "Add quantifiable achievements"
+- "Fix formatting issues" (assuming text formatting, not template)
+- "Reorganize my skills"
 
-UNSUPPORTED:
+EXAMPLES OF UNSUPPORTED REQUESTS:
 - "Change the resume template to modern"
-- "Make the resume blue"
-- "Change to a different format"
-- "Use a different layout"
+- "Make the resume blue" or "change the color to red"
+- "Change to a different format/layout"
+- "Use a different template"
 - "Change the font to Arial"
 - "Make the resume colorful"
-- "Rearrange the sections on the page"
+- "Change the accent color"
 
 Analyze the user's request and respond with ONLY valid JSON in this exact format:
 {
@@ -756,7 +779,7 @@ Analyze the user's request and respond with ONLY valid JSON in this exact format
                 { role: "user", content: `USER REQUEST: "${userPrompt}"` }
             ],
             response_format: { type: 'json_object' },
-            temperature: 0.3
+            temperature: 0.1
         });
 
         const classification = JSON.parse(classificationResponse.choices[0].message.content);
