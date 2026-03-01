@@ -11,14 +11,14 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-8 pt-6 pb-4 bg-white text-gray-800 leading-snug text-sm">
+        <div className="max-w-4xl mx-auto p-[0.3in] bg-white text-gray-800 leading-snug text-[11pt]">
             {/* Header */}
-            <header className="text-center mb-2 pb-2 border-b-2" style={{ borderColor: accentColor }}>
-                <h1 className="text-4xl font-bold mb-2" style={{ color: accentColor }}>
+            <header className="text-center mb-2 pb-1.5 border-b-2" style={{ borderColor: accentColor }}>
+                <h1 className="text-[18pt] font-bold mb-1.5" style={{ color: accentColor }}>
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>
 
-                <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+                <div className="flex flex-wrap justify-center gap-3 text-[10pt] text-gray-600">
                     {data.personal_info?.email && (
                         <div className="flex items-center gap-1">
                             <Mail className="size-4" />
@@ -55,11 +55,11 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Professional Summary */}
             {data.professional_summary && sectionVisibility.summary && (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         SUMMARY
                     </h2>
                     <div
-                        className="text-sm text-gray-700 leading-snug quill-content"
+                        className="text-[11pt] text-gray-700 leading-snug quill-content"
                         dangerouslySetInnerHTML={{ __html: data.professional_summary }}
                     />
                 </section>
@@ -68,25 +68,25 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Experience */}
             {data.experience && data.experience.length  > 0 &&   sectionVisibility.experience && (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         EXPERIENCE
                     </h2>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         {data.experience.map((exp, index) => (
                             <div key={index} className="experience-item border-l-3 pl-4" style={{ borderColor: accentColor }}>
-                                <div className="flex justify-between items-start mb-2">
+                                <div className="flex justify-between items-start mb-1">
                                     <div>
-                                        <h3 className="text-base font-semibold text-gray-900">{exp.position}</h3>
-                                        <p className="text-sm text-gray-700 font-medium">{exp.company}</p>
+                                        <h3 className="text-[11pt] font-semibold text-gray-900">{exp.position}</h3>
+                                        <p className="text-[11pt] text-gray-700 font-medium">{exp.company}</p>
                                     </div>
-                                    <div className="text-right text-sm text-gray-600">
+                                    <div className="text-right text-[10pt] text-gray-600">
                                         <p>{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}</p>
                                     </div>
                                 </div>
                                 {exp.description && (
                                     <div
-                                        className="text-sm text-gray-700 leading-snug quill-content"
+                                        className="text-[11pt] text-gray-700 leading-snug quill-content"
                                         dangerouslySetInnerHTML={{ __html: exp.description }}
                                     />
                                 )}
@@ -99,17 +99,17 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Projects */}
             {data.project && data.project.length > 0 &&  sectionVisibility.projects &&  (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         PROJECTS
                     </h2>
 
-                    <ul className="space-y-2 ">
+                    <ul className="space-y-1 ">
                         {data.project.map((proj, index) => (
                             <div key={index} className="project-item flex justify-between items-start border-l-3 border-gray-300 pl-6">
                                 <div>
-                                    <li className="text-base font-semibold text-gray-800 ">{proj.name}</li>
+                                    <li className="text-[11pt] font-semibold text-gray-800 ">{proj.name}</li>
                                     <div
-                                        className="text-sm text-gray-600 quill-content"
+                                        className="text-[11pt] text-gray-600 quill-content"
                                         dangerouslySetInnerHTML={{ __html: proj.description }}
                                     />
                                 </div>
@@ -122,21 +122,21 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Education */}
             {data.education && data.education.length > 0 && sectionVisibility.education && (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         EDUCATION
                     </h2>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         {data.education.map((edu, index) => (
                             <div key={index} className="education-item flex justify-between items-start">
                                 <div>
-                                    <h3 className="text-base font-semibold text-gray-900">
+                                    <h3 className="text-[11pt] font-semibold text-gray-900">
                                         {edu.degree} {edu.field && `in ${edu.field}`}
                                     </h3>
-                                    <p className="text-sm text-gray-700">{edu.institution}</p>
-                                    {edu.gpa && <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>}
+                                    <p className="text-[11pt] text-gray-700">{edu.institution}</p>
+                                    {edu.gpa && <p className="text-[11pt] text-gray-600">GPA: {edu.gpa}</p>}
                                 </div>
-                                <div className="text-sm text-gray-600">
+                                <div className="text-[10pt] text-gray-600">
                                     <p>{formatDate(edu.graduation_date)}</p>
                                 </div>
                             </div>
@@ -148,13 +148,13 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Skills */}
             {data.skills && data.skills.length > 0 && sectionVisibility.skills&&  (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         CORE SKILLS
                     </h2>
 
                     <div className="flex gap-4 flex-wrap">
                         {data.skills.map((skill, index) => (
-                            <div key={index} className="text-sm text-gray-700">
+                            <div key={index} className="text-[11pt] text-gray-700">
                                 • {skill}
                             </div>
                         ))}
@@ -165,16 +165,16 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Certifications */}
             {data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         CERTIFICATIONS
                     </h2>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         {data.certifications.map((cert, index) => (
                             <div key={index} className="border-l-3 pl-4" style={{ borderColor: accentColor }}>
-                                <h3 className="text-base font-semibold text-gray-900">{cert.name}</h3>
-                                {cert.issuer && <p className="text-sm text-gray-700">{cert.issuer}</p>}
-                                {cert.date && <p className="text-sm text-gray-600">{formatDate(cert.date)}</p>}
+                                <h3 className="text-[11pt] font-semibold text-gray-900">{cert.name}</h3>
+                                {cert.issuer && <p className="text-[11pt] text-gray-700">{cert.issuer}</p>}
+                                {cert.date && <p className="text-[10pt] text-gray-600">{formatDate(cert.date)}</p>}
                             </div>
                         ))}
                     </div>
@@ -184,13 +184,13 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
             {/* Achievements */}
             {data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
                 <section className="mb-2">
-                    <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                    <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                         ACHIEVEMENTS
                     </h2>
 
-                    <ul className="space-y-2">
+                    <ul className="space-y-1">
                         {data.achievements.map((achievement, index) => (
-                            <li key={index} className="text-sm text-gray-700 pl-4">
+                            <li key={index} className="text-[11pt] text-gray-700 pl-4">
                                 • {achievement}
                             </li>
                         ))}
@@ -204,11 +204,11 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
                     {data.custom_sections.map((section, index) => (
                         section.section_name && section.content && (
                             <section key={index} className="mb-2">
-                                <h2 className="text-base font-semibold mb-2" style={{ color: accentColor }}>
+                                <h2 className="text-[12pt] font-semibold mb-1" style={{ color: accentColor }}>
                                     {section.section_name.toUpperCase()}
                                 </h2>
                                 <div
-                                    className="text-sm text-gray-700 leading-snug quill-content"
+                                    className="text-[11pt] text-gray-700 leading-snug quill-content"
                                     dangerouslySetInnerHTML={{ __html: section.content }}
                                 />
                             </section>

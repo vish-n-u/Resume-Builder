@@ -1,4 +1,4 @@
-import { Lock, Mail, User2Icon, Loader2 } from 'lucide-react'
+import { Lock, Mail, User2Icon, Loader2, ServerCrash } from 'lucide-react'
 import React from 'react'
 import api from '../configs/api'
 import { useDispatch } from 'react-redux'
@@ -13,6 +13,18 @@ const Login = () => {
   const [state, setState] = React.useState(urlState || "login")
     const [isLoading, setIsLoading] = React.useState(false)
     const [isGuestLoading, setIsGuestLoading] = React.useState(false)
+    const [showServerMsg, setShowServerMsg] = React.useState(false)
+    const serverMsgTimer = React.useRef(null)
+
+    const startServerMsg = () => {
+        setShowServerMsg(false)
+        serverMsgTimer.current = setTimeout(() => setShowServerMsg(true), 3000)
+    }
+
+    const clearServerMsg = () => {
+        clearTimeout(serverMsgTimer.current)
+        setShowServerMsg(false)
+    }
 
     const [formData, setFormData] = React.useState({
         name: '',
@@ -23,6 +35,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsLoading(true)
+        startServerMsg()
         try {
             const { data } = await api.post(`/api/users/${state}`, formData)
             dispatch(login(data))
@@ -32,6 +45,7 @@ const Login = () => {
             toast(error?.response?.data?.message || error.message)
         } finally {
             setIsLoading(false)
+            clearServerMsg()
         }
     }
 
@@ -43,6 +57,7 @@ const Login = () => {
     const handleGuestLogin = async (e) => {
         e.preventDefault()
         setIsGuestLoading(true)
+        startServerMsg()
         const guestCredentials = {
             email: 'guest@gmail.com',
             password: 'abcd1234'
@@ -56,6 +71,7 @@ const Login = () => {
             toast(error?.response?.data?.message || error.message)
         } finally {
             setIsGuestLoading(false)
+            clearServerMsg()
         }
     }
   return (
@@ -92,6 +108,12 @@ const Login = () => {
                 )}
                 <p onClick={() => setState(prev => prev === "login" ? "register" : "login")} className="text-gray-500 text-xs sm:text-sm mt-3 mb-8 sm:mb-11 cursor-pointer">{state === "login" ? "Don't have an account?" : "Already have an account?"} <a href="#" className="text-yellow-600 hover:underline">click here</a></p>
             </form>
+      {showServerMsg && (
+        <div className="fixed bottom-0 left-0 right-0 bg-yellow-500 text-white px-4 py-3 flex items-center justify-center gap-3 animate-pulse z-50 shadow-lg">
+            <ServerCrash className="size-5 shrink-0" />
+            <p className="text-sm font-semibold">Server is waking up — free server takes a moment to start, please wait...</p>
+        </div>
+      )}
     </div>
   )
 }

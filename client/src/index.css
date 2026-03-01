@@ -22,18 +22,18 @@
 .quill-content ul {
   list-style-type: disc;
   padding-left: 1.5em;
-  margin: 0.5em 0;
+  margin: 0.15em 0;
 }
 
 .quill-content ol {
   list-style-type: decimal;
   padding-left: 1.5em;
-  margin: 0.5em 0;
+  margin: 0.15em 0;
 }
 
 .quill-content ul li,
 .quill-content ol li {
-  margin: 0.25em 0;
+  margin: 0.1em 0;
   padding-left: 0.25em;
 }
 
@@ -70,7 +70,7 @@
 }
 
 .quill-content p {
-  margin: 0.5em 0;
+  margin: 0.15em 0;
 }
 
 .quill-content p:first-child {
