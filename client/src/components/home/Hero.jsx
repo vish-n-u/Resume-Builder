@@ -86,10 +86,10 @@ const Hero = () => {
 
             {/* Headline + CTA */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold max-w-5xl text-center mt-4 leading-tight sm:leading-snug md:leading-[70px] px-2">
-                Your details. Their requirements. <span className="bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent whitespace-nowrap">Perfect resume. </span>
+                Free Unlimited AI Resume Builder. <span className="bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent whitespace-nowrap">Paste JD. Get hired.</span>
             </h1>
 
-            <p className="max-w-2xl text-center text-sm sm:text-base my-5 sm:my-7 px-4">Just provide your detailed professional information and paste any job description. Our AI crafts a tailored resume that matches exactly what employers are looking for.</p>
+            <p className="max-w-2xl text-center text-sm sm:text-base my-5 sm:my-7 px-4">Create unlimited resumes for free — just paste any job description and let AI craft a perfectly tailored resume. Download as PDF with no watermarks, no limits, no credit card.</p>
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-3 sm:gap-4 px-4">

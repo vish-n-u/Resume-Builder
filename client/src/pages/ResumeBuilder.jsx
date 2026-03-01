@@ -257,9 +257,9 @@ const autoSaveResume = async () => {
   return (
     <>
       <SEO
-        title="Resume Builder - Flower Resume | Create Your Professional Resume"
-        description="Build and customize your professional resume with AI assistance. Choose templates, add sections, and export to PDF."
-        keywords="build resume, resume editor, professional resume builder, customize resume, resume templates"
+        title="Free AI Resume Builder - Paste Job Description & Create Tailored Resume | Flower Resume"
+        description="Build your resume for free with AI. Paste any job description to auto-generate a tailored resume. Choose from professional templates and download as PDF — unlimited and free."
+        keywords="free AI resume builder, paste job description create resume, free resume editor, tailored resume generator, JD to resume AI, free PDF resume maker, professional resume templates free, ATS-friendly resume builder"
         ogUrl="https://flowerresume.com/app/builder"
       />
       <style>

@@ -159,9 +159,9 @@ const Dashboard = () => {
   return (
     <>
       <SEO
-        title="Dashboard - Flower Resume | Manage Your Resumes"
-        description="Access your resume dashboard. Create, edit, and manage professional resumes with AI-powered assistance."
-        keywords="resume dashboard, manage resumes, create resume, edit resume"
+        title="Dashboard - Flower Resume | Create Unlimited Free Resumes"
+        description="Create, edit, and manage unlimited resumes for free. Paste job descriptions, let AI tailor your resume, and download as PDF — no limits."
+        keywords="free resume dashboard, create unlimited resumes, manage resumes free, AI resume creator, paste JD create resume, free PDF resume download"
         ogUrl="https://flowerresume.com/app"
       />
       <div className='max-w-7xl mx-auto px-4 py-8'>

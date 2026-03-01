@@ -10,9 +10,9 @@ const Home = () => {
   return (
     <>
       <SEO
-        title="Flower Resume - AI-Powered Resume Builder | Create Professional Resumes"
-        description="Build stunning professional resumes with AI assistance. Choose from modern templates, get AI-powered suggestions, and export to PDF. Free resume builder with smart features."
-        keywords="resume builder, CV maker, professional resume, AI resume builder, free resume templates, job application, career tools"
+        title="Flower Resume - Free Unlimited AI Resume Builder | Paste Job Description & Download PDF"
+        description="Create unlimited resumes for free with AI. Paste any job description and get a perfectly tailored resume in seconds. Free PDF downloads — no watermarks, no limits, no credit card required."
+        keywords="free resume builder, free unlimited resume creator, AI resume builder, paste job description resume, free resume download PDF, no watermark resume builder, create resume from JD, free CV maker, unlimited resume downloads, AI resume generator, tailored resume builder, free online resume maker, job description to resume"
         ogUrl="https://flowerresume.com/"
       />
       <main>
