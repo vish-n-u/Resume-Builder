@@ -14,6 +14,7 @@ import SkillsForm from '../components/SkillsForm'
 import CertificationsForm from '../components/CertificationsForm'
 import AchievementsForm from '../components/AchievementsForm'
 import CustomSectionsForm from '../components/CustomSectionsForm'
+import EmailConnect from '../components/EmailConnect'
 
 const UserProfile = () => {
 
@@ -198,6 +199,9 @@ const UserProfile = () => {
           {activeTab === 'account' && (
             <div>
               <h2 className='text-xl sm:text-2xl font-semibold text-slate-800 mb-4 sm:mb-6'>Account Information</h2>
+              <div className='mb-6'>
+                <EmailConnect />
+              </div>
               <form onSubmit={handleUpdateAccount} className='space-y-4 max-w-2xl'>
                 <div>
                   <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>

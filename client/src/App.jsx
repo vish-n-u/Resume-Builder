@@ -8,6 +8,8 @@ import Preview from './pages/Preview'
 import Login from './pages/Login'
 import UserProfile from './pages/UserProfile'
 import AdminDashboard from './pages/AdminDashboard'
+import Jobs from './pages/Jobs'
+import Applied from './pages/Applied'
 import Loader from './components/Loader'
 import { useDispatch } from 'react-redux'
 import api from './configs/api'
@@ -50,6 +52,8 @@ const App = () => {
           <Route index element={<Dashboard />}/>
           <Route path='builder/:resumeId' element={<ResumeBuilder />}/>
           <Route path='profile' element={<UserProfile />}/>
+          <Route path='jobs' element={<Jobs />}/>
+          <Route path='applied' element={<Applied />}/>
           <Route path='admin' element={<AdminDashboard />}/>
         </Route>
 
