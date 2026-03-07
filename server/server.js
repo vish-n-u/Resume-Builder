@@ -8,6 +8,7 @@ import aiRouter from "./routes/aiRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import jobRouter from "./routes/jobRoutes.js";
 import applicationRouter from "./routes/applicationRoutes.js";
+import emailRouter from "./routes/emailRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 // Database connection
 await connectDB()
 
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
 app.use(cors())
 
 app.get('/', (req, res)=> res.send("Server is live..."))
@@ -25,6 +26,7 @@ app.use('/api/ai', aiRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/jobs', jobRouter)
 app.use('/api/applications', applicationRouter)
+app.use('/api/email', emailRouter)
 
 app.listen(PORT, ()=>{
     console.log(`Server is running on port ${PORT}`);
