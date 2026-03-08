@@ -159,3 +159,25 @@ export const getApplications = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch applications" });
     }
 };
+
+// POST /api/applications/:id/apply-external - Mark application as applied externally
+export const applyExternally = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { id } = req.params;
+
+        const application = await Application.findOne({ _id: id, userId });
+        if (!application) {
+            return res.status(404).json({ message: "Application not found" });
+        }
+
+        application.status = 'applied_externally';
+        application.sentAt = new Date();
+        await application.save();
+
+        res.json({ application });
+    } catch (error) {
+        console.error("Error marking external application:", error);
+        res.status(500).json({ message: "Failed to mark application" });
+    }
+};
