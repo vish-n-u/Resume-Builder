@@ -7,7 +7,7 @@ const ApplicationSchema = new mongoose.Schema({
     emailSubject: { type: String, default: '' },
     emailBody: { type: String, default: '' },
     recipientEmail: { type: String, default: '' },
-    status: { type: String, enum: ['draft', 'sent', 'failed'], default: 'draft' },
+    status: { type: String, enum: ['draft', 'sent', 'failed', 'applied_externally'], default: 'draft' },
     sentAt: { type: Date },
 }, { timestamps: true });
 
