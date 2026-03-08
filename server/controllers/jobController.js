@@ -2,6 +2,7 @@ import Job from "../models/Job.js";
 import Application from "../models/Application.js";
 import DetailedResume from "../models/DetailedResume.js";
 import User from "../models/User.js";
+import { lookupCompanyEmail } from "../utils/hunterLookup.js";
 
 // GET /api/jobs/feed - Fetch personalized job feed
 export const getJobFeed = async (req, res) => {
@@ -17,13 +18,20 @@ export const getJobFeed = async (req, res) => {
         // Build search query from user's skills and profession
         const skills = detailedResume.skills || [];
         const profession = detailedResume.personal_info?.profession || '';
-        const location = detailedResume.personal_info?.location || '';
+        const resumeLocation = detailedResume.personal_info?.location || '';
 
-        const searchQuery = profession || skills.slice(0, 3).join(' ');
+        // Use filter params if provided, otherwise fall back to resume data
+        const filterKeyword = req.query.keyword?.trim();
+        const filterLocation = req.query.location?.trim();
+        const filterType = req.query.type?.trim(); // remote, onsite, or empty for all
+
+        const searchQuery = filterKeyword || profession || skills.slice(0, 3).join(' ');
 
         if (!searchQuery) {
             return res.status(400).json({ message: "Please add your profession or skills to get job suggestions." });
         }
+
+        const searchLocation = filterLocation || resumeLocation || '';
 
         // Get user's dismissed and applied job IDs to filter them out
         const user = await User.findById(userId);
@@ -36,11 +44,21 @@ export const getJobFeed = async (req, res) => {
 
         // Fetch from JSearch API
         const page = parseInt(req.query.page) || 1;
-        let locationMumbai = "Mumbai"
-        console.log(`https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(searchQuery + (location ? ' in ' + locationMumbai : ''))}&page=${page}&num_pages=1`)
+
+        // Build JSearch query string
+        let jsearchQuery = searchQuery;
+        if (searchLocation) {
+            jsearchQuery += ` in ${searchLocation}`;
+        }
+
+        // Build JSearch URL with optional remote filter
+        let jsearchUrl = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(jsearchQuery)}&page=${page}&num_pages=1`;
+        if (filterType === 'remote') {
+            jsearchUrl += '&remote_jobs_only=true';
+        }
 
         const response = await fetch(
-            `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(searchQuery + (location ? ' in ' + locationMumbai : ''))}&page=${page}&num_pages=1`,
+            jsearchUrl,
             {
                 headers: {
                     'x-rapidapi-key': process.env.RAPIDAPI_KEY,
@@ -59,7 +77,17 @@ export const getJobFeed = async (req, res) => {
 
         // Cache jobs in DB and filter out dismissed/applied
         const jobs = [];
+        const emailCache = {};
         for (const item of apiData.data) {
+            const companyName = item.employer_name || '';
+            let applyEmail = '';
+            if (companyName) {
+                if (emailCache[companyName] === undefined) {
+                    emailCache[companyName] = await lookupCompanyEmail(companyName);
+                }
+                applyEmail = emailCache[companyName];
+            }
+
             const jobData = {
                 externalId: item.job_id,
                 title: item.job_title || '',
@@ -72,7 +100,7 @@ export const getJobFeed = async (req, res) => {
                 description: item.job_description || '',
                 skills: item.job_required_skills || [],
                 applyUrl: item.job_apply_link || '',
-                applyEmail: '',
+                applyEmail,
                 postedDate: item.job_posted_at_datetime_utc ? new Date(item.job_posted_at_datetime_utc) : new Date(),
                 source: 'jsearch',
                 fetchedAt: new Date(),
@@ -85,8 +113,9 @@ export const getJobFeed = async (req, res) => {
                 { upsert: true, new: true }
             );
 
-            // Only include if not dismissed/applied
+            // Only include if not dismissed/applied and matches type filter
             if (!excludeJobIds.some(id => id.toString() === job._id.toString())) {
+                if (filterType === 'onsite' && job.type === 'remote') continue;
                 jobs.push(job);
             }
         }
