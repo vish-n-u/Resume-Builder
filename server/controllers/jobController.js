@@ -3,6 +3,9 @@ import Application from "../models/Application.js";
 import DetailedResume from "../models/DetailedResume.js";
 import User from "../models/User.js";
 import { lookupCompanyEmail } from "../utils/hunterLookup.js";
+import { getMockJSearchResults, mockLookupCompanyEmail } from "../utils/mockJobData.js";
+
+const isDev = process.env.NODE_ENV !== 'production';
 
 // GET /api/jobs/feed - Fetch personalized job feed
 export const getJobFeed = async (req, res) => {
@@ -42,48 +45,52 @@ export const getJobFeed = async (req, res) => {
 
         const excludeJobIds = [...dismissedJobIds, ...appliedJobIds];
 
-        // Fetch from JSearch API
-        const page = parseInt(req.query.page) || 1;
+        // Fetch jobs — use mock data in development, real API in production
+        let apiResults;
 
-        // Build JSearch query string
-        let jsearchQuery = searchQuery;
-        if (searchLocation) {
-            jsearchQuery += ` in ${searchLocation}`;
-        }
+        if (isDev) {
+            // In dev mode, only filter by explicit user filters — not resume-derived searchQuery
+            apiResults = getMockJSearchResults({
+                keyword: filterKeyword || '',
+                location: filterLocation,
+                type: filterType,
+            });
+        } else {
+            const page = parseInt(req.query.page) || 1;
+            let jsearchQuery = searchQuery;
+            if (searchLocation) {
+                jsearchQuery += ` in ${searchLocation}`;
+            }
+            let jsearchUrl = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(jsearchQuery)}&page=${page}&num_pages=1`;
+            if (filterType === 'remote') {
+                jsearchUrl += '&remote_jobs_only=true';
+            }
 
-        // Build JSearch URL with optional remote filter
-        let jsearchUrl = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(jsearchQuery)}&page=${page}&num_pages=1`;
-        if (filterType === 'remote') {
-            jsearchUrl += '&remote_jobs_only=true';
-        }
-
-        const response = await fetch(
-            jsearchUrl,
-            {
+            const response = await fetch(jsearchUrl, {
                 headers: {
                     'x-rapidapi-key': process.env.RAPIDAPI_KEY,
                     'x-rapidapi-host': process.env.RAPIDAPI_HOST || 'jsearch.p.rapidapi.com',
                 },
-            }
-        );
+            });
+            const apiData = await response.json();
+            apiResults = apiData.data || [];
+        }
 
-        const apiData = await response.json();
-
-        console.log("`JSearch API response:", apiData);
-
-        if (!apiData.data || apiData.data.length === 0) {
+        if (apiResults.length === 0) {
             return res.json({ jobs: [], message: "No jobs found. Try updating your skills or profession." });
         }
 
         // Cache jobs in DB and filter out dismissed/applied
         const jobs = [];
         const emailCache = {};
-        for (const item of apiData.data) {
+        const emailLookup = isDev ? mockLookupCompanyEmail : lookupCompanyEmail;
+
+        for (const item of apiResults) {
             const companyName = item.employer_name || '';
             let applyEmail = '';
             if (companyName) {
-                if (emailCache[companyName] === undefined) {
-                    emailCache[companyName] = await lookupCompanyEmail(companyName);
+                if (!emailCache[companyName]) {
+                    emailCache[companyName] = await emailLookup(companyName);
                 }
                 applyEmail = emailCache[companyName];
             }
@@ -113,7 +120,7 @@ export const getJobFeed = async (req, res) => {
             }
             const job = await Job.findOneAndUpdate(
                 { externalId: jobData.externalId },
-                { $set: updateData, $setOnInsert: { applyEmail: '' } },
+                updateData,
                 { upsert: true, new: true }
             );
 

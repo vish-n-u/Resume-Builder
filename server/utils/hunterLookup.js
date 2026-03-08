@@ -25,6 +25,7 @@ export const lookupCompanyEmail = async (companyName) => {
 
     const json = await response.json();
     const emails = json?.data?.emails;
+    console.log("Hunter API response for", companyName, ":", emails);
 
     if (!Array.isArray(emails) || emails.length === 0) return '';
 

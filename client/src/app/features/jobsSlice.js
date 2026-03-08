@@ -6,6 +6,11 @@ const jobsSlice = createSlice({
         feed: [],
         loading: false,
         error: null,
+        filters: {
+            keyword: '',
+            location: '',
+            type: '', // '' | 'remote' | 'onsite'
+        },
     },
     reducers: {
         setJobs: (state, action) => {
@@ -27,8 +32,11 @@ const jobsSlice = createSlice({
             state.error = action.payload;
             state.loading = false;
         },
+        setFilters: (state, action) => {
+            state.filters = { ...state.filters, ...action.payload };
+        },
     }
 });
 
-export const { setJobs, addJobs, removeJob, setJobsLoading, setJobsError } = jobsSlice.actions;
+export const { setJobs, addJobs, removeJob, setJobsLoading, setJobsError, setFilters } = jobsSlice.actions;
 export default jobsSlice.reducer;

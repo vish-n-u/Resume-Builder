@@ -84,19 +84,21 @@ Description: ${job.description}`;
             return res.status(500).json({ message: "AI generated invalid response. Please try again." });
         }
 
+        // Create resume using the same pattern as createResume, then override with AI tailoring
         const tailoredResume = await Resume.create({
             userId,
             title: `${job.title} at ${job.company}`,
             job_description: job.description,
             professional_summary: aiResult.tailored_summary,
-            skills: detailedResume.skills,
-            personal_info: detailedResume.personal_info,
-            experience: detailedResume.experience,
-            project: detailedResume.project,
-            education: detailedResume.education,
-            certifications: detailedResume.certifications,
-            achievements: detailedResume.achievements,
-            custom_sections: detailedResume.custom_sections,
+            skills: detailedResume.skills || [],
+            personal_info: detailedResume.personal_info || {},
+            experience: detailedResume.experience || [],
+            project: detailedResume.project || [],
+            education: detailedResume.education || [],
+            certifications: detailedResume.certifications || [],
+            achievements: detailedResume.achievements || [],
+            custom_sections: detailedResume.custom_sections || [],
+            preferences: detailedResume.preferences || {},
         });
 
         const application = await Application.create({
