@@ -38,6 +38,12 @@ const Applied = () => {
             <XCircle className='size-3' /> Failed
           </span>
         )
+      case 'applied_externally':
+        return (
+          <span className='inline-flex items-center gap-1 text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full'>
+            <ExternalLink className='size-3' /> Applied Externally
+          </span>
+        )
       default:
         return (
           <span className='inline-flex items-center gap-1 text-xs font-medium bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full'>
