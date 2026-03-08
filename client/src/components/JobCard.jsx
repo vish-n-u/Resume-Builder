@@ -5,7 +5,7 @@ const JobCard = ({ job }) => {
   return (
     <div className='w-full h-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col'>
       {/* Header */}
-      <div className='p-6 pb-4'>
+      <div className='p-5 pb-3'>
         <div className='flex items-start gap-4'>
           <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0'>
             {job.company?.charAt(0) || '?'}
@@ -45,9 +45,9 @@ const JobCard = ({ job }) => {
       </div>
 
       {/* Description */}
-      <div className='px-6 py-4 flex-1 overflow-y-auto'>
-        <p className='text-sm text-gray-600 leading-relaxed line-clamp-[12]'>
-          {job.description?.substring(0, 600)}{job.description?.length > 600 ? '...' : ''}
+      <div className='px-5 py-3 flex-1 overflow-y-auto'>
+        <p className='text-sm text-gray-600 leading-relaxed'>
+          {job.description}
         </p>
       </div>
 
@@ -68,7 +68,7 @@ const JobCard = ({ job }) => {
       )}
 
       {/* Posted date */}
-      <div className='px-6 pb-5'>
+      <div className='px-5 pb-4'>
         <p className='text-xs text-gray-400 flex items-center gap-1'>
           <Clock className='size-3' />
           {job.postedDate ? new Date(job.postedDate).toLocaleDateString() : 'Recently posted'}

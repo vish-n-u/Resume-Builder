@@ -120,7 +120,7 @@ const Jobs = () => {
           </div>
         )}
 
-        <div className='flex justify-center'>
+        <div className='flex  justify-center'>
           <SwipeContainer
             jobs={feed}
             onSwipeLeft={handleSwipeLeft}

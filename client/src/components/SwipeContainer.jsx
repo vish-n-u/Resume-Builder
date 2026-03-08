@@ -62,9 +62,9 @@ const SwipeContainer = ({ jobs, onSwipeLeft, onSwipeRight, loading }) => {
   }
 
   return (
-    <div className='flex flex-col items-center'>
+    <div className='flex flex-col items-center w-2xl'>
       {/* Card stack */}
-      <div className='relative w-full max-w-sm h-[520px] sm:h-[560px]'>
+      <div className='relative w-full max-w-lg h-[520px] sm:h-[600px]'>
         {jobs.map((job, index) => (
           <TinderCard
             ref={childRefs[index]}

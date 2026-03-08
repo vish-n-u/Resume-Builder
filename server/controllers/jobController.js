@@ -36,9 +36,11 @@ export const getJobFeed = async (req, res) => {
 
         // Fetch from JSearch API
         const page = parseInt(req.query.page) || 1;
+        let locationMumbai = "Mumbai"
+        console.log(`https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(searchQuery + (location ? ' in ' + locationMumbai : ''))}&page=${page}&num_pages=1`)
 
         const response = await fetch(
-            `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(searchQuery + (location ? ' in ' + location : ''))}&page=${page}&num_pages=1`,
+            `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(searchQuery + (location ? ' in ' + locationMumbai : ''))}&page=${page}&num_pages=1`,
             {
                 headers: {
                     'x-rapidapi-key': process.env.RAPIDAPI_KEY,
@@ -48,6 +50,8 @@ export const getJobFeed = async (req, res) => {
         );
 
         const apiData = await response.json();
+
+        console.log("`JSearch API response:", apiData);
 
         if (!apiData.data || apiData.data.length === 0) {
             return res.json({ jobs: [], message: "No jobs found. Try updating your skills or profession." });
