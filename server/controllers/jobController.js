@@ -106,10 +106,14 @@ export const getJobFeed = async (req, res) => {
                 fetchedAt: new Date(),
             };
 
-            // Upsert job into DB
+            // Upsert job into DB — don't overwrite existing applyEmail with empty string
+            const updateData = { ...jobData };
+            if (!updateData.applyEmail) {
+                delete updateData.applyEmail;
+            }
             const job = await Job.findOneAndUpdate(
                 { externalId: jobData.externalId },
-                jobData,
+                { $set: updateData, $setOnInsert: { applyEmail: '' } },
                 { upsert: true, new: true }
             );
 

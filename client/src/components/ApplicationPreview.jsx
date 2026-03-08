@@ -166,6 +166,15 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         </div>
 
         <div className='flex-1 overflow-y-auto p-6'>
+          {/* Always render resume preview so PDF generation works from any tab */}
+          <div ref={resumeRef} style={{ display: activeTab === 'resume' ? 'block' : 'none' }}>
+            <ResumePreview
+              data={resume}
+              template={resume?.template || 'classic'}
+              accentColor={resume?.accent_color || '#000000'}
+              classes='py-4 bg-white'
+            />
+          </div>
           {activeTab === 'email' && hasEmail ? (
             <div className='space-y-4'>
               <div>
@@ -197,16 +206,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
                 />
               </div>
             </div>
-          ) : (
-            <div ref={resumeRef}>
-              <ResumePreview
-                data={resume}
-                template={resume?.template || 'classic'}
-                accentColor={resume?.accent_color || '#000000'}
-                classes='py-4 bg-white'
-              />
-            </div>
-          )}
+          ) : null}
         </div>
 
         <div className='flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50'>

@@ -81,13 +81,13 @@ const Jobs = () => {
   }
 
   const handleSwipeRight = async (job) => {
-    dispatch(removeJob(job._id))
-
     // Only require email connection for jobs with an apply email
     if (job.applyEmail && !emailConnected) {
       toast.error('Please connect your email first in your profile settings')
       return
     }
+
+    dispatch(removeJob(job._id))
 
     try {
       toast.loading('Generating tailored resume...', { id: 'preparing' })
