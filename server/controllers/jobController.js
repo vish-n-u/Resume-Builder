@@ -40,7 +40,7 @@ export const getJobFeed = async (req, res) => {
         const user = await User.findById(userId);
         const dismissedJobIds = user.dismissedJobs || [];
 
-        const appliedApplications = await Application.find({ userId }).select('jobId');
+        const appliedApplications = await Application.find({ userId, status: { $in: ['sent', 'applied_externally'] } }).select('jobId');
         const appliedJobIds = appliedApplications.map(app => app.jobId);
 
         const excludeJobIds = [...dismissedJobIds, ...appliedJobIds];

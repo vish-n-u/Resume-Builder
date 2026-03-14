@@ -406,26 +406,9 @@ Return in this exact JSON format:
 
 // controller for creating a tailored resume based on job description
 // POST: /api/ai/tailor-resume
-export const tailorResume = async (req, res) => {
-    try {
-        const { jobDescription, title } = req.body;
-        const userId = req.userId;
-
-        if (!jobDescription || !title) {
-            return res.status(400).json({ message: 'Missing required fields' });
-        }
-
-        // Get user's detailed resume data
-        const detailedResume = await DetailedResume.findOne({ userId });
-
-        if (!detailedResume) {
-            return res.status(404).json({
-                message: 'No default resume data found. Please complete your profile first.'
-            });
-        }
-
-        // Extract user preferences
-        const userPreferences = detailedResume?.preferences || {};
+// Core resume tailoring logic — reusable by both the API handler and prepareApplication
+export const tailorResumeCore = async ({ userId, jobDescription, title, detailedResume }) => {
+    const userPreferences = detailedResume?.preferences || {};
 
         console.log("Tailoring resume for user:", userId);
 
@@ -442,7 +425,6 @@ export const tailorResume = async (req, res) => {
             custom_sections:detailedResume.custom_sections
         };
 
-        console.log("userProfileData==>",userProfileData)
 
         const systemPrompt = `
 You are an expert resume tailoring AI that customizes resumes strictly based on verified user data.
@@ -620,7 +602,6 @@ NOTE: The certifications, achievements, and custom_sections arrays should be EMP
                 });
 
                 const responseContent = response.choices[0].message.content;
-                console.log("AI response (attempt " + (retryCount + 1) + "):", responseContent);
 
                 // Try to parse the JSON
                 tailoredData = JSON.parse(responseContent);
@@ -630,12 +611,10 @@ NOTE: The certifications, achievements, and custom_sections arrays should be EMP
                     throw new Error("Invalid response structure");
                 }
 
-                console.log("AI tailored resume data:", tailoredData);
                 break; // Success, exit retry loop
 
             } catch (parseError) {
                 retryCount++;
-                console.error(`JSON parse error (attempt ${retryCount}):`, parseError.message);
 
                 if (retryCount > maxRetries) {
                     throw new Error("Failed to generate valid resume data after multiple attempts. Please try again.");
@@ -671,12 +650,32 @@ NOTE: The certifications, achievements, and custom_sections arrays should be EMP
             cleanedData.custom_sections = tailoredData.custom_sections;
         }
 
-        console.log("Cleaned data (removed empty optional fields):", Object.keys(cleanedData));
 
         // Create new resume with tailored data
         const newResume = await Resume.create(cleanedData);
 
-        console.log("Tailored resume created successfully:", newResume._id);
+
+        return newResume;
+};
+
+// HTTP handler wrapper for tailorResumeCore
+export const tailorResume = async (req, res) => {
+    try {
+        const { jobDescription, title } = req.body;
+        const userId = req.userId;
+
+        if (!jobDescription || !title) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const detailedResume = await DetailedResume.findOne({ userId });
+        if (!detailedResume) {
+            return res.status(404).json({
+                message: 'No default resume data found. Please complete your profile first.'
+            });
+        }
+
+        const newResume = await tailorResumeCore({ userId, jobDescription, title, detailedResume });
 
         return res.status(201).json({
             message: 'Tailored resume created successfully',
@@ -783,7 +782,6 @@ Analyze the user's request and respond with ONLY valid JSON in this exact format
         });
 
         const classification = JSON.parse(classificationResponse.choices[0].message.content);
-        console.log("Request classification:", classification);
 
         // If request is not supported, return early with explanation
         if (!classification.supported) {
@@ -868,7 +866,6 @@ Create an enhanced, detailed prompt that clarifies what the user wants to do.`
         });
 
         const understanding = JSON.parse(understandingResponse.choices[0].message.content);
-        console.log("Enhanced prompt:", understanding.enhanced_prompt);
 
         // STEP 3: If supported, proceed with content generation using the clarified instruction
         // User's detailed resume data was already fetched above as detailedResume
@@ -979,7 +976,6 @@ Remember:
         });
 
         const generatedContent = JSON.parse(response.choices[0].message.content);
-        console.log("AI generated custom content:", generatedContent);
 
         // Process the generated content based on the action
         let generatedData = {};

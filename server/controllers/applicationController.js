@@ -3,6 +3,7 @@ import Job from "../models/Job.js";
 import Resume from "../models/Resume.js";
 import DetailedResume from "../models/DetailedResume.js";
 import ai from "../configs/ai.js";
+import { tailorResumeCore } from "./aiController.js";
 
 // POST /api/applications/prepare - Right swipe: generate tailored resume + email
 export const prepareApplication = async (req, res) => {
@@ -24,23 +25,17 @@ export const prepareApplication = async (req, res) => {
             return res.status(400).json({ message: "Please fill in your resume data first." });
         }
 
-        const userProfile = {
-            name: detailedResume.personal_info?.full_name || '',
-            profession: detailedResume.personal_info?.profession || '',
-            email: detailedResume.personal_info?.email || '',
-            skills: detailedResume.skills || [],
-            experience: detailedResume.experience || [],
-            education: detailedResume.education || [],
-            summary: detailedResume.professional_summary || '',
-            projects: detailedResume.project || [],
-        };
+        // Use the same tailorResume logic from aiController to create the resume
+        const tailoredResume = await tailorResumeCore({
+            userId,
+            jobDescription: job.description,
+            title: `${job.title} at ${job.company}`,
+            detailedResume,
+        });
 
+        // Generate application email separately
         const userPreferences = detailedResume.preferences || {};
-
-        const systemPrompt = `You are an expert career coach and resume writer. You will receive a candidate's profile and a job description. You must:
-
-1. Tailor the candidate's professional summary to align with the job requirements
-2. Write a concise application email (under 200 words) introducing the candidate for the role
+        const emailPrompt = `You are an expert career coach. Write a concise application email (under 200 words) introducing the candidate for the role.
 
 USER PREFERENCES:
 - Writing Style: ${userPreferences.writing_style || 'professional'}
@@ -49,64 +44,43 @@ ${userPreferences.custom_requirements ? `\nCUSTOM REQUIREMENTS: ${userPreference
 
 Respond in this exact JSON format:
 {
-    "tailored_summary": "The tailored professional summary",
     "email_subject": "Application for [Job Title] at [Company]",
     "email_body": "The application email body"
 }
 
 Only return valid JSON. No markdown, no code blocks.`;
 
-        const userMessage = `CANDIDATE PROFILE:
-Name: ${userProfile.name}
-Profession: ${userProfile.profession}
-Skills: ${userProfile.skills.join(', ')}
-Experience: ${userProfile.experience.map(e => `${e.position} at ${e.company}`).join('; ')}
-Education: ${userProfile.education.map(e => `${e.degree} in ${e.field} from ${e.institution}`).join('; ')}
-Summary: ${userProfile.summary}
-
-JOB DESCRIPTION:
-Title: ${job.title}
-Company: ${job.company}
-Description: ${job.description}`;
-
-        const aiResponse = await ai.chat.completions.create({
+        const emailResponse = await ai.chat.completions.create({
             model: process.env.OPENAI_MODEL,
             messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userMessage },
+                { role: "system", content: emailPrompt },
+                {
+                    role: "user",
+                    content: `Candidate: ${detailedResume.personal_info?.full_name || ''}, ${detailedResume.personal_info?.profession || ''}
+Skills: ${(detailedResume.skills || []).join(', ')}
+Job: ${job.title} at ${job.company}
+Description: ${job.description}`
+                },
             ],
+            response_format: { type: 'json_object' },
         });
 
-        let aiResult;
+        let emailResult;
         try {
-            aiResult = JSON.parse(aiResponse.choices[0].message.content);
+            emailResult = JSON.parse(emailResponse.choices[0].message.content);
         } catch {
-            return res.status(500).json({ message: "AI generated invalid response. Please try again." });
+            emailResult = {
+                email_subject: `Application for ${job.title} at ${job.company}`,
+                email_body: '',
+            };
         }
-
-        // Create resume using the same pattern as createResume, then override with AI tailoring
-        const tailoredResume = await Resume.create({
-            userId,
-            title: `${job.title} at ${job.company}`,
-            job_description: job.description,
-            professional_summary: aiResult.tailored_summary,
-            skills: detailedResume.skills || [],
-            personal_info: detailedResume.personal_info || {},
-            experience: detailedResume.experience || [],
-            project: detailedResume.project || [],
-            education: detailedResume.education || [],
-            certifications: detailedResume.certifications || [],
-            achievements: detailedResume.achievements || [],
-            custom_sections: detailedResume.custom_sections || [],
-            preferences: detailedResume.preferences || {},
-        });
 
         const application = await Application.create({
             userId,
             jobId: job._id,
             resumeId: tailoredResume._id,
-            emailSubject: aiResult.email_subject,
-            emailBody: aiResult.email_body,
+            emailSubject: emailResult.email_subject,
+            emailBody: emailResult.email_body,
             recipientEmail: job.applyEmail || '',
             status: 'draft',
         });

@@ -27,7 +27,6 @@
     "react-quill-new": "^3.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.3",
-    "react-tinder-card": "^1.6.4",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {

@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react'
-import { X, Send, Loader2, Mail, FileText, Edit3, ExternalLink, Download } from 'lucide-react'
+import { X, Send, Loader2, Mail, FileText, Edit3, ExternalLink, Download, Upload, CheckCircle } from 'lucide-react'
 import ResumePreview from './ResumePreview'
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
 import api from '../configs/api'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
@@ -14,44 +12,98 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
   const [recipientEmail, setRecipientEmail] = useState(application?.recipientEmail || job?.applyEmail || '')
   const [sending, setSending] = useState(false)
   const [activeTab, setActiveTab] = useState(job?.applyEmail ? 'email' : 'resume')
+  const [pdfFile, setPdfFile] = useState(null)
+  const fileInputRef = useRef(null)
   const resumeRef = useRef(null)
 
   const hasEmail = !!job?.applyEmail
 
   if (!isOpen || !application) return null
 
-  const generatePDF = async () => {
+  const handleDownloadResume = () => {
+    // Open a clean window with just the resume and trigger print
     const resumeElement = resumeRef.current?.querySelector('#resume-preview')
     if (!resumeElement) {
-      throw new Error('Resume preview not found')
+      toast.error('Resume preview not found')
+      return
     }
 
-    const canvas = await html2canvas(resumeElement, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    })
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      toast.error('Pop-up blocked. Please allow pop-ups and try again.')
+      return
+    }
 
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+    // Collect all stylesheets from the current page
+    const stylesheets = Array.from(document.styleSheets)
+      .map(sheet => {
+        try {
+          return Array.from(sheet.cssRules || []).map(rule => rule.cssText).join('\n')
+        } catch {
+          // Cross-origin stylesheet — link it instead
+          return sheet.href ? `@import url("${sheet.href}");` : ''
+        }
+      })
+      .join('\n')
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-    return pdf
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${job?.title || 'Resume'} - ${job?.company || 'Download'}</title>
+        <style>
+          ${stylesheets}
+
+          @page {
+            size: letter;
+            margin: 0;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+        </style>
+      </head>
+      <body>
+        ${resumeElement.outerHTML}
+      </body>
+      </html>
+    `)
+    printWindow.document.close()
+
+    // Wait for content to render, then print
+    printWindow.onload = () => {
+      printWindow.focus()
+      printWindow.print()
+    }
+    // Fallback if onload doesn't fire
+    setTimeout(() => {
+      printWindow.focus()
+      printWindow.print()
+    }, 500)
   }
 
-  const handleDownloadResume = async () => {
-    try {
-      toast.loading('Generating PDF...', { id: 'pdf' })
-      const pdf = await generatePDF()
-      pdf.save(`${job?.title || 'Resume'} - ${job?.company || 'Application'}.pdf`)
-      toast.dismiss('pdf')
-      toast.success('Resume downloaded!')
-    } catch (error) {
-      toast.dismiss('pdf')
-      toast.error('Failed to generate PDF')
+  const handlePdfUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Please upload a PDF file')
+      return
     }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('PDF must be under 10MB')
+      return
+    }
+
+    setPdfFile(file)
+    toast.success('Resume PDF attached!')
   }
 
   const handleApplyOnWebsite = async () => {
@@ -94,6 +146,11 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       return
     }
 
+    if (!pdfFile) {
+      toast.error('Please attach your resume PDF first. Download it from the Resume tab, then upload it here.')
+      return
+    }
+
     setSending(true)
     try {
       await api.put(`/api/applications/${application._id}/edit`, {
@@ -102,8 +159,13 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         recipientEmail,
       }, { headers: { Authorization: token } })
 
-      const pdf = await generatePDF()
-      const pdfBase64 = pdf.output('datauristring').split(',')[1]
+      // Convert uploaded PDF to base64
+      const pdfBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result.split(',')[1])
+        reader.onerror = reject
+        reader.readAsDataURL(pdfFile)
+      })
 
       await api.post(`/api/email/send/${application._id}`, {
         pdfBase64,
@@ -166,15 +228,6 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         </div>
 
         <div className='flex-1 overflow-y-auto p-6'>
-          {/* Always render resume preview so PDF generation works from any tab */}
-          <div ref={resumeRef} style={{ display: activeTab === 'resume' ? 'block' : 'none' }}>
-            <ResumePreview
-              data={resume}
-              template={resume?.template || 'classic'}
-              accentColor={resume?.accent_color || '#000000'}
-              classes='py-4 bg-white'
-            />
-          </div>
           {activeTab === 'email' && hasEmail ? (
             <div className='space-y-4'>
               <div>
@@ -201,12 +254,59 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
                 <textarea
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
-                  rows={10}
+                  rows={8}
                   className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none'
                 />
               </div>
+
+              {/* PDF Upload Section */}
+              <div className='border-t border-gray-200 pt-4'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>Resume Attachment</label>
+                <p className='text-xs text-gray-500 mb-3'>
+                  Download your tailored resume from the Resume tab (using Save as PDF), then attach it here.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type='file'
+                  accept='.pdf'
+                  onChange={handlePdfUpload}
+                  className='hidden'
+                />
+                {pdfFile ? (
+                  <div className='flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg'>
+                    <CheckCircle className='size-5 text-green-600 shrink-0' />
+                    <div className='flex-1 min-w-0'>
+                      <p className='text-sm font-medium text-green-800 truncate'>{pdfFile.name}</p>
+                      <p className='text-xs text-green-600'>{(pdfFile.size / 1024).toFixed(0)} KB</p>
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className='text-xs text-green-700 hover:text-green-900 font-medium'
+                    >
+                      Change
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className='w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors'
+                  >
+                    <Upload className='size-4' />
+                    Attach Resume PDF
+                  </button>
+                )}
+              </div>
             </div>
-          ) : null}
+          ) : (
+            <div ref={resumeRef}>
+              <ResumePreview
+                data={resume}
+                template={resume?.template || 'classic'}
+                accentColor={resume?.accent_color || '#000000'}
+                classes='py-4 bg-white'
+              />
+            </div>
+          )}
         </div>
 
         <div className='flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50'>
@@ -219,23 +319,32 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
                 <Edit3 className='size-4' />
                 Save Draft
               </button>
-              <button
-                onClick={handleSend}
-                disabled={sending}
-                className='px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg hover:from-green-600 hover:to-emerald-700 flex items-center gap-2 disabled:opacity-50 shadow-lg'
-              >
-                {sending ? (
-                  <>
-                    <Loader2 className='size-4 animate-spin' />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className='size-4' />
-                    Send Application
-                  </>
-                )}
-              </button>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={handleDownloadResume}
+                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2'
+                >
+                  <Download className='size-4' />
+                  Download Resume
+                </button>
+                <button
+                  onClick={handleSend}
+                  disabled={sending}
+                  className='px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg hover:from-green-600 hover:to-emerald-700 flex items-center gap-2 disabled:opacity-50 shadow-lg'
+                >
+                  {sending ? (
+                    <>
+                      <Loader2 className='size-4 animate-spin' />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className='size-4' />
+                      Send Application
+                    </>
+                  )}
+                </button>
+              </div>
             </>
           ) : (
             <>
