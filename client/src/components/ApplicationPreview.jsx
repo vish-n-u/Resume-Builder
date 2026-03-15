@@ -41,20 +41,41 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       return
     }
 
-    // Collect non-print stylesheets from the current page (skip @media print rules
-    // that were designed for main-page printing — they hide body content and use
-    // position:absolute which breaks the dedicated print window)
+    // Clone the element and stamp print-safe positioning directly onto it via
+    // the style attribute. Inline style !important has higher priority than any
+    // @media print { #resume-preview { position: absolute !important } } rule
+    // in an external/internal stylesheet, so this cannot be overridden by CSS.
+    const clone = resumeElement.cloneNode(true)
+    clone.setAttribute(
+      'style',
+      'position: static !important; overflow: visible !important; ' +
+      'top: auto !important; left: auto !important; ' +
+      'margin: 0 !important; box-shadow: none !important; border: none !important;'
+    )
+
+    // Collect stylesheets, skipping @media print blocks (they were written for
+    // main-page printing and are irrelevant in a dedicated print window)
     const stylesheets = Array.from(document.styleSheets)
       .map(sheet => {
         try {
           return Array.from(sheet.cssRules || [])
-            .filter(rule => rule.media?.mediaText !== 'print')
+            .filter(rule => !(rule.type === CSSRule.MEDIA_RULE && rule.conditionText?.includes('print')))
             .map(rule => rule.cssText)
             .join('\n')
         } catch {
-          return sheet.href ? `@import url("${sheet.href}");` : ''
+          // Cross-origin linked sheet — load via <link> instead of @import
+          // (returned separately and placed as a <link> tag, not inside <style>)
+          return sheet.href ? `__LINK__${sheet.href}` : ''
         }
       })
+
+    const linkTags = stylesheets
+      .filter(s => s.startsWith('__LINK__'))
+      .map(s => `<link rel="stylesheet" href="${s.slice(8)}">`)
+      .join('\n')
+
+    const styleContent = stylesheets
+      .filter(s => !s.startsWith('__LINK__'))
       .join('\n')
 
     printWindow.document.write(`
@@ -62,47 +83,24 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       <html>
       <head>
         <title>${job?.title || 'Resume'} - ${job?.company || 'Download'}</title>
+        ${linkTags}
         <style>
-          ${stylesheets}
-
+          ${styleContent}
           @page { size: letter; margin: 0; }
-
           *, *::before, *::after {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-
-          html, body {
-            margin: 0;
-            padding: 0;
-            background: white;
-          }
-
-          /* Override the main-page @media print rules that use position:absolute
-             (absolute elements repeat on every printed page in most browsers) */
-          @media print {
-            body * { visibility: visible !important; }
-            #resume-preview {
-              position: static !important;
-              top: auto !important;
-              left: auto !important;
-              width: 100% !important;
-              overflow: visible !important;
-              box-shadow: none !important;
-              border: none !important;
-            }
-          }
+          html, body { margin: 0; padding: 0; background: white; }
         </style>
       </head>
       <body>
-        ${resumeElement.outerHTML}
+        ${clone.outerHTML}
       </body>
       </html>
     `)
     printWindow.document.close()
 
-    // Trigger print exactly once — onload fires when content is ready,
-    // the flag prevents the setTimeout fallback from firing a second time
     let printed = false
     const doPrint = () => {
       if (printed) return
@@ -112,7 +110,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
     }
 
     printWindow.onload = doPrint
-    setTimeout(doPrint, 600)
+    setTimeout(doPrint, 800)
   }
 
   const handlePdfUpload = (e) => {
