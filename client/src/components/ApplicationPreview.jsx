@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { X, Send, Loader2, Mail, FileText, Edit3, ExternalLink, Download, Upload, CheckCircle } from 'lucide-react'
 import ResumePreview from './ResumePreview'
 import api from '../configs/api'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
+import ResumeEditDrawer from './ResumeEditDrawer'
 
 const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent }) => {
   const { token } = useSelector(state => state.auth)
@@ -11,6 +12,13 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
   const [emailBody, setEmailBody] = useState(application?.emailBody || '')
   const [recipientEmail, setRecipientEmail] = useState(application?.recipientEmail || job?.applyEmail || '')
   const [sending, setSending] = useState(false)
+  const [resumeData, setResumeData] = useState(resume)
+  const [showDrawer, setShowDrawer] = useState(false)
+
+  useEffect(() => {
+    setResumeData(resume)
+  }, [resume])
+
   const [activeTab, setActiveTab] = useState(job?.applyEmail ? 'email' : 'resume')
   const [pdfFile, setPdfFile] = useState(null)
   const fileInputRef = useRef(null)
@@ -137,6 +145,21 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       toast.success('Changes saved')
     } catch (error) {
       toast.error('Failed to save changes')
+    }
+  }
+
+  const handleResumeChange = (field, value) => {
+    setResumeData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleResumeBlur = async () => {
+    try {
+      const formData = new FormData()
+      formData.append('resumeId', resumeData._id)
+      formData.append('resumeData', JSON.stringify(resumeData))
+      await api.put('/api/resumes/update', formData, { headers: { Authorization: token } })
+    } catch {
+      toast.error('Failed to save resume changes')
     }
   }
 
@@ -299,8 +322,17 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
             </div>
           ) : (
             <div ref={resumeRef}>
+              <div className='flex justify-end mb-3'>
+                <button
+                  onClick={() => setShowDrawer(true)}
+                  className='flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors'
+                >
+                  <Edit3 className='size-3.5' />
+                  Edit Resume
+                </button>
+              </div>
               <ResumePreview
-                data={resume}
+                data={resumeData}
                 template={resume?.template || 'classic'}
                 accentColor={resume?.accent_color || '#000000'}
                 classes='py-4 bg-white'
@@ -375,6 +407,15 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
             </>
           )}
         </div>
+
+        {showDrawer && (
+          <ResumeEditDrawer
+            resume={resumeData}
+            onChange={handleResumeChange}
+            onBlur={handleResumeBlur}
+            onClose={() => setShowDrawer(false)}
+          />
+        )}
       </div>
     </div>
   )
