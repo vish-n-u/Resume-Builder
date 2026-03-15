@@ -29,7 +29,6 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
   if (!isOpen || !application) return null
 
   const handleDownloadResume = () => {
-    // Open a clean window with just the resume and trigger print
     const resumeElement = resumeRef.current?.querySelector('#resume-preview')
     if (!resumeElement) {
       toast.error('Resume preview not found')
@@ -42,13 +41,17 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       return
     }
 
-    // Collect all stylesheets from the current page
+    // Collect non-print stylesheets from the current page (skip @media print rules
+    // that were designed for main-page printing — they hide body content and use
+    // position:absolute which breaks the dedicated print window)
     const stylesheets = Array.from(document.styleSheets)
       .map(sheet => {
         try {
-          return Array.from(sheet.cssRules || []).map(rule => rule.cssText).join('\n')
+          return Array.from(sheet.cssRules || [])
+            .filter(rule => rule.media?.mediaText !== 'print')
+            .map(rule => rule.cssText)
+            .join('\n')
         } catch {
-          // Cross-origin stylesheet — link it instead
           return sheet.href ? `@import url("${sheet.href}");` : ''
         }
       })
@@ -62,18 +65,28 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         <style>
           ${stylesheets}
 
-          @page {
-            size: letter;
-            margin: 0;
-          }
-          * {
+          @page { size: letter; margin: 0; }
+
+          *, *::before, *::after {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+
           html, body {
             margin: 0;
             padding: 0;
             background: white;
+          }
+
+          /* Ensure resume renders from the top with no clipping */
+          #resume-preview {
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            width: 100% !important;
+            overflow: visible !important;
+            box-shadow: none !important;
+            border: none !important;
           }
         </style>
       </head>
@@ -84,16 +97,18 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
     `)
     printWindow.document.close()
 
-    // Wait for content to render, then print
-    printWindow.onload = () => {
+    // Trigger print exactly once — onload fires when content is ready,
+    // the flag prevents the setTimeout fallback from firing a second time
+    let printed = false
+    const doPrint = () => {
+      if (printed) return
+      printed = true
       printWindow.focus()
       printWindow.print()
     }
-    // Fallback if onload doesn't fire
-    setTimeout(() => {
-      printWindow.focus()
-      printWindow.print()
-    }, 500)
+
+    printWindow.onload = doPrint
+    setTimeout(doPrint, 600)
   }
 
   const handlePdfUpload = (e) => {
