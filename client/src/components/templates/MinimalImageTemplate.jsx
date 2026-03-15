@@ -206,7 +206,7 @@ const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
                             <ul className="space-y-1 list-disc pl-6">
                                 {data.achievements.map((achievement, index) => (
                                     <li key={index} className="text-[11pt] text-zinc-700">
-                                        {achievement}
+                                        {typeof achievement === 'string' ? achievement : achievement.title}
                                     </li>
                                 ))}
                             </ul>

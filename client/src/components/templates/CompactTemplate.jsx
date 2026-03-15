@@ -204,7 +204,7 @@ const CompactTemplate = ({ data, accentColor, sectionVisibility }) => {
 							<ul className="space-y-0.5 list-disc pl-4">
 								{data.achievements.map((achievement, index) => (
 									<li key={index} className="text-[11pt] text-gray-700 leading-snug">
-										{achievement}
+										{typeof achievement === 'string' ? achievement : achievement.title}
 									</li>
 								))}
 							</ul>

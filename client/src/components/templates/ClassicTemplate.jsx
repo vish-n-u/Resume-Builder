@@ -191,7 +191,7 @@ const ClassicTemplate = ({ data, accentColor,sectionVisibility }) => {
                     <ul className="space-y-1">
                         {data.achievements.map((achievement, index) => (
                             <li key={index} className="text-[11pt] text-gray-700 pl-4">
-                                • {achievement}
+                                • {typeof achievement === 'string' ? achievement : achievement.title}
                             </li>
                         ))}
                     </ul>

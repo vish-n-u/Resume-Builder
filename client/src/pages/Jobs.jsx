@@ -65,7 +65,7 @@ const Jobs = () => {
     if (feed.length > 0 && !feed.find(j => j._id === selectedJob?._id)) {
       setSelectedJob(feed[0])
     }
-  }, [feed])
+  }, [feed, selectedJob])
 
   const handleApplyFilters = () => {
     dispatch(setFilters(localFilters))
@@ -107,7 +107,8 @@ const Jobs = () => {
   }
 
   const handleJobClick = (job) => {
-    if (window.innerWidth < 768) {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    if (isMobile) {
       setSheetJob(job)
     } else {
       setSelectedJob(job)
@@ -275,11 +276,11 @@ const Jobs = () => {
             </div>
 
             <div className='hidden md:flex flex-1 bg-white border border-gray-200 rounded-xl p-6 overflow-hidden'>
-              <JobDetail
+              {selectedJob && <JobDetail
                 job={selectedJob}
                 onApply={() => handleApply(selectedJob)}
                 onApplyExternal={() => handleApplyExternal(selectedJob)}
-              />
+              />}
             </div>
           </div>
         )}
