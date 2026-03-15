@@ -21,9 +21,10 @@ import api from '../configs/api'
 import toast from 'react-hot-toast'
 import SEO from '../components/SEO'
 
-const ResumeBuilder = () => {
+const ResumeBuilder = ({ initialData = null, onClose = null }) => {
 
-  const { resumeId } = useParams()
+  const { resumeId: paramResumeId } = useParams()
+  const resumeId = paramResumeId || initialData?._id || ''
   const {token} = useSelector(state => state.auth)
 
   console.log("resume builder")
@@ -136,7 +137,11 @@ const ResumeBuilder = () => {
   }
 
   useEffect(()=>{
-    loadExistingResume()
+    if (initialData) {
+      setResumeData(initialData)
+    } else {
+      loadExistingResume()
+    }
     loadDefaultResumeData()
   },[])
 
@@ -256,12 +261,14 @@ const autoSaveResume = async () => {
 
   return (
     <>
-      <SEO
-        title="Free AI Resume Builder - Paste Job Description & Create Tailored Resume | Flower Resume"
-        description="Build your resume for free with AI. Paste any job description to auto-generate a tailored resume. Choose from professional templates and download as PDF — unlimited and free."
-        keywords="free AI resume builder, paste job description create resume, free resume editor, tailored resume generator, JD to resume AI, free PDF resume maker, professional resume templates free, ATS-friendly resume builder"
-        ogUrl="https://flowerresume.com/app/builder"
-      />
+      {!onClose && (
+        <SEO
+          title="Free AI Resume Builder - Paste Job Description & Create Tailored Resume | Flower Resume"
+          description="Build your resume for free with AI. Paste any job description to auto-generate a tailored resume. Choose from professional templates and download as PDF — unlimited and free."
+          keywords="free AI resume builder, paste job description create resume, free resume editor, tailored resume generator, JD to resume AI, free PDF resume maker, professional resume templates free, ATS-friendly resume builder"
+          ogUrl="https://flowerresume.com/app/builder"
+        />
+      )}
       <style>
         {`
           @media (max-width: 1024px) {
@@ -272,10 +279,24 @@ const autoSaveResume = async () => {
           }
         `}
       </style>
-      <div className="max-w-7xl mx-auto px-4 py-3 lg:py-4">
-        <Link to={'/app'} className='inline-flex gap-1.5 items-center text-slate-500 hover:text-slate-700 transition-all text-xs sm:text-sm font-medium'>
-          <ArrowLeftIcon className="size-3.5 sm:size-4"/> <span className='hidden sm:inline'>Back to Dashboard</span><span className='sm:hidden'>Back</span>
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 py-3 lg:py-4 flex items-center justify-between">
+        {onClose ? (
+          <button
+            onClick={() => onClose(resumeData)}
+            className='inline-flex gap-1.5 items-center text-slate-500 hover:text-slate-700 transition-all text-xs sm:text-sm font-medium'
+          >
+            <ArrowLeftIcon className="size-3.5 sm:size-4"/> <span>Back to Application</span>
+          </button>
+        ) : (
+          <Link to={'/app'} className='inline-flex gap-1.5 items-center text-slate-500 hover:text-slate-700 transition-all text-xs sm:text-sm font-medium'>
+            <ArrowLeftIcon className="size-3.5 sm:size-4"/> <span className='hidden sm:inline'>Back to Dashboard</span><span className='sm:hidden'>Back</span>
+          </Link>
+        )}
+        {onClose && (
+          <button onClick={() => onClose(resumeData)} className='p-1.5 hover:bg-gray-100 rounded-lg text-gray-500'>
+            <X className='size-5' />
+          </button>
+        )}
       </div>
 
       <div className='max-w-7xl mx-auto px-4 pb-4 hidden lg:block'>

@@ -4,7 +4,7 @@ import ResumePreview from './ResumePreview'
 import api from '../configs/api'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import ResumeFullEditor from './ResumeFullEditor'
+import ResumeBuilder from '../pages/ResumeBuilder'
 
 const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent }) => {
   const { token } = useSelector(state => state.auth)
@@ -395,13 +395,15 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         </div>
 
         {showDrawer && (
-          <ResumeFullEditor
-            resume={resumeData}
-            onClose={(updated) => {
-              setResumeData(updated)
-              setShowDrawer(false)
-            }}
-          />
+          <div className='fixed inset-0 z-[60] bg-white overflow-y-auto'>
+            <ResumeBuilder
+              initialData={resumeData}
+              onClose={(updated) => {
+                if (updated) setResumeData(updated)
+                setShowDrawer(false)
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
