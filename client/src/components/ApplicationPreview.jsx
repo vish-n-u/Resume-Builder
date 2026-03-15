@@ -78,15 +78,19 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
             background: white;
           }
 
-          /* Ensure resume renders from the top with no clipping */
-          #resume-preview {
-            position: static !important;
-            top: auto !important;
-            left: auto !important;
-            width: 100% !important;
-            overflow: visible !important;
-            box-shadow: none !important;
-            border: none !important;
+          /* Override the main-page @media print rules that use position:absolute
+             (absolute elements repeat on every printed page in most browsers) */
+          @media print {
+            body * { visibility: visible !important; }
+            #resume-preview {
+              position: static !important;
+              top: auto !important;
+              left: auto !important;
+              width: 100% !important;
+              overflow: visible !important;
+              box-shadow: none !important;
+              border: none !important;
+            }
           }
         </style>
       </head>
