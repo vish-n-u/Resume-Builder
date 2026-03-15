@@ -35,82 +35,41 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       return
     }
 
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) {
-      toast.error('Pop-up blocked. Please allow pop-ups and try again.')
-      return
-    }
-
-    // Clone the element and stamp print-safe positioning directly onto it via
-    // the style attribute. Inline style !important has higher priority than any
-    // @media print { #resume-preview { position: absolute !important } } rule
-    // in an external/internal stylesheet, so this cannot be overridden by CSS.
+    // Clone the resume and append it directly to <body> as a top-level element.
+    // A <style> block hides everything else via display:none (removes from flow,
+    // unlike visibility:hidden) so the resume sits at the very top of the page
+    // with no positioning tricks needed — no new window, no repetition.
     const clone = resumeElement.cloneNode(true)
-    clone.setAttribute(
-      'style',
-      'position: static !important; overflow: visible !important; ' +
-      'top: auto !important; left: auto !important; ' +
-      'margin: 0 !important; box-shadow: none !important; border: none !important;'
-    )
+    clone.id = 'resume-print-portal'
 
-    // Collect stylesheets, skipping @media print blocks (they were written for
-    // main-page printing and are irrelevant in a dedicated print window)
-    const stylesheets = Array.from(document.styleSheets)
-      .map(sheet => {
-        try {
-          return Array.from(sheet.cssRules || [])
-            .filter(rule => !(rule.type === CSSRule.MEDIA_RULE && rule.conditionText?.includes('print')))
-            .map(rule => rule.cssText)
-            .join('\n')
-        } catch {
-          // Cross-origin linked sheet — load via <link> instead of @import
-          // (returned separately and placed as a <link> tag, not inside <style>)
-          return sheet.href ? `__LINK__${sheet.href}` : ''
+    const style = document.createElement('style')
+    style.id = 'resume-print-portal-style'
+    style.textContent = `
+      @media print {
+        body > *:not(#resume-print-portal) { display: none !important; }
+        #resume-print-portal {
+          display: block !important;
+          position: static !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: visible !important;
+          box-shadow: none !important;
+          border: none !important;
         }
-      })
+      }
+    `
 
-    const linkTags = stylesheets
-      .filter(s => s.startsWith('__LINK__'))
-      .map(s => `<link rel="stylesheet" href="${s.slice(8)}">`)
-      .join('\n')
+    document.head.appendChild(style)
+    document.body.appendChild(clone)
 
-    const styleContent = stylesheets
-      .filter(s => !s.startsWith('__LINK__'))
-      .join('\n')
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${job?.title || 'Resume'} - ${job?.company || 'Download'}</title>
-        ${linkTags}
-        <style>
-          ${styleContent}
-          @page { size: letter; margin: 0; }
-          *, *::before, *::after {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          html, body { margin: 0; padding: 0; background: white; }
-        </style>
-      </head>
-      <body>
-        ${clone.outerHTML}
-      </body>
-      </html>
-    `)
-    printWindow.document.close()
-
-    let printed = false
-    const doPrint = () => {
-      if (printed) return
-      printed = true
-      printWindow.focus()
-      printWindow.print()
+    const cleanup = () => {
+      document.head.removeChild(style)
+      document.body.removeChild(clone)
+      window.removeEventListener('afterprint', cleanup)
     }
+    window.addEventListener('afterprint', cleanup)
 
-    printWindow.onload = doPrint
-    setTimeout(doPrint, 800)
+    window.print()
   }
 
   const handlePdfUpload = (e) => {
