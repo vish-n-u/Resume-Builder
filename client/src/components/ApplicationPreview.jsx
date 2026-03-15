@@ -4,7 +4,7 @@ import ResumePreview from './ResumePreview'
 import api from '../configs/api'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import ResumeEditDrawer from './ResumeEditDrawer'
+import ResumeFullEditor from './ResumeFullEditor'
 
 const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent }) => {
   const { token } = useSelector(state => state.auth)
@@ -148,20 +148,6 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
     }
   }
 
-  const handleResumeChange = (field, value) => {
-    setResumeData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleResumeBlur = async () => {
-    try {
-      const formData = new FormData()
-      formData.append('resumeId', resumeData._id)
-      formData.append('resumeData', JSON.stringify(resumeData))
-      await api.put('/api/resumes/update', formData, { headers: { Authorization: token } })
-    } catch {
-      toast.error('Failed to save resume changes')
-    }
-  }
 
   const handleSend = async () => {
     if (!recipientEmail) {
@@ -409,11 +395,12 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         </div>
 
         {showDrawer && (
-          <ResumeEditDrawer
+          <ResumeFullEditor
             resume={resumeData}
-            onChange={handleResumeChange}
-            onBlur={handleResumeBlur}
-            onClose={() => setShowDrawer(false)}
+            onClose={(updated) => {
+              setResumeData(updated)
+              setShowDrawer(false)
+            }}
           />
         )}
       </div>
