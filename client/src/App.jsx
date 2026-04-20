@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Layout from './pages/Layout'
 import Dashboard from './pages/Dashboard'
@@ -11,7 +11,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import Jobs from './pages/Jobs'
 import Applied from './pages/Applied'
 import Loader from './components/Loader'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import api from './configs/api'
 import { login, setLoading } from './app/features/authSlice'
 import {Toaster} from 'react-hot-toast'
@@ -19,6 +19,8 @@ import {Toaster} from 'react-hot-toast'
 const App = () => {
 
   const dispatch = useDispatch()
+  const { user } = useSelector(state => state.auth)
+  const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL
 
   const getUserData = async () => {
     const token = localStorage.getItem('token')
@@ -52,7 +54,7 @@ const App = () => {
           <Route index element={<Dashboard />}/>
           <Route path='builder/:resumeId' element={<ResumeBuilder />}/>
           <Route path='profile' element={<UserProfile />}/>
-          <Route path='jobs' element={<Jobs />}/>
+          <Route path='jobs' element={isAdmin ? <Jobs /> : <Navigate to='/app' replace />}/>
           <Route path='applied' element={<Applied />}/>
           <Route path='admin' element={<AdminDashboard />}/>
         </Route>
