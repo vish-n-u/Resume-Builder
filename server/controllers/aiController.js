@@ -999,18 +999,8 @@ Remember:
             // For 'replace' action, completely replace the sections
             generatedData = { ...currentResumeData, ...sections };
         } else {
-            // For 'update' action (default), merge the data
-            generatedData = { ...currentResumeData };
-
-            Object.keys(sections).forEach(key => {
-                if (Array.isArray(sections[key]) && sections[key].length > 0) {
-                    // For arrays, append new items
-                    generatedData[key] = [...(currentResumeData[key] || []), ...sections[key]];
-                } else {
-                    // For strings and other types, replace
-                    generatedData[key] = sections[key];
-                }
-            });
+            // For 'update' action (default), replace sections with AI-generated content
+            generatedData = { ...currentResumeData, ...sections };
         }
 
         return res.status(200).json({

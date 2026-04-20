@@ -49,12 +49,16 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
         body > *:not(#resume-print-portal) { display: none !important; }
         #resume-print-portal {
           display: block !important;
+          visibility: visible !important;
           position: static !important;
           margin: 0 !important;
           padding: 0 !important;
           overflow: visible !important;
           box-shadow: none !important;
           border: none !important;
+        }
+        #resume-print-portal * {
+          visibility: visible !important;
         }
       }
     `
