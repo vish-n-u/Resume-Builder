@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
-import Home from './pages/Home'
 import Layout from './pages/Layout'
 import Dashboard from './pages/Dashboard'
 import ResumeBuilder from './pages/ResumeBuilder'
@@ -15,12 +14,14 @@ import { useDispatch, useSelector } from 'react-redux'
 import api from './configs/api'
 import { login, setLoading } from './app/features/authSlice'
 import {Toaster} from 'react-hot-toast'
+import { usePostHog } from 'posthog-js/react'
 
 const App = () => {
 
   const dispatch = useDispatch()
   const { user } = useSelector(state => state.auth)
   const isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL
+  const posthog = usePostHog()
 
   const getUserData = async () => {
     const token = localStorage.getItem('token')
@@ -29,6 +30,7 @@ const App = () => {
         const { data } = await api.get('/api/users/data', {headers: {Authorization: token}})
         if(data.user){
           dispatch(login({token, user: data.user}))
+          posthog?.identify(data.user._id, { email: data.user.email, name: data.user.name })
         }
         dispatch(setLoading(false))
       }else{
@@ -48,7 +50,7 @@ const App = () => {
     <>
     <Toaster />
       <Routes>
-        <Route path='/' element={<Home />}/>
+        <Route path='/' element={<Navigate to='/app' replace />}/>
 
         <Route path='app' element={<Layout />}>
           <Route index element={<Dashboard />}/>

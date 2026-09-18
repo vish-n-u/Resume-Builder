@@ -20,12 +20,14 @@ import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import SEO from '../components/SEO'
+import { usePostHog } from 'posthog-js/react'
 
 const ResumeBuilder = ({ initialData = null, onClose = null }) => {
 
   const { resumeId: paramResumeId } = useParams()
   const resumeId = paramResumeId || initialData?._id || ''
   const {token} = useSelector(state => state.auth)
+  const posthog = usePostHog()
 
   console.log("resume builder")
 
@@ -203,6 +205,7 @@ const ResumeBuilder = ({ initialData = null, onClose = null }) => {
   }
 
   const downloadResume = () => {
+    posthog?.capture('resume_downloaded', { template: resumeData.template, resumeId })
     window.print();
   }
 
@@ -224,6 +227,7 @@ const saveResume = async () => {
     const { data } = await api.put('/api/resumes/update', formData, {headers: { Authorization: token }})
 
     setResumeData(data.resume)
+    posthog?.capture('resume_saved', { template: resumeData.template, resumeId })
     toast.success(data.message)
   } catch (error) {
     console.error("Error saving resume:", error)

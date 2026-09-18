@@ -1,28 +1,29 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { logout } from '../app/features/authSlice'
 import { UserCircleIcon, FileTextIcon, ShieldIcon, BriefcaseIcon, HeartIcon } from 'lucide-react'
+import { usePostHog } from 'posthog-js/react'
 
 const Navbar = () => {
 
    const {user} = useSelector(state => state.auth)
    const dispatch = useDispatch()
-
-    const navigate = useNavigate()
+   const posthog = usePostHog()
 
     const logoutUser = ()=>{
-        navigate('/')
+        posthog?.reset()
         dispatch(logout())
+        window.location.href = 'https://flowerresume.com'
     }
 
   return (
     <div className='shadow bg-white'>
       <nav className='flex items-center justify-between max-w-7xl mx-auto px-4 py-3.5 text-slate-800 transition-all'>
-        <Link to='/' className="flex items-center gap-2">
+        <a href='https://flowerresume.com' className="flex items-center gap-2">
             <span className="text-2xl">🌻</span>
             <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
-        </Link>
+        </a>
         <div className='flex items-center gap-3 text-sm'>
             <p className='max-sm:hidden text-slate-700 font-medium'>Hi, {user?.name}</p>
             {user?.email === import.meta.env.VITE_ADMIN_EMAIL && (

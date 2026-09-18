@@ -4,10 +4,12 @@ import api from '../configs/api'
 import { useDispatch } from 'react-redux'
 import { login } from '../app/features/authSlice'
 import toast from 'react-hot-toast'
+import { usePostHog } from 'posthog-js/react'
 
 const Login = () => {
 
     const dispatch = useDispatch()
+    const posthog = usePostHog()
   const query = new URLSearchParams(window.location.search)
   const urlState = query.get('state')
   const [state, setState] = React.useState(urlState || "login")
@@ -40,6 +42,8 @@ const Login = () => {
             const { data } = await api.post(`/api/users/${state}`, formData)
             dispatch(login(data))
             localStorage.setItem('token', data.token)
+            posthog?.identify(data.user._id, { email: data.user.email, name: data.user.name })
+            posthog?.capture(state === 'login' ? 'user_logged_in' : 'user_registered')
             toast.success(data.message)
         } catch (error) {
             toast(error?.response?.data?.message || error.message)
@@ -66,6 +70,8 @@ const Login = () => {
             const { data } = await api.post('/api/users/login', guestCredentials)
             dispatch(login(data))
             localStorage.setItem('token', data.token)
+            posthog?.identify(data.user._id, { email: data.user.email, name: data.user.name })
+            posthog?.capture('user_logged_in', { method: 'guest' })
             toast.success(data.message)
         } catch (error) {
             toast(error?.response?.data?.message || error.message)
