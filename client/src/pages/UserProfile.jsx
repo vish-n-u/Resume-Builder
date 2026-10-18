@@ -187,7 +187,7 @@ const UserProfile = () => {
                 }`}
               >
                 <Icon className='size-4 sm:size-5' />
-                <span className='max-sm:hidden text-sm sm:text-base'>{tab.name}</span>
+                <span className='text-xs sm:text-base'>{tab.name}</span>
               </button>
             )
           })}

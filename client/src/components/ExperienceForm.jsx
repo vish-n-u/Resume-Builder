@@ -126,7 +126,7 @@ const updateExperience = (index, field, value)=>{
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-wrap items-center justify-between gap-2'>
         <div>
             <h3 className='flex items-center gap-2 text-lg font-semibold text-gray-900'> Professional Experience </h3>
             <p className='text-sm text-gray-500'>Add your job experience</p>
@@ -171,7 +171,7 @@ const updateExperience = (index, field, value)=>{
                     </label>
 
                     <div className="space-y-2">
-                        <div className='flex items-center justify-between'>
+                        <div className='flex flex-wrap items-center justify-between gap-2'>
                             <label className='text-sm font-medium text-gray-700'>Job Description</label>
                             <div className='flex items-center gap-2'>
                                 <button
@@ -212,7 +212,7 @@ const updateExperience = (index, field, value)=>{
                         {showSuggestions[index] && suggestions[index] && (
                             <div className='relative'>
                                 <div className='absolute top-0 left-0 right-0 bg-white border border-blue-300 rounded-lg shadow-lg p-4 z-10 max-h-96 overflow-y-auto'>
-                                    <div className='flex items-center justify-between mb-3'>
+                                    <div className='flex flex-wrap items-center justify-between gap-2 mb-3'>
                                         <h4 className='text-sm font-semibold text-gray-900 flex items-center gap-2'>
                                             <Lightbulb className='w-4 h-4 text-blue-600'/>
                                             AI Suggestions

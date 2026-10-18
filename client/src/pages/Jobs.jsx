@@ -122,7 +122,7 @@ const Jobs = () => {
         description="Browse personalized job suggestions and apply with AI-tailored resumes."
       />
 
-      <div className='max-w-7xl mx-auto px-4 py-6 flex flex-col h-[calc(100vh-64px)]'>
+      <div className='max-w-7xl mx-auto px-4 py-6 flex flex-col h-[calc(100dvh-64px)]'>
 
         {!checkingEmail && !emailConnected && (
           <div className='mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3 shrink-0'>
@@ -264,7 +264,7 @@ const Jobs = () => {
           </div>
         ) : (
           <div className='flex-1 flex gap-4 min-h-0'>
-            <div className='w-80 shrink-0 overflow-y-auto flex flex-col gap-2 pr-1'>
+            <div className='w-full md:w-80 shrink-0 overflow-y-auto flex flex-col gap-2 md:pr-1'>
               {feed.map(job => (
                 <JobRow
                   key={job._id}

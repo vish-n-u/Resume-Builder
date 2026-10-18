@@ -175,16 +175,16 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
       <div className='absolute inset-0 bg-black/60' onClick={onClose} />
 
-      <div className='relative bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] mx-4 overflow-hidden flex flex-col shadow-2xl'>
-        <div className='flex items-center justify-between px-6 py-4 border-b border-gray-200'>
-          <div>
+      <div className='relative bg-white rounded-2xl w-full max-w-4xl max-h-[90dvh] mx-3 sm:mx-4 overflow-hidden flex flex-col shadow-2xl'>
+        <div className='flex items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200'>
+          <div className='min-w-0'>
             <h2 className='text-lg font-bold text-gray-900'>Review Application</h2>
-            <p className='text-sm text-gray-500'>{job?.title} at {job?.company}</p>
+            <p className='text-sm text-gray-500 truncate'>{job?.title} at {job?.company}</p>
             {!hasEmail && (
               <p className='text-xs text-amber-600 mt-1'>No email found — apply on website with your tailored resume</p>
             )}
           </div>
-          <button onClick={onClose} className='p-2 hover:bg-gray-100 rounded-lg'>
+          <button onClick={onClose} aria-label='Close' className='p-2 hover:bg-gray-100 rounded-lg shrink-0'>
             <X className='size-5' />
           </button>
         </div>
@@ -216,7 +216,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
           </button>
         </div>
 
-        <div className='flex-1 overflow-y-auto p-6'>
+        <div className='flex-1 overflow-y-auto p-4 sm:p-6'>
           {activeTab === 'email' && hasEmail ? (
             <div className='space-y-4'>
               <div>
@@ -307,12 +307,12 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
           )}
         </div>
 
-        <div className='flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50'>
+        <div className='flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50'>
           {hasEmail ? (
             <>
               <button
                 onClick={handleSave}
-                className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2'
+                className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 max-sm:flex-1'
               >
                 <Edit3 className='size-4' />
                 Save Draft
@@ -320,15 +320,15 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
               <div className='flex items-center gap-2'>
                 <button
                   onClick={handleDownloadResume}
-                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2'
+                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 max-sm:flex-1'
                 >
                   <Download className='size-4' />
-                  Download Resume
+                  <span>Download<span className='max-sm:hidden'> Resume</span></span>
                 </button>
                 <button
                   onClick={handleSend}
                   disabled={sending}
-                  className='px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg hover:from-green-600 hover:to-emerald-700 flex items-center gap-2 disabled:opacity-50 shadow-lg'
+                  className='px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg hover:from-green-600 hover:to-emerald-700 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg max-sm:flex-1'
                 >
                   {sending ? (
                     <>
@@ -338,7 +338,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
                   ) : (
                     <>
                       <Send className='size-4' />
-                      Send Application
+                      Send<span className='max-sm:hidden'> Application</span>
                     </>
                   )}
                 </button>
@@ -348,7 +348,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
             <>
               <button
                 onClick={handleDownloadResume}
-                className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2'
+                className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 max-sm:flex-1'
               >
                 <Download className='size-4' />
                 Download Resume
@@ -356,7 +356,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
               <button
                 onClick={handleApplyOnWebsite}
                 disabled={sending}
-                className='px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 flex items-center gap-2 disabled:opacity-50 shadow-lg'
+                className='px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg max-sm:flex-1'
               >
                 {sending ? (
                   <>

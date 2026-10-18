@@ -59,9 +59,9 @@ const JobRequirementsModal = ({ isOpen, onClose, jobDescription }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90dvh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 rounded-t-lg">
           <div className="flex items-center gap-3">
             <AlertCircle className="size-7" />
             <div>
@@ -78,7 +78,7 @@ const JobRequirementsModal = ({ isOpen, onClose, jobDescription }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {!jobDescription || jobDescription.trim() === '' ? (
             <div className="text-center py-12">
               <FileText className="size-16 text-gray-300 mx-auto mb-4" />

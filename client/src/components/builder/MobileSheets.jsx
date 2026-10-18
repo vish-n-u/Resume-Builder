@@ -19,7 +19,7 @@ export const BottomDrawer = ({ header, label, onClose, children }) => {
   return (
     <>
       <div className='fixed inset-0 bg-black/60 z-40 lg:hidden' onClick={onClose} />
-      <div role='dialog' aria-modal='true' aria-label={label} className='fixed inset-x-0 bottom-0 bg-white z-50 lg:hidden overflow-hidden flex flex-col rounded-t-2xl shadow-2xl' style={{height: '92vh', maxHeight: '92vh'}}>
+      <div role='dialog' aria-modal='true' aria-label={label} className='fixed inset-x-0 bottom-0 bg-white z-50 lg:hidden overflow-hidden flex flex-col rounded-t-2xl shadow-2xl' style={{height: '92dvh', maxHeight: '92dvh'}}>
         <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0'>
           {header}
           <button onClick={onClose} aria-label='Close' className='p-1.5 hover:bg-gray-100 rounded-lg transition-colors'>
@@ -41,7 +41,7 @@ const OptionSheet = ({ title, onClose, children }) => {
   return (
     <>
       <div className='fixed inset-0 bg-black/50 z-40 transition-opacity' onClick={onClose} />
-      <div role='dialog' aria-modal='true' aria-label={title} className='fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 bg-white z-50 shadow-2xl rounded-t-2xl sm:rounded-2xl max-h-[80vh] overflow-hidden flex flex-col'>
+      <div role='dialog' aria-modal='true' aria-label={title} className='fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 bg-white z-50 shadow-2xl rounded-t-2xl sm:rounded-2xl max-h-[80dvh] overflow-hidden flex flex-col'>
         <div className='flex items-center justify-between p-4 border-b border-gray-200'>
           <h2 className='text-lg font-semibold text-gray-900'>{title}</h2>
           <button onClick={onClose} aria-label='Close' className='p-2 hover:bg-gray-100 rounded-lg transition-colors'>

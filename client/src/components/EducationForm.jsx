@@ -27,7 +27,7 @@ const updateEducation = (index, field, value)=>{
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-wrap items-center justify-between gap-2'>
         <div>
             <h3 className='flex items-center gap-2 text-lg font-semibold text-gray-900'> Education </h3>
             <p className='text-sm text-gray-500'>Add your education details</p>
