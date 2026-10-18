@@ -64,7 +64,32 @@ const ResumeSchema = new mongoose.Schema({
             section_name: { type: String },
             content: { type: String },
         }
-    ]
+    ],
+    sectionVisibility: {
+        summary: { type: Boolean, default: true },
+        experience: { type: Boolean, default: true },
+        education: { type: Boolean, default: true },
+        projects: { type: Boolean, default: true },
+        skills: { type: Boolean, default: true },
+        certifications: { type: Boolean, default: true },
+        achievements: { type: Boolean, default: true },
+        customSections: { type: Boolean, default: true },
+    },
+    // Order of the reorderable sections (ids as in sectionVisibility); empty = template's default order
+    section_order: [{ type: String }],
+    // Keywords extracted from job_description by AI, used for the job match score
+    jd_analysis: {
+        keywords: [
+            {
+                _id: false,
+                term: { type: String },
+                importance: { type: String, enum: ['required', 'preferred'], default: 'required' },
+                aliases: [{ type: String }],
+            }
+        ],
+        jd_hash: { type: String }, // hash of the job_description the keywords were extracted from
+        analyzed_at: { type: Date },
+    }
 }, {timestamps: true, minimize: false})
 
 const Resume = mongoose.model('Resume', ResumeSchema)

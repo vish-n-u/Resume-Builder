@@ -1,6 +1,8 @@
+import { Fragment } from "react";
+import { orderSections } from "./sectionOrder";
 import { Mail, Phone, MapPin } from "lucide-react";
 
-const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
+const MinimalImageTemplate = ({ data, accentColor,sectionVisibility, sectionOrder }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
         const [year, month] = dateStr.split("-");
@@ -9,6 +11,162 @@ const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
             month: "short",
         });
     };
+
+    // Each reorderable section, rendered in the user's chosen order by renderSections
+    const sections = {
+        // Education
+        education: data.education && data.education.length > 0 && sectionVisibility.education && (
+            <section className="mb-2">
+                <h2 className="text-[12pt] font-semibold tracking-widest text-zinc-600 mb-1">
+                    EDUCATION
+                </h2>
+                <div className="space-y-1.5 text-[11pt]">
+                    {data.education.map((edu, index) => (
+                        <div key={index} className="education-item">
+                            <p className="font-semibold uppercase">{edu.degree}</p>
+                            <p className="text-zinc-600">{edu.institution}</p>
+                            <p className="text-[10pt] text-zinc-500">
+                                {formatDate(edu.graduation_date)}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+        ),
+        // Skills
+        skills: data.skills && data.skills.length > 0 &&sectionVisibility.skills && (
+            <section>
+                <h2 className="text-[12pt] font-semibold tracking-widest text-zinc-600 mb-1">
+                    SKILLS
+                </h2>
+                <ul className="space-y-1 text-[11pt]">
+                    {data.skills.map((skill, index) => (
+                        <li key={index}>{skill}</li>
+                    ))}
+                </ul>
+            </section>
+        ),
+        // Summary
+        summary: data.professional_summary && sectionVisibility.summary &&  (
+            <section className="mb-2">
+                <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }} >
+                    SUMMARY
+                </h2>
+                <div
+                    className="text-[11pt] text-zinc-700 leading-snug quill-content"
+                    dangerouslySetInnerHTML={{ __html: data.professional_summary }}
+                />
+            </section>
+        ),
+        // Experience
+        experience: data.experience && data.experience.length > 0 && sectionVisibility.experience && (
+            <section>
+                <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }} >
+                    EXPERIENCE
+                </h2>
+                <div className="space-y-1.5 mb-1.5">
+                    {data.experience.map((exp, index) => (
+                        <div key={index} className="experience-item">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-[11pt] font-semibold text-zinc-900">
+                                    {exp.position}
+                                </h3>
+                                <span className="text-[10pt] text-zinc-500">
+                                    {formatDate(exp.start_date)} -{" "}
+                                    {exp.is_current ? "Present" : formatDate(exp.end_date)}
+                                </span>
+                            </div>
+                            <p className="text-[11pt] mb-2" style={{ color: accentColor }} >
+                                {exp.company}
+                            </p>
+                            {exp.description && (
+                                <div
+                                    className="text-[11pt] text-zinc-700 leading-snug quill-content"
+                                    dangerouslySetInnerHTML={{ __html: exp.description }}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </section>
+        ),
+        // Projects
+        projects: data.project && data.project.length > 0 &&  sectionVisibility.projects && (
+            <section className="mb-2">
+                <h2 className="text-[12pt] uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
+                    PROJECTS
+                </h2>
+                <div className="space-y-1">
+                    {data.project.map((project, index) => (
+                        <div key={index} className="project-item">
+                            <h3 className="text-[11pt] font-medium text-zinc-800">{project.name}</h3>
+                            <p className="text-[11pt]" style={{ color: accentColor }} >
+                                {project.type}
+                            </p>
+                            {project.description && (
+                                <div
+                                    className="text-[11pt] text-zinc-700 leading-snug quill-content"
+                                    dangerouslySetInnerHTML={{ __html: project.description }}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </section>
+        ),
+        // Certifications
+        certifications: data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
+            <section className="mb-2">
+                <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }}>
+                    CERTIFICATIONS
+                </h2>
+                <div className="space-y-1.5">
+                    {data.certifications.map((cert, index) => (
+                        <div key={index}>
+                            <h3 className="text-[11pt] font-semibold text-zinc-900">{cert.name}</h3>
+                            {cert.issuer && <p className="text-[11pt]" style={{ color: accentColor }}>{cert.issuer}</p>}
+                            {cert.date && <p className="text-[10pt] text-zinc-500">{formatDate(cert.date)}</p>}
+                        </div>
+                    ))}
+                </div>
+            </section>
+        ),
+        // Achievements
+        achievements: data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
+            <section className="mb-2">
+                <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }}>
+                    ACHIEVEMENTS
+                </h2>
+                <ul className="space-y-1 list-disc pl-6">
+                    {data.achievements.map((achievement, index) => (
+                        <li key={index} className="text-[11pt] text-zinc-700">
+                            {typeof achievement === 'string' ? achievement : achievement.title}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        ),
+        // Custom Sections
+        customSections: data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
+            <>
+                {data.custom_sections.map((section, index) => (
+                    section.section_name && section.content && (
+                        <section key={index} className="mb-2">
+                            <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }}>
+                                {section.section_name.toUpperCase()}
+                            </h2>
+                            <div
+                                className="text-[11pt] text-zinc-700 leading-snug quill-content"
+                                dangerouslySetInnerHTML={{ __html: section.content }}
+                            />
+                        </section>
+                    )
+                ))}
+            </>
+        ),
+    };
+
+    const renderSections = (ids) => orderSections(sectionOrder, ids).map(id => <Fragment key={id}>{sections[id]}</Fragment>);
 
     return (
         <div className="max-w-5xl mx-auto bg-white text-zinc-800 text-[11pt]">
@@ -70,167 +228,13 @@ const MinimalImageTemplate = ({ data, accentColor,sectionVisibility }) => {
                         </div>
                     </section>
 
-                    {/* Education */}
-                    {data.education && data.education.length > 0 && sectionVisibility.education && (
-                        <section className="mb-2">
-                            <h2 className="text-[12pt] font-semibold tracking-widest text-zinc-600 mb-1">
-                                EDUCATION
-                            </h2>
-                            <div className="space-y-1.5 text-[11pt]">
-                                {data.education.map((edu, index) => (
-                                    <div key={index} className="education-item">
-                                        <p className="font-semibold uppercase">{edu.degree}</p>
-                                        <p className="text-zinc-600">{edu.institution}</p>
-                                        <p className="text-[10pt] text-zinc-500">
-                                            {formatDate(edu.graduation_date)}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Skills */}
-                    {data.skills && data.skills.length > 0 &&sectionVisibility.skills && (
-                        <section>
-                            <h2 className="text-[12pt] font-semibold tracking-widest text-zinc-600 mb-1">
-                                SKILLS
-                            </h2>
-                            <ul className="space-y-1 text-[11pt]">
-                                {data.skills.map((skill, index) => (
-                                    <li key={index}>{skill}</li>
-                                ))}
-                            </ul>
-                        </section>
-                    )}
+                    {renderSections(['education', 'skills'])}
                 </aside>
 
                 {/* Right Content */}
                 <main className="col-span-2 px-[0.3in] pb-4 pt-0">
 
-                    {/* Summary */}
-                    {data.professional_summary && sectionVisibility.summary &&  (
-                        <section className="mb-2">
-                            <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }} >
-                                SUMMARY
-                            </h2>
-                            <div
-                                className="text-[11pt] text-zinc-700 leading-snug quill-content"
-                                dangerouslySetInnerHTML={{ __html: data.professional_summary }}
-                            />
-                        </section>
-                    )}
-
-                    {/* Experience */}
-                    {data.experience && data.experience.length > 0 && sectionVisibility.experience && (
-                        <section>
-                            <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }} >
-                                EXPERIENCE
-                            </h2>
-                            <div className="space-y-1.5 mb-1.5">
-                                {data.experience.map((exp, index) => (
-                                    <div key={index} className="experience-item">
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="text-[11pt] font-semibold text-zinc-900">
-                                                {exp.position}
-                                            </h3>
-                                            <span className="text-[10pt] text-zinc-500">
-                                                {formatDate(exp.start_date)} -{" "}
-                                                {exp.is_current ? "Present" : formatDate(exp.end_date)}
-                                            </span>
-                                        </div>
-                                        <p className="text-[11pt] mb-2" style={{ color: accentColor }} >
-                                            {exp.company}
-                                        </p>
-                                        {exp.description && (
-                                            <div
-                                                className="text-[11pt] text-zinc-700 leading-snug quill-content"
-                                                dangerouslySetInnerHTML={{ __html: exp.description }}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Projects */}
-                    {data.project && data.project.length > 0 &&  sectionVisibility.projects && (
-                        <section className="mb-2">
-                            <h2 className="text-[12pt] uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
-                                PROJECTS
-                            </h2>
-                            <div className="space-y-1">
-                                {data.project.map((project, index) => (
-                                    <div key={index} className="project-item">
-                                        <h3 className="text-[11pt] font-medium text-zinc-800">{project.name}</h3>
-                                        <p className="text-[11pt]" style={{ color: accentColor }} >
-                                            {project.type}
-                                        </p>
-                                        {project.description && (
-                                            <div
-                                                className="text-[11pt] text-zinc-700 leading-snug quill-content"
-                                                dangerouslySetInnerHTML={{ __html: project.description }}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Certifications */}
-                    {data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
-                        <section className="mb-2">
-                            <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }}>
-                                CERTIFICATIONS
-                            </h2>
-                            <div className="space-y-1.5">
-                                {data.certifications.map((cert, index) => (
-                                    <div key={index}>
-                                        <h3 className="text-[11pt] font-semibold text-zinc-900">{cert.name}</h3>
-                                        {cert.issuer && <p className="text-[11pt]" style={{ color: accentColor }}>{cert.issuer}</p>}
-                                        {cert.date && <p className="text-[10pt] text-zinc-500">{formatDate(cert.date)}</p>}
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Achievements */}
-                    {data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
-                        <section className="mb-2">
-                            <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }}>
-                                ACHIEVEMENTS
-                            </h2>
-                            <ul className="space-y-1 list-disc pl-6">
-                                {data.achievements.map((achievement, index) => (
-                                    <li key={index} className="text-[11pt] text-zinc-700">
-                                        {typeof achievement === 'string' ? achievement : achievement.title}
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
-                    )}
-
-                    {/* Custom Sections */}
-                    {data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
-                        <>
-                            {data.custom_sections.map((section, index) => (
-                                section.section_name && section.content && (
-                                    <section key={index} className="mb-2">
-                                        <h2 className="text-[12pt] font-semibold tracking-widest mb-1" style={{ color: accentColor }}>
-                                            {section.section_name.toUpperCase()}
-                                        </h2>
-                                        <div
-                                            className="text-[11pt] text-zinc-700 leading-snug quill-content"
-                                            dangerouslySetInnerHTML={{ __html: section.content }}
-                                        />
-                                    </section>
-                                )
-                            ))}
-                        </>
-                    )}
+                    {renderSections(['summary', 'experience', 'projects', 'certifications', 'achievements', 'customSections'])}
                 </main>
             </div>
         </div>

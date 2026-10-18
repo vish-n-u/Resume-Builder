@@ -6,7 +6,7 @@ const SEO = ({
   description = 'Create unlimited resumes for free with AI. Paste any job description and get a perfectly tailored resume in seconds. Free resume downloads as PDF — no watermarks, no limits, no credit card required.',
   keywords = 'free resume builder, free unlimited resume creator, AI resume builder, paste job description resume, free resume download PDF, no watermark resume builder, create resume from job description, free CV maker, unlimited resume downloads, AI resume generator, JD to resume, tailored resume builder, free online resume maker',
   ogImage = '/logo.svg',
-  ogUrl = 'https://flowerresume.com/',
+  ogUrl = 'https://app.flower-resume.com/',
   article = false
 }) => {
   return (

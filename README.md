@@ -101,7 +101,7 @@ JWT_SECRET=your_secure_jwt_secret_key
 
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-4.1
 
 # ImageKit
 IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
@@ -345,7 +345,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Support
 
-For support, email support@flowerresume.com or open an issue in the repository.
+For support, email support@app.flower-resume.com or open an issue in the repository.
 
 ---
 

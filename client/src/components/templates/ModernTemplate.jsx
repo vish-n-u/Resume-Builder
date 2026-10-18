@@ -1,6 +1,8 @@
+import { Fragment } from "react";
+import { orderSections } from "./sectionOrder";
 import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
-const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
+const ModernTemplate = ({ data, accentColor,sectionVisibility, sectionOrder }) => {
 	const formatDate = (dateStr) => {
 		if (!dateStr) return "";
 		const [year, month] = dateStr.split("-");
@@ -8,6 +10,203 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 			year: "numeric",
 			month: "short"
 		});
+	};
+
+	// Each reorderable section, rendered in the user's chosen order by renderSections
+	const sections = {
+		// Professional Summary
+		summary: data.professional_summary && sectionVisibility.summary  && (
+			<section className="mb-2">
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Summary
+				</h2>
+				<div
+					className="text-[11pt] text-gray-700 quill-content"
+					dangerouslySetInnerHTML={{ __html: data.professional_summary }}
+				/>
+			</section>
+		),
+		// Experience
+		experience: data.experience &&   sectionVisibility.experience && data.experience.length > 0 && (
+			<section className="mb-2">
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Experience
+				</h2>
+
+				<div className="space-y-1.5">
+					{data.experience.map((exp, index) => (
+						<div key={index} className="experience-item relative pl-6 border-l border-gray-200">
+
+							<div className="flex justify-between items-start mb-1">
+								<div>
+									<h3 className="text-[11pt] font-medium text-gray-900">{exp.position}</h3>
+									<p className="text-[11pt] font-medium" style={{ color: accentColor }}>{exp.company}</p>
+								</div>
+								<div className="text-[10pt] text-gray-500 bg-gray-100 px-3 py-1 rounded">
+									{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+								</div>
+							</div>
+							{exp.description && (
+								<div
+									className="text-[11pt] text-gray-700 leading-snug mt-1 quill-content"
+									dangerouslySetInnerHTML={{ __html: exp.description }}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</section>
+		),
+		// Projects
+		projects: data.project && data.project.length > 0 &&sectionVisibility.projects && (
+			<section className="mb-2">
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Projects
+				</h2>
+
+				<div className="space-y-1">
+					{data.project.map((p, index) => (
+						<div key={index} className="project-item relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
+
+
+							<div className="flex justify-between items-start">
+								<div>
+									<h3 className="text-[11pt] font-medium text-gray-900">{p.name}</h3>
+								</div>
+							</div>
+							{p.description && (
+								<div
+									className="text-[11pt] text-gray-700 leading-snug mt-1 quill-content"
+									dangerouslySetInnerHTML={{ __html: p.description }}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</section>
+		),
+		// Education
+		education: data.education && data.education.length > 0 && sectionVisibility.education && (
+			<section>
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Education
+				</h2>
+
+				<div className="space-y-1.5">
+					{data.education.map((edu, index) => (
+						<div key={index} className="education-item">
+							<h3 className="text-[11pt] font-semibold text-gray-900">
+								{edu.degree} {edu.field && `in ${edu.field}`}
+							</h3>
+							<p className="text-[11pt]" style={{ color: accentColor }}>{edu.institution}</p>
+							<div className="flex justify-between items-center text-[10pt] text-gray-600">
+								<span>{formatDate(edu.graduation_date)}</span>
+								{edu.gpa && <span>GPA: {edu.gpa}</span>}
+							</div>
+						</div>
+					))}
+				</div>
+			</section>
+		),
+		// Skills
+		skills: data.skills && data.skills.length > 0 &&sectionVisibility.skills&& (
+			<section>
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Skills
+				</h2>
+
+				<div className="flex flex-wrap gap-2">
+					{data.skills.map((skill, index) => (
+						<span
+							key={index}
+							className="px-3 py-1 text-[11pt] text-white rounded-full"
+							style={{ backgroundColor: accentColor }}
+						>
+							{skill}
+						</span>
+					))}
+				</div>
+			</section>
+		),
+		// Certifications
+		certifications: data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
+			<section className="mb-2 mt-2">
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Certifications
+				</h2>
+
+				<div className="space-y-1.5">
+					{data.certifications.map((cert, index) => (
+						<div key={index} className="relative pl-6 border-l border-gray-200">
+							<h3 className="text-[11pt] font-medium text-gray-900">{cert.name}</h3>
+							{cert.issuer && <p className="text-[11pt] font-medium" style={{ color: accentColor }}>{cert.issuer}</p>}
+							{cert.date && <p className="text-[10pt] text-gray-500">{formatDate(cert.date)}</p>}
+						</div>
+					))}
+				</div>
+			</section>
+		),
+		// Achievements
+		achievements: data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
+			<section className="mb-2">
+				<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+					Achievements
+				</h2>
+
+				<ul className="space-y-1 list-disc pl-6">
+					{data.achievements.map((achievement, index) => (
+						<li key={index} className="text-[11pt] text-gray-700">
+							{typeof achievement === 'string' ? achievement : achievement.title}
+						</li>
+					))}
+				</ul>
+			</section>
+		),
+		// Custom Sections
+		customSections: data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
+			<>
+				{data.custom_sections.map((section, index) => (
+					section.section_name && section.content && (
+						<section key={index} className="mb-2">
+							<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
+								{section.section_name}
+							</h2>
+							<div
+								className="text-[11pt] text-gray-700 leading-snug quill-content"
+								dangerouslySetInnerHTML={{ __html: section.content }}
+							/>
+						</section>
+					)
+				))}
+			</>
+		),
+	};
+
+	// Education and skills sit side by side in a two-column grid when they are next to each other
+	// in the order; apart, each keeps its half-width column.
+	const renderModernSections = () => {
+		const ids = orderSections(sectionOrder, ['summary', 'experience', 'projects', 'education', 'skills', 'certifications', 'achievements', 'customSections'])
+			.filter(id => sections[id]);
+		const paired = ['education', 'skills'];
+		const output = [];
+
+		for (let i = 0; i < ids.length; i++) {
+			const id = ids[i];
+			if (paired.includes(id) && paired.includes(ids[i + 1])) {
+				output.push(
+					<div key={`${id}-${ids[i + 1]}`} className="grid sm:grid-cols-2 gap-8">
+						{sections[id]}
+						{sections[ids[i + 1]]}
+					</div>
+				);
+				i++;
+			} else if (paired.includes(id)) {
+				output.push(<div key={id} className="grid sm:grid-cols-2 gap-8">{sections[id]}</div>);
+			} else {
+				output.push(<Fragment key={id}>{sections[id]}</Fragment>);
+			}
+		}
+		return output;
 	};
 
 	return (
@@ -53,181 +252,7 @@ const ModernTemplate = ({ data, accentColor,sectionVisibility }) => {
 			</header>
 
 			<div className="px-[0.3in] py-4">
-				{/* Professional Summary */}
-				{data.professional_summary && sectionVisibility.summary  && (
-					<section className="mb-2">
-						<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-							Summary
-						</h2>
-						<div
-							className="text-[11pt] text-gray-700 quill-content"
-							dangerouslySetInnerHTML={{ __html: data.professional_summary }}
-						/>
-					</section>
-				)}
-
-				{/* Experience */}
-				{data.experience &&   sectionVisibility.experience && data.experience.length > 0 && (
-					<section className="mb-2">
-						<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-							Experience
-						</h2>
-
-						<div className="space-y-1.5">
-							{data.experience.map((exp, index) => (
-								<div key={index} className="experience-item relative pl-6 border-l border-gray-200">
-
-									<div className="flex justify-between items-start mb-1">
-										<div>
-											<h3 className="text-[11pt] font-medium text-gray-900">{exp.position}</h3>
-											<p className="text-[11pt] font-medium" style={{ color: accentColor }}>{exp.company}</p>
-										</div>
-										<div className="text-[10pt] text-gray-500 bg-gray-100 px-3 py-1 rounded">
-											{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-										</div>
-									</div>
-									{exp.description && (
-										<div
-											className="text-[11pt] text-gray-700 leading-snug mt-1 quill-content"
-											dangerouslySetInnerHTML={{ __html: exp.description }}
-										/>
-									)}
-								</div>
-							))}
-						</div>
-					</section>
-				)}
-
-				{/* Projects */}
-				{data.project && data.project.length > 0 &&sectionVisibility.projects && (
-					<section className="mb-2">
-						<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-							Projects
-						</h2>
-
-						<div className="space-y-1">
-							{data.project.map((p, index) => (
-								<div key={index} className="project-item relative pl-6 border-l border-gray-200" style={{borderLeftColor: accentColor}}>
-
-
-									<div className="flex justify-between items-start">
-										<div>
-											<h3 className="text-[11pt] font-medium text-gray-900">{p.name}</h3>
-										</div>
-									</div>
-									{p.description && (
-										<div
-											className="text-[11pt] text-gray-700 leading-snug mt-1 quill-content"
-											dangerouslySetInnerHTML={{ __html: p.description }}
-										/>
-									)}
-								</div>
-							))}
-						</div>
-					</section>
-				)}
-
-				<div className="grid sm:grid-cols-2 gap-8">
-					{/* Education */}
-					{data.education && data.education.length > 0 && sectionVisibility.education && (
-						<section>
-							<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-								Education
-							</h2>
-
-							<div className="space-y-1.5">
-								{data.education.map((edu, index) => (
-									<div key={index} className="education-item">
-										<h3 className="text-[11pt] font-semibold text-gray-900">
-											{edu.degree} {edu.field && `in ${edu.field}`}
-										</h3>
-										<p className="text-[11pt]" style={{ color: accentColor }}>{edu.institution}</p>
-										<div className="flex justify-between items-center text-[10pt] text-gray-600">
-											<span>{formatDate(edu.graduation_date)}</span>
-											{edu.gpa && <span>GPA: {edu.gpa}</span>}
-										</div>
-									</div>
-								))}
-							</div>
-						</section>
-					)}
-
-					{/* Skills */}
-					{data.skills && data.skills.length > 0 &&sectionVisibility.skills&& (
-						<section>
-							<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-								Skills
-							</h2>
-
-							<div className="flex flex-wrap gap-2">
-								{data.skills.map((skill, index) => (
-									<span
-										key={index}
-										className="px-3 py-1 text-[11pt] text-white rounded-full"
-										style={{ backgroundColor: accentColor }}
-									>
-										{skill}
-									</span>
-								))}
-							</div>
-						</section>
-					)}
-				</div>
-
-				{/* Certifications */}
-				{data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
-					<section className="mb-2 mt-2">
-						<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-							Certifications
-						</h2>
-
-						<div className="space-y-1.5">
-							{data.certifications.map((cert, index) => (
-								<div key={index} className="relative pl-6 border-l border-gray-200">
-									<h3 className="text-[11pt] font-medium text-gray-900">{cert.name}</h3>
-									{cert.issuer && <p className="text-[11pt] font-medium" style={{ color: accentColor }}>{cert.issuer}</p>}
-									{cert.date && <p className="text-[10pt] text-gray-500">{formatDate(cert.date)}</p>}
-								</div>
-							))}
-						</div>
-					</section>
-				)}
-
-				{/* Achievements */}
-				{data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
-					<section className="mb-2">
-						<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-							Achievements
-						</h2>
-
-						<ul className="space-y-1 list-disc pl-6">
-							{data.achievements.map((achievement, index) => (
-								<li key={index} className="text-[11pt] text-gray-700">
-									{typeof achievement === 'string' ? achievement : achievement.title}
-								</li>
-							))}
-						</ul>
-					</section>
-				)}
-
-				{/* Custom Sections */}
-				{data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
-					<>
-						{data.custom_sections.map((section, index) => (
-							section.section_name && section.content && (
-								<section key={index} className="mb-2">
-									<h2 className="text-[12pt] font-light mb-1 pb-1 border-b border-gray-200">
-										{section.section_name}
-									</h2>
-									<div
-										className="text-[11pt] text-gray-700 leading-snug quill-content"
-										dangerouslySetInnerHTML={{ __html: section.content }}
-									/>
-								</section>
-							)
-						))}
-					</>
-				)}
+				{renderModernSections()}
 			</div>
 		</div>
 	);

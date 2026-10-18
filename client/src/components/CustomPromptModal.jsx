@@ -62,10 +62,30 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
       }
 
       // Merge the AI-generated data with existing resume data
+      const previousData = resumeData
       const updatedData = { ...resumeData, ...response.data.generatedData }
       setResumeData(updatedData)
 
-      toast.success('Resume updated successfully!')
+      toast.success((t) => (
+        <span className="flex items-center gap-3">
+          Resume updated by AI
+          <button
+            onClick={() => { setResumeData(previousData); toast.dismiss(t.id); toast('Change undone') }}
+            className="px-2 py-1 text-xs font-semibold text-purple-700 bg-purple-100 rounded hover:bg-purple-200"
+          >
+            Undo
+          </button>
+        </span>
+      ), { duration: 10000 })
+
+      // Warn about placeholders the AI left for facts it didn't have, so they don't end up in a downloaded resume
+      const countPlaceholders = (data) => (JSON.stringify(data).match(/\[[^\]\n"]{2,40}\]/g) || []).length
+      if (countPlaceholders(updatedData) > countPlaceholders(previousData)) {
+        toast('AI left some [placeholders] where it needed details from you — fill them in before downloading.', {
+          icon: '✏️',
+          duration: 8000,
+        })
+      }
       setPrompt('')
       setAiUnderstanding(null)
       onClose()
@@ -104,9 +124,9 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
             </p>
             <p className="text-gray-500 text-[10px] sm:text-xs">
               <strong>Examples:</strong>
-              <br />• "Add a project about building a mobile app"
-              <br />• "Improve the description of my first experience"
-              <br />• "Add AWS certification completed in 2024"
+              <br />• "Add my e-commerce project from my profile"
+              <br />• "Make my first experience more impactful and use bullet points"
+              <br />• "Add AWS Solutions Architect certification, issued by Amazon in 2024"
             </p>
           </div>
 
@@ -117,7 +137,7 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g., Add a project about an e-commerce website..."
+              placeholder="e.g., Add my e-commerce project and bold the technologies in it..."
               className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm"
               rows={6}
               disabled={isGenerating}
@@ -137,7 +157,7 @@ const CustomPromptModal = ({ isOpen, onClose, resumeData, setResumeData }) => {
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
             <p className="text-blue-800 text-[10px] sm:text-sm">
-              <strong>Tip:</strong> AI analyzes your request and generates accurate content based on your resume data.
+              <strong>Tip:</strong> AI only uses facts from your resume, your profile, or what you type here. Anything it doesn't know — like a metric or tech stack — is left as a <strong>[placeholder]</strong> for you to fill in.
             </p>
           </div>
 

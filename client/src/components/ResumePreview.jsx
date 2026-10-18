@@ -1,11 +1,14 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import ClassicTemplate from './templates/ClassicTemplate'
 import ModernTemplate from './templates/ModernTemplate'
 import MinimalTemplate from './templates/MinimalTemplate'
 import MinimalImageTemplate from './templates/MinimalImageTemplate'
 import CompactTemplate from './templates/CompactTemplate'
+import { sanitizeResumeData } from '../utils/sanitize'
 
-const ResumePreview = ({data, template, accentColor, classes = ""}) => {
+const ResumePreview = ({data: rawData, template, accentColor, classes = ""}) => {
+
+    const data = useMemo(() => sanitizeResumeData(rawData), [rawData])
 
     const sectionVisibility = data?.sectionVisibility || {
         summary: true,
@@ -15,21 +18,22 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
         skills: true,
         certifications: true,
         achievements: true,
+        customSections: true,
     }
 
     const renderTemplate = ()=>{
         switch (template) {
             case "modern":
-                return <ModernTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
+                return <ModernTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility} sectionOrder={data?.section_order}/>;
             case "minimal":
-                return <MinimalTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
+                return <MinimalTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility} sectionOrder={data?.section_order}/>;
             case "minimal-image":
-                return <MinimalImageTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
+                return <MinimalImageTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility} sectionOrder={data?.section_order}/>;
             case "compact":
-                return <CompactTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
+                return <CompactTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility} sectionOrder={data?.section_order}/>;
 
             default:
-                return <ClassicTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility}/>;
+                return <ClassicTemplate data={data} accentColor={accentColor} sectionVisibility={sectionVisibility} sectionOrder={data?.section_order}/>;
         }
     }
 

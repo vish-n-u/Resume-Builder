@@ -15,6 +15,7 @@ import CertificationsForm from '../components/CertificationsForm'
 import AchievementsForm from '../components/AchievementsForm'
 import CustomSectionsForm from '../components/CustomSectionsForm'
 import EmailConnect from '../components/EmailConnect'
+import { TONES, WRITING_STYLES } from '../configs/aiPreferences'
 
 const UserProfile = () => {
 
@@ -25,7 +26,7 @@ const UserProfile = () => {
   const params = new URLSearchParams(window.location.search)
   const fromOnboarding = params.get('onboarding') === 'true'
 
-  const [activeTab, setActiveTab] = useState(fromOnboarding ? 'resume-data' : 'account') // account, resume-data, preferences
+  const [activeTab, setActiveTab] = useState(fromOnboarding ? 'resume-data' : (['account', 'resume-data', 'preferences'].includes(params.get('tab')) ? params.get('tab') : 'account')) // account, resume-data, preferences
   const [isLoading, setIsLoading] = useState(false)
 
   // Account fields
@@ -409,31 +410,36 @@ const UserProfile = () => {
                   <label className='block text-sm font-medium text-slate-700 mb-3'>
                     Writing Style
                   </label>
-                  <div className='grid grid-cols-2 gap-3'>
-                    {['professional', 'technical', 'creative', 'casual'].map((style) => (
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                    {WRITING_STYLES.map((style) => (
                       <button
-                        key={style}
+                        key={style.id}
                         type="button"
+                        aria-pressed={defaultResumeData.preferences.writing_style === style.id}
                         onClick={() => setDefaultResumeData(prev => ({
                           ...prev,
-                          preferences: { ...prev.preferences, writing_style: style }
+                          preferences: { ...prev.preferences, writing_style: style.id }
                         }))}
-                        className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                          defaultResumeData.preferences.writing_style === style
-                            ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
-                            : 'border-gray-200 hover:border-gray-300 text-slate-600'
+                        className={`px-4 py-3 rounded-lg border-2 text-left transition-all ${
+                          defaultResumeData.preferences.writing_style === style.id
+                            ? 'border-yellow-500 bg-yellow-50'
+                            : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
-                        {style.charAt(0).toUpperCase() + style.slice(1)}
+                        <span className={`block text-sm font-medium ${defaultResumeData.preferences.writing_style === style.id ? 'text-yellow-700' : 'text-slate-700'}`}>{style.label}</span>
+                        <span className='block text-xs text-slate-500 mt-0.5'>{style.description}</span>
                       </button>
                     ))}
                   </div>
-                  <p className='text-xs text-slate-500 mt-2'>
-                    {defaultResumeData.preferences.writing_style === 'professional' && 'Formal and business-oriented language'}
-                    {defaultResumeData.preferences.writing_style === 'technical' && 'Technical jargon and specific terminology'}
-                    {defaultResumeData.preferences.writing_style === 'creative' && 'Engaging and unique expressions'}
-                    {defaultResumeData.preferences.writing_style === 'casual' && 'Conversational and approachable tone'}
-                  </p>
+                  {(() => {
+                    const selected = WRITING_STYLES.find(style => style.id === defaultResumeData.preferences.writing_style) || WRITING_STYLES[0]
+                    return (
+                      <div className='mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                        <p className='text-[11px] font-medium uppercase tracking-wide text-slate-500 mb-1'>Example bullet in {selected.label} style</p>
+                        <p className='text-sm text-slate-700'>• {selected.example}</p>
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 {/* Tone */}
@@ -441,22 +447,24 @@ const UserProfile = () => {
                   <label className='block text-sm font-medium text-slate-700 mb-3'>
                     Tone
                   </label>
-                  <div className='grid grid-cols-2 gap-3'>
-                    {['confident', 'friendly', 'formal', 'enthusiastic'].map((t) => (
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                    {TONES.map((tone) => (
                       <button
-                        key={t}
+                        key={tone.id}
                         type="button"
+                        aria-pressed={defaultResumeData.preferences.tone === tone.id}
                         onClick={() => setDefaultResumeData(prev => ({
                           ...prev,
-                          preferences: { ...prev.preferences, tone: t }
+                          preferences: { ...prev.preferences, tone: tone.id }
                         }))}
-                        className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                          defaultResumeData.preferences.tone === t
-                            ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
-                            : 'border-gray-200 hover:border-gray-300 text-slate-600'
+                        className={`px-4 py-3 rounded-lg border-2 text-left transition-all ${
+                          defaultResumeData.preferences.tone === tone.id
+                            ? 'border-yellow-500 bg-yellow-50'
+                            : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
-                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                        <span className={`block text-sm font-medium ${defaultResumeData.preferences.tone === tone.id ? 'text-yellow-700' : 'text-slate-700'}`}>{tone.label}</span>
+                        <span className='block text-xs text-slate-500 mt-0.5'>{tone.description}</span>
                       </button>
                     ))}
                   </div>
@@ -473,7 +481,7 @@ const UserProfile = () => {
                       ...prev,
                       preferences: { ...prev.preferences, custom_requirements: e.target.value }
                     }))}
-                    placeholder="Any specific requirements or instructions for how AI should generate your resume content..."
+                    placeholder={'Examples:\n• Use British English spelling\n• Keep every bullet under 20 words\n• Always mention my AWS certification when relevant'}
                     className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none text-sm'
                     rows={5}
                   />
@@ -486,7 +494,7 @@ const UserProfile = () => {
                     <Sparkles className='size-5 text-blue-600 mt-0.5 flex-shrink-0' />
                     <div className='text-sm text-blue-800'>
                       <strong>How it works:</strong> These preferences guide the AI when generating or enhancing your resume content.
-                      They apply to features like "Enhance with AI", "Tailor Resume", and custom prompts.
+                      They apply to features like "AI Enhance", "Tailor Resume", and AI Prompt. You can also pick a different style and tone for a single tailored resume when you create it.
                     </div>
                   </div>
                 </div>

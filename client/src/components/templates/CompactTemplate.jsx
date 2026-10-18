@@ -1,6 +1,8 @@
+import { Fragment } from "react";
+import { orderSections } from "./sectionOrder";
 import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
-const CompactTemplate = ({ data, accentColor, sectionVisibility }) => {
+const CompactTemplate = ({ data, accentColor, sectionVisibility, sectionOrder }) => {
 	const formatDate = (dateStr) => {
 		if (!dateStr) return "";
 		const [year, month] = dateStr.split("-");
@@ -9,6 +11,164 @@ const CompactTemplate = ({ data, accentColor, sectionVisibility }) => {
 			month: "short"
 		});
 	};
+
+	// Each reorderable section, rendered in the user's chosen order by renderSections
+	const sections = {
+		// Skills
+		skills: data.skills && data.skills.length > 0 && sectionVisibility.skills && (
+			<div className="mb-2">
+				<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1" style={{ color: accentColor }}>
+					Skills
+				</h2>
+				<div className="flex flex-wrap gap-1">
+					{data.skills.map((skill, index) => (
+						<span
+							key={index}
+							className="px-2 py-0.5 text-[11pt] rounded"
+							style={{ backgroundColor: accentColor, color: "white" }}
+						>
+							{skill}
+						</span>
+					))}
+				</div>
+			</div>
+		),
+		// Education
+		education: data.education && data.education.length > 0 && sectionVisibility.education && (
+			<div className="mb-2">
+				<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1" style={{ color: accentColor }}>
+					Education
+				</h2>
+				<div className="space-y-1.5">
+					{data.education.map((edu, index) => (
+						<div key={index} className="education-item">
+							<h3 className="text-[11pt] font-semibold leading-tight">
+								{edu.degree}
+							</h3>
+							{edu.field && <p className="text-[11pt] text-gray-600 leading-tight">{edu.field}</p>}
+							<p className="text-[11pt] text-gray-600 leading-tight">{edu.institution}</p>
+							<div className="flex justify-between items-center text-[10pt] text-gray-500 mt-0.5">
+								<span>{formatDate(edu.graduation_date)}</span>
+								{edu.gpa && <span>GPA: {edu.gpa}</span>}
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		),
+		// Certifications
+		certifications: data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
+			<div className="mb-2">
+				<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1" style={{ color: accentColor }}>
+					Certifications
+				</h2>
+				<div className="space-y-1.5">
+					{data.certifications.map((cert, index) => (
+						<div key={index}>
+							<h3 className="text-[11pt] font-semibold leading-tight">{cert.name}</h3>
+							{cert.issuer && <p className="text-[11pt] text-gray-600 leading-tight">{cert.issuer}</p>}
+							{cert.date && <p className="text-[10pt] text-gray-500 leading-tight">{formatDate(cert.date)}</p>}
+						</div>
+					))}
+				</div>
+			</div>
+		),
+		// Professional Summary
+		summary: data.professional_summary && sectionVisibility.summary && (
+			<section className="mb-2.5">
+				<div
+					className="text-[11pt] text-gray-700 leading-snug quill-content"
+					dangerouslySetInnerHTML={{ __html: data.professional_summary }}
+				/>
+			</section>
+		),
+		// Experience
+		experience: data.experience && sectionVisibility.experience && data.experience.length > 0 && (
+			<section className="mb-2.5">
+				<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
+					Experience
+				</h2>
+
+				<div className="space-y-1.5">
+					{data.experience.map((exp, index) => (
+						<div key={index} className="experience-item">
+							<div className="flex justify-between items-baseline mb-0.5">
+								<h3 className="text-[11pt] font-semibold text-gray-900">{exp.position}</h3>
+								<div className="text-[10pt] text-gray-500">
+									{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
+								</div>
+							</div>
+							<p className="text-[11pt] font-medium mb-1" style={{ color: accentColor }}>{exp.company}</p>
+							{exp.description && (
+								<div
+									className="text-[11pt] text-gray-700 leading-snug quill-content"
+									dangerouslySetInnerHTML={{ __html: exp.description }}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</section>
+		),
+		// Projects
+		projects: data.project && data.project.length > 0 && sectionVisibility.projects && (
+			<section className="mb-2.5">
+				<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
+					Projects
+				</h2>
+
+				<div className="space-y-1">
+					{data.project.map((p, index) => (
+						<div key={index} className="project-item">
+							<h3 className="text-[11pt] font-semibold text-gray-900 mb-0.5">{p.name}</h3>
+							{p.description && (
+								<div
+									className="text-[11pt] text-gray-700 leading-snug quill-content"
+									dangerouslySetInnerHTML={{ __html: p.description }}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</section>
+		),
+		// Achievements
+		achievements: data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
+			<section className="mb-2.5">
+				<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
+					Achievements
+				</h2>
+
+				<ul className="space-y-0.5 list-disc pl-4">
+					{data.achievements.map((achievement, index) => (
+						<li key={index} className="text-[11pt] text-gray-700 leading-snug">
+							{typeof achievement === 'string' ? achievement : achievement.title}
+						</li>
+					))}
+				</ul>
+			</section>
+		),
+		// Custom Sections
+		customSections: data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
+			<>
+				{data.custom_sections.map((section, index) =>
+					section.section_name && section.content ? (
+						<section key={index} className="mb-2.5">
+							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
+								{section.section_name}
+							</h2>
+							<div
+								className="text-[11pt] text-gray-700 leading-snug quill-content"
+								dangerouslySetInnerHTML={{ __html: section.content }}
+							/>
+						</section>
+					) : null
+				)}
+			</>
+		),
+	};
+
+	const renderSections = (ids) => orderSections(sectionOrder, ids).map(id => <Fragment key={id}>{sections[id]}</Fragment>);
 
 	return (
 		<div className="max-w-4xl mx-auto text-gray-800 text-[11pt]" style={{
@@ -60,67 +220,7 @@ const CompactTemplate = ({ data, accentColor, sectionVisibility }) => {
 						</div>
 					</div>
 
-					{/* Skills */}
-					{data.skills && data.skills.length > 0 && sectionVisibility.skills && (
-						<div className="mb-2">
-							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1" style={{ color: accentColor }}>
-								Skills
-							</h2>
-							<div className="flex flex-wrap gap-1">
-								{data.skills.map((skill, index) => (
-									<span
-										key={index}
-										className="px-2 py-0.5 text-[11pt] rounded"
-										style={{ backgroundColor: accentColor, color: "white" }}
-									>
-										{skill}
-									</span>
-								))}
-							</div>
-						</div>
-					)}
-
-					{/* Education */}
-					{data.education && data.education.length > 0 && sectionVisibility.education && (
-						<div className="mb-2">
-							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1" style={{ color: accentColor }}>
-								Education
-							</h2>
-							<div className="space-y-1.5">
-								{data.education.map((edu, index) => (
-									<div key={index} className="education-item">
-										<h3 className="text-[11pt] font-semibold leading-tight">
-											{edu.degree}
-										</h3>
-										{edu.field && <p className="text-[11pt] text-gray-600 leading-tight">{edu.field}</p>}
-										<p className="text-[11pt] text-gray-600 leading-tight">{edu.institution}</p>
-										<div className="flex justify-between items-center text-[10pt] text-gray-500 mt-0.5">
-											<span>{formatDate(edu.graduation_date)}</span>
-											{edu.gpa && <span>GPA: {edu.gpa}</span>}
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					)}
-
-					{/* Certifications */}
-					{data.certifications && data.certifications.length > 0 && sectionVisibility.certifications && (
-						<div className="mb-2">
-							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1" style={{ color: accentColor }}>
-								Certifications
-							</h2>
-							<div className="space-y-1.5">
-								{data.certifications.map((cert, index) => (
-									<div key={index}>
-										<h3 className="text-[11pt] font-semibold leading-tight">{cert.name}</h3>
-										{cert.issuer && <p className="text-[11pt] text-gray-600 leading-tight">{cert.issuer}</p>}
-										{cert.date && <p className="text-[10pt] text-gray-500 leading-tight">{formatDate(cert.date)}</p>}
-									</div>
-								))}
-							</div>
-						</div>
-					)}
+					{renderSections(['skills', 'education', 'certifications'])}
 				</div>
 
 				{/* Main Content - 2/3 width */}
@@ -132,103 +232,7 @@ const CompactTemplate = ({ data, accentColor, sectionVisibility }) => {
 						</h1>
 					</header>
 
-					{/* Professional Summary */}
-					{data.professional_summary && sectionVisibility.summary && (
-						<section className="mb-2.5">
-							<div
-								className="text-[11pt] text-gray-700 leading-snug quill-content"
-								dangerouslySetInnerHTML={{ __html: data.professional_summary }}
-							/>
-						</section>
-					)}
-
-					{/* Experience */}
-					{data.experience && sectionVisibility.experience && data.experience.length > 0 && (
-						<section className="mb-2.5">
-							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
-								Experience
-							</h2>
-
-							<div className="space-y-1.5">
-								{data.experience.map((exp, index) => (
-									<div key={index} className="experience-item">
-										<div className="flex justify-between items-baseline mb-0.5">
-											<h3 className="text-[11pt] font-semibold text-gray-900">{exp.position}</h3>
-											<div className="text-[10pt] text-gray-500">
-												{formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-											</div>
-										</div>
-										<p className="text-[11pt] font-medium mb-1" style={{ color: accentColor }}>{exp.company}</p>
-										{exp.description && (
-											<div
-												className="text-[11pt] text-gray-700 leading-snug quill-content"
-												dangerouslySetInnerHTML={{ __html: exp.description }}
-											/>
-										)}
-									</div>
-								))}
-							</div>
-						</section>
-					)}
-
-					{/* Projects */}
-					{data.project && data.project.length > 0 && sectionVisibility.projects && (
-						<section className="mb-2.5">
-							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
-								Projects
-							</h2>
-
-							<div className="space-y-1">
-								{data.project.map((p, index) => (
-									<div key={index} className="project-item">
-										<h3 className="text-[11pt] font-semibold text-gray-900 mb-0.5">{p.name}</h3>
-										{p.description && (
-											<div
-												className="text-[11pt] text-gray-700 leading-snug quill-content"
-												dangerouslySetInnerHTML={{ __html: p.description }}
-											/>
-										)}
-									</div>
-								))}
-							</div>
-						</section>
-					)}
-
-					{/* Achievements */}
-					{data.achievements && data.achievements.length > 0 && sectionVisibility.achievements && (
-						<section className="mb-2.5">
-							<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
-								Achievements
-							</h2>
-
-							<ul className="space-y-0.5 list-disc pl-4">
-								{data.achievements.map((achievement, index) => (
-									<li key={index} className="text-[11pt] text-gray-700 leading-snug">
-										{typeof achievement === 'string' ? achievement : achievement.title}
-									</li>
-								))}
-							</ul>
-						</section>
-					)}
-
-					{/* Custom Sections */}
-					{data.custom_sections && data.custom_sections.length > 0 && sectionVisibility.customSections && (
-						<>
-							{data.custom_sections.map((section, index) =>
-								section.section_name && section.content ? (
-									<section key={index} className="mb-2.5">
-										<h2 className="text-[12pt] font-bold uppercase tracking-wide mb-1 pb-1 border-b-2" style={{ color: accentColor, borderColor: accentColor }}>
-											{section.section_name}
-										</h2>
-										<div
-											className="text-[11pt] text-gray-700 leading-snug quill-content"
-											dangerouslySetInnerHTML={{ __html: section.content }}
-										/>
-									</section>
-								) : null
-							)}
-						</>
-					)}
+					{renderSections(['summary', 'experience', 'projects', 'achievements', 'customSections'])}
 				</div>
 			</div>
 		</div>

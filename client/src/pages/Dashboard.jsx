@@ -6,6 +6,9 @@ import api from '../configs/api'
 import toast from 'react-hot-toast'
 import pdfToText from 'react-pdftotext'
 import SEO from '../components/SEO'
+import TailorProgress from '../components/TailorProgress'
+import { streamTailorResume } from '../utils/tailorStream'
+import { TONES, WRITING_STYLES } from '../configs/aiPreferences'
 
 const Dashboard = () => {
 
@@ -24,6 +27,10 @@ const Dashboard = () => {
   const [hasDefaultResumeData, setHasDefaultResumeData] = useState(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showAllResumes, setShowAllResumes] = useState(false)
+  // Writing style / tone for the next tailored resume; starts from the saved AI Preferences
+  const [tailorPreferences, setTailorPreferences] = useState({ writing_style: 'professional', tone: 'confident' })
+  const [tailorStage, setTailorStage] = useState(null) // current progress stage while tailoring
+  const [tailorRetrying, setTailorRetrying] = useState(false)
 
   const navigate = useNavigate()
 
@@ -41,6 +48,13 @@ const Dashboard = () => {
       )
 
       setHasDefaultResumeData(hasMeaningfulData)
+      const savedPreferences = data.defaultResumeData?.preferences
+      if (savedPreferences) {
+        setTailorPreferences({
+          writing_style: savedPreferences.writing_style || 'professional',
+          tone: savedPreferences.tone || 'confident',
+        })
+      }
       if (!hasMeaningfulData) {
         setShowOnboarding(true)
       }
@@ -131,12 +145,20 @@ const Dashboard = () => {
     }
 
     setIsLoading(true)
+    setTailorStage('profile')
+    setTailorRetrying(false)
     try {
-      // Send job description to AI endpoint
-      const { data } = await api.post('/api/ai/tailor-resume',
-        { jobDescription, title },
-        { headers: { Authorization: token } }
-      )
+      // Stream the job description to the AI endpoint so each step can be shown as it happens
+      const resumeId = await streamTailorResume({
+        token,
+        jobDescription,
+        title,
+        preferences: tailorPreferences,
+        onProgress: (stage) => {
+          if (stage === 'retrying') setTailorRetrying(true)
+          else setTailorStage(stage)
+        },
+      })
 
       toast.success('Resume tailored successfully!')
       setJobDescription('')
@@ -144,10 +166,11 @@ const Dashboard = () => {
       setShowJobDescriptionModal(false)
 
       // Navigate to resume builder with the newly created resume
-      navigate(`/app/builder/${data.resumeId}`)
+      navigate(`/app/builder/${resumeId}`)
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message)
+      toast.error(error.message)
     }
+    setTailorStage(null)
     setIsLoading(false)
   }
 
@@ -162,7 +185,7 @@ const Dashboard = () => {
         title="Dashboard - Flower Resume | Create Unlimited Free Resumes"
         description="Create, edit, and manage unlimited resumes for free. Paste job descriptions, let AI tailor your resume, and download as PDF — no limits."
         keywords="free resume dashboard, create unlimited resumes, manage resumes free, AI resume creator, paste JD create resume, free PDF resume download"
-        ogUrl="https://flowerresume.com/app"
+        ogUrl="https://app.flower-resume.com/app"
       />
       <div className='max-w-7xl mx-auto px-4 py-8'>
 
@@ -442,7 +465,7 @@ const Dashboard = () => {
 
         {/* Job Description Modal - AI Tailored Resume */}
         {showJobDescriptionModal && (
-          <form onSubmit={createTailoredResume} onClick={()=> setShowJobDescriptionModal(false)} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center p-4'>
+          <form onSubmit={createTailoredResume} onClick={()=> { if (!isLoading) setShowJobDescriptionModal(false) }} className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center p-4'>
             <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto'>
               <div className='flex items-center gap-2 sm:gap-3 mb-4'>
                 <div className='p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg flex-shrink-0'>
@@ -455,7 +478,9 @@ const Dashboard = () => {
                 Our AI will analyze the job description and create a resume highlighting your most relevant experience and skills from your profile.
               </p>
 
-              <div className='space-y-4'>
+              {tailorStage && <TailorProgress stage={tailorStage} retrying={tailorRetrying} />}
+
+              <div className={`space-y-4 ${tailorStage ? 'hidden' : ''}`}>
                 <div>
                   <label className='block text-xs sm:text-sm font-medium text-slate-700 mb-2'>
                     Resume Title
@@ -490,6 +515,35 @@ We are looking for a Senior Software Engineer with 5+ years of experience in Rea
                     💡 Tip: Include requirements, responsibilities, and qualifications for best results
                   </p>
                 </div>
+
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                  <div>
+                    <label htmlFor='tailor-style' className='block text-xs sm:text-sm font-medium text-slate-700 mb-1'>Writing style</label>
+                    <select
+                      id='tailor-style'
+                      value={tailorPreferences.writing_style}
+                      onChange={(e) => setTailorPreferences(prev => ({ ...prev, writing_style: e.target.value }))}
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    >
+                      {WRITING_STYLES.map(style => <option key={style.id} value={style.id}>{style.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor='tailor-tone' className='block text-xs sm:text-sm font-medium text-slate-700 mb-1'>Tone</label>
+                    <select
+                      id='tailor-tone'
+                      value={tailorPreferences.tone}
+                      onChange={(e) => setTailorPreferences(prev => ({ ...prev, tone: e.target.value }))}
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent'
+                    >
+                      {TONES.map(tone => <option key={tone.id} value={tone.id}>{tone.label}</option>)}
+                    </select>
+                  </div>
+                  <p className='sm:col-span-2 text-xs text-slate-500'>
+                    Applies to this resume only. Change your defaults in{' '}
+                    <button type='button' onClick={() => navigate('/app/profile?tab=preferences')} className='text-amber-700 hover:underline'>Profile → AI Preferences</button>.
+                  </p>
+                </div>
               </div>
 
               <div className='flex flex-col sm:flex-row gap-3 mt-6'>
@@ -522,7 +576,7 @@ We are looking for a Senior Software Engineer with 5+ years of experience in Rea
                 </button>
               </div>
 
-              <XIcon className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors' onClick={()=> {setShowJobDescriptionModal(false); setTitle(''); setJobDescription('')}}/>
+              {!isLoading && <XIcon className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors' onClick={()=> {setShowJobDescriptionModal(false); setTitle(''); setJobDescription('')}}/>}
             </div>
           </form>
         )}

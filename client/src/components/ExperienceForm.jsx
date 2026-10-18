@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import QuillEditor from './QuillTextEditor'
+import RegenerateButton from './RegenerateButton'
 
 const ExperienceForm = ({ data, onChange, jobDescription }) => {
 
@@ -45,7 +46,7 @@ const updateExperience = (index, field, value)=>{
         const { data } = await api.post('api/ai/enhance-job-desc', {userContent: prompt}, { headers: { Authorization: token } })
         updateExperience(index, "description", data.enhancedContent)
     } catch (error) {
-        toast.error(error.message)
+        toast.error(error?.response?.data?.message || error.message)
     }finally{
         setGeneratingIndex(-1)
     }
@@ -172,8 +173,29 @@ const updateExperience = (index, field, value)=>{
                     <div className="space-y-2">
                         <div className='flex items-center justify-between'>
                             <label className='text-sm font-medium text-gray-700'>Job Description</label>
+                            <div className='flex items-center gap-2'>
+                                <button
+                                    onClick={()=> generateDescription(index)}
+                                    disabled={generatingIndex === index || !experience.description?.replace(/<[^>]*>/g, '').trim()}
+                                    title='Rewrite this description with AI'
+                                    className='flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                                >
+                                    {generatingIndex === index ? (
+                                        <Loader2 className="w-3 h-3 animate-spin"/>
+                                    ) : (
+                                        <Sparkles className='w-3 h-3'/>
+                                    )}
+                                    AI Enhance
+                                </button>
+                                <RegenerateButton
+                                    size='xs'
+                                    section='experience'
+                                    item={experience}
+                                    currentText={experience.description}
+                                    jobDescription={jobDescription}
+                                    onApply={(text) => updateExperience(index, "description", text)}
+                                />
                             {jobDescription && (
-                                <div className='flex items-center gap-2'>
                                     <button onClick={()=> generateSuggestions(index)} disabled={suggestingIndex === index} className='flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors disabled:opacity-50'>
                                         {suggestingIndex === index ? (
                                             <Loader2 className="w-3 h-3 animate-spin"/>
@@ -182,8 +204,8 @@ const updateExperience = (index, field, value)=>{
                                         )}
                                         AI Suggestions
                                     </button>
-                                </div>
                             )}
+                            </div>
                         </div>
 
                         {/* Suggestions Dropdown */}

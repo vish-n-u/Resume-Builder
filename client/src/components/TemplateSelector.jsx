@@ -1,36 +1,10 @@
 import { Check, Layout } from 'lucide-react'
 import React, { useState } from 'react'
+import { TEMPLATES } from '../configs/resumeOptions'
 
 const TemplateSelector = ({ selectedTemplate, onChange }) => {
     const [isOpen, setIsOpen] = useState(false)
 
-    const templates = [
-        {
-            id: "classic",
-            name: "Classic",
-            preview: "A clean, traditional resume format with clear sections and professional typography"
-        },
-        {
-            id: "modern",
-            name: "Modern",
-            preview: "Sleek design with strategic use of color and modern font choices"
-        },
-        {
-            id: "minimal-image",
-            name: "Minimal Image",
-            preview: "Minimal design with a single image and clean typography"
-        },
-            {
-            id: "minimal",
-            name: "Minimal",
-            preview: "Ultra-clean design that puts your content front and center"
-        },
-        {
-            id: "compact",
-            name: "Compact",
-            preview: "Space-efficient two-column layout perfect for fitting more content on one page"
-        },
-    ]
   return (
     <div className='relative flex-1 sm:flex-initial'>
       <button onClick={()=> setIsOpen(!isOpen)} className='flex items-center justify-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 active:scale-95 transition-all px-3 py-2 rounded-lg group w-full sm:w-auto' title='Change resume template'>
@@ -44,7 +18,7 @@ const TemplateSelector = ({ selectedTemplate, onChange }) => {
                 <h3 className='text-sm font-bold text-gray-800 mb-1'>Choose Resume Template</h3>
                 <p className='text-xs text-gray-500'>Select a layout style for your resume</p>
             </div>
-            {templates.map((template)=>(
+            {TEMPLATES.map((template)=>(
                 <div key={template.id} onClick={()=> {onChange(template.id); setIsOpen(false)}} className={`relative p-3 border rounded-md cursor-pointer transition-all ${selectedTemplate === template.id ?
                     "border-blue-400 bg-blue-100"
                     : "border-gray-300 hover:border-gray-400 hover:bg-gray-100"

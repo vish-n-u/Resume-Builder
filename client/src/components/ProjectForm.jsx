@@ -1,8 +1,9 @@
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import React from 'react'
 import QuillEditor from './QuillTextEditor'
+import RegenerateButton from './RegenerateButton'
 
-const ProjectForm = ({ data, onChange }) => {
+const ProjectForm = ({ data, onChange, jobDescription }) => {
 
 const addProject = () =>{
     const newProject = {
@@ -87,7 +88,19 @@ const moveProjectDown = (index) => {
                         <input value={project.type || ""} onChange={(e)=>updateProject(index, "type", e.target.value)} type="text" placeholder="Project Type" className="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring focus:ring-blue-500 focus:border-blue-500 outline-none"/>
 
                         <div className="space-y-2">
-                            <label className='text-sm font-medium text-gray-700'>Project Description</label>
+                            <div className='flex items-center justify-between gap-2'>
+                                <label className='text-sm font-medium text-gray-700'>Project Description</label>
+                                <div className='flex items-center gap-2'>
+                                    <RegenerateButton
+                                        size='xs'
+                                        section='project'
+                                        item={project}
+                                        currentText={project.description}
+                                        jobDescription={jobDescription}
+                                        onApply={(text) => updateProject(index, "description", text)}
+                                    />
+                                </div>
+                            </div>
                             <div className="max-w-full overflow-x-hidden">
                                 <QuillEditor content={project.description || ""} onTextChange={(value)=> updateProject(index, "description", value)} />
                             </div>

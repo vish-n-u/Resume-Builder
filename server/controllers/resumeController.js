@@ -3,6 +3,12 @@ import Resume from "../models/Resume.js";
 import DetailedResume from "../models/DetailedResume.js";
 import fs from 'fs';
 
+const EDITABLE_RESUME_FIELDS = [
+    'title', 'job_description', 'public', 'template', 'accent_color',
+    'professional_summary', 'skills', 'personal_info', 'experience', 'project',
+    'education', 'certifications', 'achievements', 'custom_sections', 'sectionVisibility', 'section_order'
+]
+
 
 // controller for creating a new resume
 // POST: /api/resumes/create
@@ -107,28 +113,31 @@ export const updateResume = async (req, res) =>{
         const {resumeId, resumeData, removeBackground} = req.body
         const image = req.file;
         
-        let resumeDataCopy; 
-        if(typeof resumeData === 'string'){
-            resumeDataCopy = await JSON.parse(resumeData)
-        }else{
-            resumeDataCopy = structuredClone(resumeData)
+        const parsedData = typeof resumeData === 'string' ? JSON.parse(resumeData) : (resumeData || {})
+
+        // Only allow editable fields; never let the client change ownership or ids
+        const resumeDataCopy = {}
+        for (const field of EDITABLE_RESUME_FIELDS) {
+            if (parsedData[field] !== undefined) resumeDataCopy[field] = parsedData[field]
         }
 
         if(image){
-            
+            try {
+                const imageBufferData = fs.createReadStream(image.path)
 
-            const imageBufferData = fs.createReadStream(image.path)
+                const response = await imagekit.files.upload({
+                                file: imageBufferData,
+                                fileName: 'resume.png',
+                                folder: 'user-resumes',
+                                 transformation: {
+                                    pre: 'w-300,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : '')
+                                 }
+                                });
 
-            const response = await imagekit.files.upload({
-                            file: imageBufferData,
-                            fileName: 'resume.png',
-                            folder: 'user-resumes',
-                             transformation: {
-                                pre: 'w-300,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : '')
-                             }
-                            });
-
-            resumeDataCopy.personal_info.image = response.url
+                resumeDataCopy.personal_info = { ...(resumeDataCopy.personal_info || {}), image: response.url }
+            } finally {
+                fs.promises.unlink(image.path).catch(() => {})
+            }
         }
 
        // Use findOneAndUpdate to ensure we're updating the correct user's resume

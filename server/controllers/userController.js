@@ -237,19 +237,22 @@ export const updateDefaultResumeData = async (req, res) => {
 
         // Handle image upload if present
         if(req.file){
-            console.log("req",req.file,req.body)
             const imageKit = (await import('../configs/imageKit.js')).default;
-               const imageBufferData = fs.createReadStream(req.file.path)
+            try {
+                const imageBufferData = fs.createReadStream(req.file.path)
 
-            const uploadResult = await imageKit.files.upload({
-                file: imageBufferData,
-                fileName: req.file.originalname,
-                transformation: req.body.removeBackground === 'yes'
-                    ? [{ pre: 'l-image,i-remove_bg_shadow,bg-FFFFFF' }]
-                    : undefined
-            });
+                const uploadResult = await imageKit.files.upload({
+                    file: imageBufferData,
+                    fileName: req.file.originalname,
+                    transformation: req.body.removeBackground === 'yes'
+                        ? [{ pre: 'l-image,i-remove_bg_shadow,bg-FFFFFF' }]
+                        : undefined
+                });
 
-            parsedData.personal_info.image = uploadResult.url;
+                parsedData.personal_info.image = uploadResult.url;
+            } finally {
+                fs.promises.unlink(req.file.path).catch(() => {})
+            }
         }
 
         // Save or update in DetailedResume collection (separate from User)

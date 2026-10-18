@@ -14,13 +14,13 @@ const Navbar = () => {
     const logoutUser = ()=>{
         posthog?.reset()
         dispatch(logout())
-        window.location.href = 'https://flowerresume.com'
+        window.location.href = 'https://app.flower-resume.com'
     }
 
   return (
     <div className='shadow bg-white'>
       <nav className='flex items-center justify-between max-w-7xl mx-auto px-4 py-3.5 text-slate-800 transition-all'>
-        <a href='https://flowerresume.com' className="flex items-center gap-2">
+        <a href='https://app.flower-resume.com' className="flex items-center gap-2">
             <span className="text-2xl">🌻</span>
             <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Flower Resume</span>
         </a>
