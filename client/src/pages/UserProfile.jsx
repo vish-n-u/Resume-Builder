@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeftIcon, UserIcon, SaveIcon, Briefcase, GraduationCap, FolderIcon, Sparkles, FileTextIcon, PlusIcon, TrashIcon, Award, Trophy, Settings } from 'lucide-react'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
@@ -18,6 +18,7 @@ import EmailConnect from '../components/EmailConnect'
 import { TONES, WRITING_STYLES } from '../configs/aiPreferences'
 
 const UserProfile = () => {
+  const navigate = useNavigate()
 
   const { user, token } = useSelector(state => state.auth)
   const dispatch = useDispatch()
@@ -146,6 +147,8 @@ const UserProfile = () => {
       }
 
       toast.success('Your resume data saved successfully!')
+      // First-time users: take them straight on to creating their first tailored resume
+      if (fromOnboarding) navigate('/app?next=tailor')
     } catch (error) {
       console.error('Error saving your resume data:', error)
       toast.error(error?.response?.data?.message || error.message)

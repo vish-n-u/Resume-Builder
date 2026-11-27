@@ -1,4 +1,4 @@
-import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FilePenLineIcon, LoaderCircleIcon, CheckIcon, ArrowRightIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, SparklesIcon, BriefcaseIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import {useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -9,6 +9,7 @@ import SEO from '../components/SEO'
 import TailorProgress from '../components/TailorProgress'
 import { streamTailorResume } from '../utils/tailorStream'
 import { TONES, WRITING_STYLES } from '../configs/aiPreferences'
+import { usePostHog } from 'posthog-js/react'
 
 const Dashboard = () => {
 
@@ -31,8 +32,12 @@ const Dashboard = () => {
   const [tailorPreferences, setTailorPreferences] = useState({ writing_style: 'professional', tone: 'confident' })
   const [tailorStage, setTailorStage] = useState(null) // current progress stage while tailoring
   const [tailorRetrying, setTailorRetrying] = useState(false)
+  // Guided first-run flow: 'upload' (step 1) -> 'job' (step 2) -> tailored resume opens in the builder (step 3)
+  const [onboardingStep, setOnboardingStep] = useState('upload')
+  const [onboardingFile, setOnboardingFile] = useState(null)
 
   const navigate = useNavigate()
+  const posthog = usePostHog()
 
   const checkDefaultResumeData = async () => {
     try {
@@ -103,6 +108,30 @@ const Dashboard = () => {
     setIsLoading(false)
   }
 
+  // Step 1 of onboarding: read the PDF into the profile, then go straight to pasting a job
+  const uploadOnboardingResume = async (file) => {
+    if (!file) return
+    setOnboardingFile(file)
+    setIsLoading(true)
+    try {
+      const resumeText = await pdfToText(file)
+      await api.post('/api/ai/upload-resume-to-profile', {resumeText}, {headers: { Authorization: token }})
+      setHasDefaultResumeData(true)
+      posthog?.capture('onboarding_resume_uploaded')
+      setOnboardingStep('job')
+    } catch (error) {
+      setOnboardingFile(null)
+      toast.error(error?.response?.data?.message || "We couldn't read that PDF. Try another file or enter your details instead.")
+    }
+    setIsLoading(false)
+  }
+
+  const finishOnboardingLater = (path) => {
+    posthog?.capture('onboarding_skipped', { at_step: onboardingStep })
+    setShowOnboarding(false)
+    if (path) navigate(path)
+  }
+
   const editTitle = async (event) => {
     try {
       event.preventDefault()
@@ -160,7 +189,9 @@ const Dashboard = () => {
         },
       })
 
+      posthog?.capture('tailored_resume_generated', { from_onboarding: showOnboarding })
       toast.success('Resume tailored successfully!')
+      setShowOnboarding(false)
       setJobDescription('')
       setTitle('')
       setShowJobDescriptionModal(false)
@@ -177,6 +208,11 @@ const Dashboard = () => {
   useEffect(()=>{
     checkDefaultResumeData()
     loadAllResumes()
+    // Coming back from filling in the profile during onboarding: open "Paste a job" right away
+    if (new URLSearchParams(window.location.search).get('next') === 'tailor') {
+      setShowJobDescriptionModal(true)
+      navigate('/app', { replace: true })
+    }
   },[])
 
   return (
@@ -359,106 +395,103 @@ const Dashboard = () => {
         )
         }
 
-        {/* Onboarding Modal */}
-        {showOnboarding && hasDefaultResumeData === false && (
+        {/* Onboarding: 3 guided steps ending on a finished, tailored resume */}
+        {showOnboarding && (hasDefaultResumeData === false || onboardingStep === 'job') && (
           <div className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-50 flex items-center justify-center p-4'>
-            <div className='relative bg-white rounded-2xl w-full max-w-2xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto'>
-              {/* Header */}
-              <div className='text-center mb-6 sm:mb-8'>
-                <div className='inline-block p-3 sm:p-4 bg-gradient-to-br from-yellow-100 to-amber-100 rounded-full mb-4'>
-                  <span className='text-4xl sm:text-5xl'>🌻</span>
-                </div>
-                <h2 className='text-2xl sm:text-3xl font-bold text-slate-800 mb-3'>
-                  Welcome to Flower Resume!
-                </h2>
-                <p className='text-base sm:text-lg text-slate-600 max-w-xl mx-auto'>
-                  To get started with AI-powered resume generation, we need your professional details first.
-                </p>
-              </div>
+            <div className='relative bg-white rounded-2xl w-full max-w-2xl p-5 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto'>
 
-              {/* Options */}
-              <div className='grid sm:grid-cols-2 gap-4 mb-6'>
-                {/* Upload Resume Option */}
-                <button
-                  onClick={() => {
-                    setShowOnboarding(false)
-                    setShowUploadResume(true)
-                  }}
-                  className='group relative bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200 hover:border-purple-300 rounded-xl p-4 sm:p-6 text-left transition-all active:scale-95'
-                >
-                  <div className='flex items-start gap-3 sm:gap-4'>
-                    <div className='p-2 sm:p-3 bg-gradient-to-br from-purple-400 to-purple-500 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0'>
-                      <UploadCloudIcon className='size-5 sm:size-6 text-white' />
-                    </div>
-                    <div className='flex-1 pr-16 sm:pr-0'>
-                      <h3 className='text-base sm:text-lg font-bold text-slate-800 mb-2'>
-                        Upload Resume
-                      </h3>
-                      <p className='text-xs sm:text-sm text-slate-600'>
-                        Have an existing resume? Upload it and we'll extract all your information automatically.
-                      </p>
-                    </div>
-                  </div>
-                  <div className='absolute top-3 sm:top-4 right-3 sm:right-4'>
-                    <div className='px-2 sm:px-3 py-1 bg-purple-500 text-white text-xs font-medium rounded-full'>
-                      Fastest
-                    </div>
-                  </div>
-                </button>
+              {/* Step indicator */}
+              <ol className='flex items-center justify-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm'>
+                {['Add your resume', 'Paste a job', 'Get your resume'].map((label, index) => {
+                  const current = onboardingStep === 'upload' ? 0 : (tailorStage ? 2 : 1)
+                  const done = index < current
+                  const active = index === current
+                  return (
+                    <li key={label} className='flex items-center gap-2'>
+                      <span className={`size-6 rounded-full flex items-center justify-center font-semibold shrink-0 ${done ? 'bg-green-500 text-white' : active ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                        {done ? <CheckIcon className='size-3.5' /> : index + 1}
+                      </span>
+                      <span className={`${active ? 'text-slate-800 font-medium' : 'text-slate-500'} hidden sm:inline`}>{label}</span>
+                      {index < 2 && <span className='w-4 sm:w-8 h-px bg-slate-300' />}
+                    </li>
+                  )
+                })}
+              </ol>
 
-                {/* Manual Entry Option */}
-                <button
-                  onClick={() => {
-                    setShowOnboarding(false)
-                    navigate('/app/profile?onboarding=true')
-                  }}
-                  className='group relative bg-gradient-to-br from-yellow-50 to-amber-100 hover:from-yellow-100 hover:to-amber-200 border-2 border-yellow-200 hover:border-yellow-300 rounded-xl p-4 sm:p-6 text-left transition-all active:scale-95'
-                >
-                  <div className='flex items-start gap-3 sm:gap-4'>
-                    <div className='p-2 sm:p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0'>
-                      <FilePenLineIcon className='size-5 sm:size-6 text-white' />
-                    </div>
-                    <div className='flex-1 pr-16 sm:pr-0'>
-                      <h3 className='text-base sm:text-lg font-bold text-slate-800 mb-2'>
-                        Enter Details Manually
-                      </h3>
-                      <p className='text-xs sm:text-sm text-slate-600'>
-                        Fill out your information step-by-step. Add experience, education, skills, and more.
-                      </p>
-                    </div>
-                  </div>
-                  <div className='absolute top-3 sm:top-4 right-3 sm:right-4'>
-                    <div className='px-2 sm:px-3 py-1 bg-yellow-500 text-white text-xs font-medium rounded-full'>
-                      Most Control
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Info Box */}
-              <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6'>
-                <div className='flex items-start gap-3'>
-                  <SparklesIcon className='size-5 text-blue-600 mt-0.5 flex-shrink-0' />
-                  <div className='flex-1'>
-                    <p className='text-sm text-blue-900 font-medium mb-1'>
-                      Why do we need this?
-                    </p>
-                    <p className='text-sm text-blue-800'>
-                      Your profile information is used by our AI to create tailored resumes for each job you apply to. The more detailed you are, the better your resumes will be!
+              {onboardingStep === 'upload' ? (
+                <>
+                  <div className='text-center mb-6'>
+                    <span className='text-4xl'>🌻</span>
+                    <h2 className='text-2xl sm:text-3xl font-bold text-slate-800 mt-2 mb-2'>
+                      Welcome{user?.name && !/guest/i.test(user.name) ? `, ${user.name.split(' ')[0]}` : ''}!
+                    </h2>
+                    <p className='text-sm sm:text-base text-slate-600 max-w-lg mx-auto'>
+                      Get a resume tailored to the job you want in about 2 minutes. Start by adding your current resume.
                     </p>
                   </div>
-                </div>
-              </div>
 
-              {/* Skip Option */}
-              {/* <div className='text-center'>
-                <button
-                  onClick={() => setShowOnboarding(false)}
-                  className='text-sm text-slate-500 hover:text-slate-700 underline transition-colors'
-                >
-                  I'll do this later
-                </button>
-              </div> */}
+                  <label htmlFor='onboarding-resume' className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-8 sm:p-10 transition-colors ${isLoading ? 'border-amber-300 bg-amber-50 cursor-wait' : 'border-slate-300 hover:border-amber-500 hover:bg-amber-50 cursor-pointer'}`}>
+                    {isLoading ? (
+                      <>
+                        <LoaderCircleIcon className='size-10 text-amber-600 animate-spin' />
+                        <p className='text-sm font-medium text-slate-700'>Reading {onboardingFile?.name || 'your resume'}…</p>
+                        <p className='text-xs text-slate-500'>Pulling out your experience, education and skills</p>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloudIcon className='size-12 text-amber-500 stroke-[1.5]' />
+                        <p className='text-sm sm:text-base font-medium text-slate-700'>Click to upload your resume (PDF)</p>
+                        <p className='text-xs text-slate-500'>We'll fill in your profile for you — no typing needed</p>
+                      </>
+                    )}
+                  </label>
+                  <input type='file' id='onboarding-resume' accept='.pdf' hidden disabled={isLoading} onChange={(e) => { uploadOnboardingResume(e.target.files[0]); e.target.value = '' }} />
+
+                  <div className='text-center mt-5 text-sm text-slate-500'>
+                    No resume yet?{' '}
+                    <button type='button' disabled={isLoading} onClick={() => finishOnboardingLater('/app/profile?onboarding=true')} className='text-amber-700 font-medium hover:underline'>
+                      Enter your details instead
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <form onSubmit={createTailoredResume}>
+                  {!tailorStage && (
+                    <div className='flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-3 mb-5'>
+                      <CheckIcon className='size-5 text-green-600 shrink-0 mt-0.5' />
+                      <p className='text-sm text-green-900'>
+                        <span className='font-medium'>Your profile is ready.</span> Now paste a job you want to apply for and we'll write a resume for it.
+                      </p>
+                    </div>
+                  )}
+
+                  {tailorStage && <TailorProgress stage={tailorStage} retrying={tailorRetrying} />}
+
+                  <div className={`space-y-4 ${tailorStage ? 'hidden' : ''}`}>
+                    <div>
+                      <label htmlFor='onboarding-title' className='block text-sm font-medium text-slate-700 mb-1'>Job title</label>
+                      <input id='onboarding-title' onChange={(e)=>setTitle(e.target.value)} value={title} type='text' placeholder='e.g., Marketing Manager at Spotify' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base' required />
+                    </div>
+                    <div>
+                      <label htmlFor='onboarding-jd' className='block text-sm font-medium text-slate-700 mb-1'>
+                        Job description <span className='text-slate-500 font-normal'>(copy and paste the job post)</span>
+                      </label>
+                      <textarea id='onboarding-jd' onChange={(e)=>setJobDescription(e.target.value)} value={jobDescription} rows={8} placeholder='Paste the full job post here — responsibilities, requirements, qualifications...' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none text-sm sm:text-base' required />
+                    </div>
+                  </div>
+
+                  <button type='submit' disabled={isLoading} className='mt-5 w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium'>
+                    {isLoading ? <><LoaderCircleIcon className='animate-spin size-5'/> Creating your resume…</> : <><SparklesIcon className='size-5'/> Create my tailored resume <ArrowRightIcon className='size-4'/></>}
+                  </button>
+
+                  {!isLoading && (
+                    <div className='flex flex-col sm:flex-row justify-center gap-2 sm:gap-6 mt-4 text-sm text-center'>
+                      <button type='button' onClick={() => finishOnboardingLater('/app/profile?onboarding=true')} className='text-slate-500 hover:text-slate-700 hover:underline'>Check my profile first</button>
+                      <button type='button' onClick={() => finishOnboardingLater()} className='text-slate-500 hover:text-slate-700 hover:underline'>I'll do this later</button>
+                    </div>
+                  )}
+                </form>
+              )}
             </div>
           </div>
         )}

@@ -117,7 +117,7 @@ const Login = () => {
       {showServerMsg && (
         <div className="fixed bottom-0 left-0 right-0 bg-yellow-500 text-white px-4 py-3 flex items-center justify-center gap-3 animate-pulse z-50 shadow-lg">
             <ServerCrash className="size-5 shrink-0" />
-            <p className="text-sm font-semibold">Server is waking up — free server takes a moment to start, please wait...</p>
+            <p className="text-sm font-semibold">Lots of people are using Flower Resume right now — hang tight, it'll be ready in a moment...</p>
         </div>
       )}
     </div>

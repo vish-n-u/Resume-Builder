@@ -165,18 +165,18 @@ const Loader = () => {
       {phase >= 1 && (
         <div className='flex items-center gap-2 text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 animate-pulse'>
           <ServerCrash className='size-4 shrink-0' />
-          <span className='text-sm'>Server is waking up — free server takes a moment to start, please wait...</span>
+          <span className='text-sm'>Lots of people are using Flower Resume right now — hang tight, it'll be ready in a moment...</span>
         </div>
       )}
 
       {phase >= 2 && (
         <div className='text-center space-y-1'>
           <p className='text-sm text-gray-600'>
-            This app runs on a <span className='font-semibold'>free server</span> that goes to sleep after inactivity.
-            Cold starts can take up to 2 minutes.
+            We're seeing <span className='font-semibold'>high traffic</span> right now, so things are a little slower than usual.
+            It can take up to 2 minutes.
           </p>
           <p className='text-xs text-gray-400'>
-            The app is not frozen — it's still waiting for the server to respond.
+            The app isn't frozen — your spot is saved, and it will load on its own.
           </p>
         </div>
       )}
