@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import api from '../configs/api'
-import { LoaderCircleIcon, UsersIcon, FileTextIcon, ChevronDownIcon, EyeIcon, XIcon, UserIcon, BriefcaseIcon, GraduationCapIcon, CodeIcon, AwardIcon, MailIcon, PhoneIcon, MapPinIcon, LinkedinIcon, GlobeIcon } from 'lucide-react'
+import { LoaderCircleIcon, UsersIcon, FileTextIcon, ChevronDownIcon, EyeIcon, XIcon, UserIcon, BriefcaseIcon, GraduationCapIcon, CodeIcon, AwardIcon, MailIcon, PhoneIcon, MapPinIcon, LinkedinIcon, GlobeIcon, SearchIcon } from 'lucide-react'
 import ResumePreview from '../components/ResumePreview'
+import { sanitizeHtml } from '../utils/sanitize'
 
 const AdminDashboard = () => {
   const { token } = useSelector(state => state.auth)
   const navigate = useNavigate()
 
   const [users, setUsers] = useState([])
+  const [search, setSearch] = useState('')
   const [selectedUserId, setSelectedUserId] = useState(null)
   const [resumes, setResumes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -34,7 +36,8 @@ const AdminDashboard = () => {
   const fetchUsers = async () => {
     try {
       const { data } = await api.get('/api/admin/users', { headers: { Authorization: token } })
-      setUsers(data)
+      // Newest sign-ups first
+      setUsers([...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
     } catch (error) {
       if (error?.response?.status === 403) {
         setUnauthorized(true)
@@ -164,8 +167,13 @@ const AdminDashboard = () => {
         </div>
         <div>
           <h1 className='text-2xl font-bold text-slate-800'>Admin Dashboard</h1>
-          <p className='text-sm text-slate-500'>{users.length} registered {users.length === 1 ? 'user' : 'users'}</p>
+          <p className='text-sm text-slate-500'>{users.length} registered {users.length === 1 ? 'user' : 'users'} · newest first · click a name to see their resumes</p>
         </div>
+      </div>
+
+      <div className='relative mb-4 max-w-md'>
+        <SearchIcon className='size-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2' />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} type='search' placeholder='Search by name or email' className='w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent' />
       </div>
 
       {/* Users Table */}
@@ -182,7 +190,7 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {users.filter(u => !search.trim() || `${u.name} ${u.email}`.toLowerCase().includes(search.trim().toLowerCase())).map((user) => (
                 <React.Fragment key={user._id}>
                   <tr
                     onClick={() => fetchResumes(user._id)}
@@ -368,7 +376,7 @@ const AdminDashboard = () => {
                     <h3 className='text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2'>
                       <UserIcon className='size-4' /> Professional Summary
                     </h3>
-                    <p className='text-sm text-slate-600 bg-slate-50 rounded-lg p-3'>{profileData.professional_summary}</p>
+                    <div className='text-sm text-slate-600 bg-slate-50 rounded-lg p-3 [&_ul]:list-disc [&_ul]:pl-5' dangerouslySetInnerHTML={{ __html: sanitizeHtml(profileData.professional_summary) }} />
                   </div>
                 )}
 
@@ -404,7 +412,7 @@ const AdminDashboard = () => {
                               {exp.start_date} - {exp.is_current ? 'Present' : exp.end_date}
                             </p>
                           </div>
-                          {exp.description && <p className='text-xs text-slate-600 mt-2 whitespace-pre-line'>{exp.description}</p>}
+                          {exp.description && <div className='text-xs text-slate-600 mt-2 [&_ul]:list-disc [&_ul]:pl-5' dangerouslySetInnerHTML={{ __html: sanitizeHtml(exp.description) }} />}
                         </div>
                       ))}
                     </div>
@@ -449,7 +457,7 @@ const AdminDashboard = () => {
                             <p className='font-medium text-slate-800 text-sm'>{proj.name}</p>
                             {proj.type && <span className='px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-xs ml-2'>{proj.type}</span>}
                           </div>
-                          {proj.description && <p className='text-xs text-slate-600 mt-2 whitespace-pre-line'>{proj.description}</p>}
+                          {proj.description && <div className='text-xs text-slate-600 mt-2 [&_ul]:list-disc [&_ul]:pl-5' dangerouslySetInnerHTML={{ __html: sanitizeHtml(proj.description) }} />}
                         </div>
                       ))}
                     </div>
@@ -484,7 +492,7 @@ const AdminDashboard = () => {
                       {profileData.achievements.map((ach, i) => (
                         <div key={i} className='bg-slate-50 rounded-lg p-3'>
                           <p className='font-medium text-slate-800 text-sm'>{ach.title}</p>
-                          {ach.description && <p className='text-xs text-slate-600 mt-1'>{ach.description}</p>}
+                          {ach.description && <div className='text-xs text-slate-600 mt-1' dangerouslySetInnerHTML={{ __html: sanitizeHtml(ach.description) }} />}
                         </div>
                       ))}
                     </div>
