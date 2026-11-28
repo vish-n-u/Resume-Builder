@@ -19,6 +19,7 @@ import api from '../configs/api'
 import toast from 'react-hot-toast'
 import SEO from '../components/SEO'
 import { usePostHog } from 'posthog-js/react'
+import { trackResumeDownload } from '../utils/trackDownload'
 
 const ResumeBuilder = ({ initialData = null, onClose = null }) => {
 
@@ -139,9 +140,32 @@ const ResumeBuilder = ({ initialData = null, onClose = null }) => {
   }
 
   const downloadResume = () => {
-    posthog?.capture('resume_downloaded', { template: resumeData.template, resumeId })
+    trackResumeDownload({ resumeId, token, posthog, source: 'button', template: resumeData.template })
     window.print();
   }
+
+  // Also count Ctrl+P / the browser's own Print menu, and note how long the Save as PDF
+  // window stayed open (a very short time usually means the person pressed Cancel)
+  useEffect(() => {
+    if (!resumeId) return
+    let openedAt = 0
+    const beforePrint = () => {
+      openedAt = Date.now()
+      trackResumeDownload({ resumeId, token, posthog, source: 'browser_print', template: resumeData.template })
+    }
+    const afterPrint = () => {
+      if (!openedAt) return
+      const secondsOpen = Math.round((Date.now() - openedAt) / 100) / 10
+      posthog?.capture('resume_print_closed', { resumeId, seconds_open: secondsOpen, likely_saved: secondsOpen >= 2 })
+      openedAt = 0
+    }
+    window.addEventListener('beforeprint', beforePrint)
+    window.addEventListener('afterprint', afterPrint)
+    return () => {
+      window.removeEventListener('beforeprint', beforePrint)
+      window.removeEventListener('afterprint', afterPrint)
+    }
+  }, [resumeId, token, posthog, resumeData.template])
 
   const saveResume = () => {
     toast.promise(saveNow(), {

@@ -6,6 +6,9 @@ const ResumeSchema = new mongoose.Schema({
     job_description: {type: String, default: ''},
     public: { type: Boolean, default: false },
     template: { type: String, default: "classic" },
+    // Download tracking (each time the user opens Save as PDF for this resume)
+    downloadCount: { type: Number, default: 0 },
+    lastDownloadedAt: { type: Date },
     accent_color: { type: String, default: "#000000" },
     professional_summary: { type: String, default: '' },
     skills: [{ type: String }],

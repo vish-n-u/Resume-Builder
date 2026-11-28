@@ -33,7 +33,7 @@ export const getUserResumes = async (req, res) => {
     const { userId } = req.params;
     const resumes = await Resume.find(
       { userId },
-      "title template createdAt updatedAt"
+      "title template createdAt updatedAt downloadCount lastDownloadedAt"
     ).sort({ updatedAt: -1 });
 
     res.json(resumes);
@@ -63,6 +63,34 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ message: "Profile not found" });
     }
     res.json({ profile });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Admin-only: record downloads that happened before server-side tracking existed
+// (copied from PostHog). Never lowers an existing count.
+// POST /api/admin/resumes/:resumeId/backfill-downloads  { count, lastDownloadedAt }
+export const backfillResumeDownloads = async (req, res) => {
+  try {
+    const { resumeId } = req.params;
+    const count = Math.max(0, parseInt(req.body?.count, 10) || 0);
+    const last = req.body?.lastDownloadedAt ? new Date(req.body.lastDownloadedAt) : null;
+    if (!count || !last || isNaN(last)) {
+      return res.status(400).json({ message: "count and lastDownloadedAt are required" });
+    }
+    const resume = await Resume.findById(resumeId, "downloadCount lastDownloadedAt");
+    if (!resume) return res.status(404).json({ message: "Resume not found" });
+
+    await Resume.updateOne(
+      { _id: resumeId },
+      { $set: {
+          downloadCount: Math.max(resume.downloadCount || 0, count),
+          lastDownloadedAt: resume.lastDownloadedAt && resume.lastDownloadedAt > last ? resume.lastDownloadedAt : last,
+      } },
+      { timestamps: false }
+    );
+    res.json({ message: "Backfilled" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

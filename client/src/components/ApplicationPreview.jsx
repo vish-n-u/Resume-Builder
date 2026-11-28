@@ -4,10 +4,13 @@ import ResumePreview from './ResumePreview'
 import api from '../configs/api'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
+import { usePostHog } from 'posthog-js/react'
+import { trackResumeDownload } from '../utils/trackDownload'
 import ResumeBuilder from '../pages/ResumeBuilder'
 
 const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent }) => {
   const { token } = useSelector(state => state.auth)
+  const posthog = usePostHog()
   const [emailSubject, setEmailSubject] = useState(application?.emailSubject || '')
   const [emailBody, setEmailBody] = useState(application?.emailBody || '')
   const [recipientEmail, setRecipientEmail] = useState(application?.recipientEmail || job?.applyEmail || '')
@@ -34,6 +37,7 @@ const ApplicationPreview = ({ isOpen, onClose, application, resume, job, onSent 
       toast.error('Resume preview not found')
       return
     }
+    trackResumeDownload({ resumeId: resumeData?._id || resume?._id, token, posthog, source: 'application', template: resumeData?.template })
 
     // Clone the resume and append it directly to <body> as a top-level element.
     // A <style> block hides everything else via display:none (removes from flow,

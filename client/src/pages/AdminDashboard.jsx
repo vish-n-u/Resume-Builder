@@ -2,9 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import api from '../configs/api'
-import { LoaderCircleIcon, UsersIcon, FileTextIcon, ChevronDownIcon, EyeIcon, XIcon, UserIcon, BriefcaseIcon, GraduationCapIcon, CodeIcon, AwardIcon, MailIcon, PhoneIcon, MapPinIcon, LinkedinIcon, GlobeIcon, SearchIcon } from 'lucide-react'
+import { LoaderCircleIcon, UsersIcon, FileTextIcon, ChevronDownIcon, EyeIcon, XIcon, UserIcon, BriefcaseIcon, GraduationCapIcon, CodeIcon, AwardIcon, MailIcon, PhoneIcon, MapPinIcon, LinkedinIcon, GlobeIcon, SearchIcon, CheckIcon } from 'lucide-react'
 import ResumePreview from '../components/ResumePreview'
 import { sanitizeHtml } from '../utils/sanitize'
+
+// Server-side download tracking started on this date; older resumes may have been
+// downloaded before then without being recorded.
+const DOWNLOAD_TRACKING_START = new Date('2026-11-28T12:00:00Z')
+
+const DownloadTag = ({ resume }) => {
+  if (resume.downloadCount > 0) {
+    const last = resume.lastDownloadedAt ? new Date(resume.lastDownloadedAt).toLocaleDateString() : ''
+    return (
+      <span title={last ? `Last downloaded ${last}` : ''} className='inline-flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700'>
+        <CheckIcon className='size-3' /> Downloaded{resume.downloadCount > 1 ? ` · ${resume.downloadCount}×` : ''}
+      </span>
+    )
+  }
+  if (new Date(resume.updatedAt) < DOWNLOAD_TRACKING_START) {
+    return <span title='Created before download tracking started' className='whitespace-nowrap px-2 py-0.5 rounded-full text-xs border border-slate-300 text-slate-500'>Not tracked</span>
+  }
+  return <span className='whitespace-nowrap px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600'>Not downloaded</span>
+}
 
 const AdminDashboard = () => {
   const { token } = useSelector(state => state.auth)
@@ -235,6 +254,7 @@ const AdminDashboard = () => {
                               <thead>
                                 <tr className='border-b border-slate-200'>
                                   <th className='text-left px-3 py-2 font-medium text-slate-600'>Title</th>
+                                  <th className='text-left px-3 py-2 font-medium text-slate-600'>Downloaded</th>
                                   <th className='text-left px-3 py-2 font-medium text-slate-600'>Template</th>
                                   <th className='text-left px-3 py-2 font-medium text-slate-600'>Created</th>
                                   <th className='text-left px-3 py-2 font-medium text-slate-600'>Updated</th>
@@ -245,6 +265,7 @@ const AdminDashboard = () => {
                                 {resumes.map((resume) => (
                                   <tr key={resume._id} className='border-b border-slate-100'>
                                     <td className='px-3 py-2 text-slate-800'>{resume.title}</td>
+                                    <td className='px-3 py-2'><DownloadTag resume={resume} /></td>
                                     <td className='px-3 py-2'>
                                       <span className='px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-xs capitalize'>{resume.template}</span>
                                     </td>

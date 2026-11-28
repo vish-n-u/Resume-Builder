@@ -156,3 +156,27 @@ export const updateResume = async (req, res) =>{
         return res.status(400).json({message: error.message})
     }
 }
+
+// controller for recording that a user downloaded (opened Save as PDF for) their resume
+// POST: /api/resumes/downloaded/:resumeId
+export const markResumeDownloaded = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { resumeId } = req.params;
+
+        // timestamps: false so a download doesn't change the resume's "Updated" date
+        const result = await Resume.updateOne(
+            { _id: resumeId, userId },
+            { $inc: { downloadCount: 1 }, $set: { lastDownloadedAt: new Date() } },
+            { timestamps: false }
+        );
+
+        if (!result.matchedCount) {
+            return res.status(404).json({ message: 'Resume not found' });
+        }
+
+        return res.status(200).json({ message: 'Download recorded' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+}
