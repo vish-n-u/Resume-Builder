@@ -35,6 +35,16 @@ const Dashboard = () => {
   // Guided first-run flow: 'upload' (step 1) -> 'job' (step 2) -> tailored resume opens in the builder (step 3)
   const [onboardingStep, setOnboardingStep] = useState('upload')
   const [onboardingFile, setOnboardingFile] = useState(null)
+  // Step 1 offers three ways in: upload a PDF, paste text, or fill in a short form
+  const [onboardingMethod, setOnboardingMethod] = useState('upload')
+  const [pastedResume, setPastedResume] = useState('')
+  const [noExperience, setNoExperience] = useState(false)
+  const [skillDraft, setSkillDraft] = useState('')
+  const [usedQuickForm, setUsedQuickForm] = useState(false)
+  const [quickProfile, setQuickProfile] = useState({
+    full_name: '', email: '', position: '', company: '', start_date: '', end_date: 'current',
+    did: '', degree: '', institution: '', projects: '', education: '', skills: []
+  })
 
   const navigate = useNavigate()
   const posthog = usePostHog()
@@ -108,23 +118,99 @@ const Dashboard = () => {
     setIsLoading(false)
   }
 
-  // Step 1 of onboarding: read the PDF into the profile, then go straight to pasting a job
+  // Step 1 of onboarding (upload or paste): the AI reads the text into the profile, then on to "Paste a job"
+  const readResumeIntoProfile = async (resumeText, method) => {
+    await api.post('/api/ai/upload-resume-to-profile', {resumeText}, {headers: { Authorization: token }})
+    setHasDefaultResumeData(true)
+    posthog?.capture('onboarding_resume_uploaded', { method })
+    setOnboardingStep('job')
+  }
+
   const uploadOnboardingResume = async (file) => {
     if (!file) return
     setOnboardingFile(file)
     setIsLoading(true)
     try {
       const resumeText = await pdfToText(file)
-      await api.post('/api/ai/upload-resume-to-profile', {resumeText}, {headers: { Authorization: token }})
-      setHasDefaultResumeData(true)
-      posthog?.capture('onboarding_resume_uploaded')
-      setOnboardingStep('job')
+      await readResumeIntoProfile(resumeText, 'pdf')
     } catch (error) {
       setOnboardingFile(null)
-      toast.error(error?.response?.data?.message || "We couldn't read that PDF. Try another file or enter your details instead.")
+      toast.error(error?.response?.data?.message || "We couldn't read that PDF. Try another file, paste the text, or fill in your details.")
     }
     setIsLoading(false)
   }
+
+  const submitPastedResume = async (event) => {
+    event.preventDefault()
+    if (pastedResume.trim().length < 80) {
+      toast.error('Please paste a bit more, like your jobs, studies and skills.')
+      return
+    }
+    setIsLoading(true)
+    try {
+      await readResumeIntoProfile(pastedResume, 'paste')
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "We couldn't read that text. Try again or fill in your details.")
+    }
+    setIsLoading(false)
+  }
+
+  const setQuick = (field, value) => setQuickProfile(prev => ({ ...prev, [field]: value }))
+
+  const addSkill = () => {
+    const skill = skillDraft.trim().replace(/,$/, '')
+    if (skill && !quickProfile.skills.includes(skill)) setQuick('skills', [...quickProfile.skills, skill])
+    setSkillDraft('')
+  }
+
+  // Turns plain sentences ("Helped customers, ran the till.") into a bullet list for the profile
+  const toBullets = (text) => {
+    const parts = text.split(/\n|(?<=[.!?])\s+/).map(t => t.trim().replace(/^[-•*]\s*/, '')).filter(Boolean)
+    const escape = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return parts.length ? `<ul>${parts.map(t => `<li>${escape(t)}</li>`).join('')}</ul>` : ''
+  }
+
+  const submitQuickProfile = async (event) => {
+    event.preventDefault()
+    const q = quickProfile
+    const skills = skillDraft.trim() ? [...q.skills, skillDraft.trim()] : q.skills
+    const educationLine = q.education.trim()
+    const defaultResumeData = {
+      professional_summary: '',
+      skills,
+      personal_info: { image: '', full_name: q.full_name.trim(), profession: noExperience ? (q.degree.trim() ? `${q.degree.trim()} student` : '') : q.position.trim(), email: q.email.trim(), phone: '', location: '', linkedin: '', website: '' },
+      experience: noExperience ? [] : [{
+        company: q.company.trim(), position: q.position.trim(), start_date: q.start_date.trim(),
+        end_date: q.end_date === 'current' ? '' : q.end_date, is_current: q.end_date === 'current', description: toBullets(q.did)
+      }],
+      project: noExperience && q.projects.trim() ? [{ name: 'Projects and activities', type: '', description: toBullets(q.projects) }] : [],
+      education: noExperience
+        ? (q.degree.trim() || q.institution.trim() ? [{ institution: q.institution.trim(), degree: q.degree.trim(), field: '', graduation_date: '', gpa: '' }] : [])
+        : (educationLine ? [{ institution: '', degree: educationLine, field: '', graduation_date: '', gpa: '' }] : []),
+      certifications: [], achievements: [], custom_sections: []
+    }
+    setIsLoading(true)
+    try {
+      const formData = new FormData()
+      formData.append('defaultResumeData', JSON.stringify(defaultResumeData))
+      await api.put('/api/users/update-default-resume-data', formData, { headers: { Authorization: token } })
+      setHasDefaultResumeData(true)
+      setUsedQuickForm(true)
+      posthog?.capture('onboarding_resume_uploaded', { method: 'quick_form', no_experience: noExperience })
+      setOnboardingStep('job')
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "We couldn't save your details. Please try again.")
+    }
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    if (user) setQuickProfile(prev => ({
+      ...prev,
+      full_name: prev.full_name || (/guest/i.test(user.name || '') ? '' : (user.name || '')),
+      email: prev.email || (/guest@/i.test(user.email || '') ? '' : (user.email || ''))
+    }))
+  }, [user])
 
   const finishOnboardingLater = (path) => {
     posthog?.capture('onboarding_skipped', { at_step: onboardingStep })
@@ -402,7 +488,7 @@ const Dashboard = () => {
 
               {/* Step indicator */}
               <ol className='flex items-center justify-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm'>
-                {['Add your resume', 'Paste a job', 'Get your resume'].map((label, index) => {
+                {['Tell us about you', 'Paste a job', 'Get your resume'].map((label, index) => {
                   const current = onboardingStep === 'upload' ? 0 : (tailorStage ? 2 : 1)
                   const done = index < current
                   const active = index === current
@@ -420,37 +506,146 @@ const Dashboard = () => {
 
               {onboardingStep === 'upload' ? (
                 <>
-                  <div className='text-center mb-6'>
+                  <div className='text-center mb-5'>
                     <span className='text-4xl'>🌻</span>
                     <h2 className='text-2xl sm:text-3xl font-bold text-slate-800 mt-2 mb-2'>
                       Welcome{user?.name && !/guest/i.test(user.name) ? `, ${user.name.split(' ')[0]}` : ''}!
                     </h2>
                     <p className='text-sm sm:text-base text-slate-600 max-w-lg mx-auto'>
-                      Get a resume tailored to the job you want in about 2 minutes. Start by adding your current resume.
+                      Get a resume tailored to the job you want in about 2 minutes. First, tell us about yourself. Pick whichever is easiest.
                     </p>
                   </div>
 
-                  <label htmlFor='onboarding-resume' className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-8 sm:p-10 transition-colors ${isLoading ? 'border-amber-300 bg-amber-50 cursor-wait' : 'border-slate-300 hover:border-amber-500 hover:bg-amber-50 cursor-pointer'}`}>
-                    {isLoading ? (
-                      <>
-                        <LoaderCircleIcon className='size-10 text-amber-600 animate-spin' />
-                        <p className='text-sm font-medium text-slate-700'>Reading {onboardingFile?.name || 'your resume'}…</p>
-                        <p className='text-xs text-slate-500'>Pulling out your experience, education and skills</p>
-                      </>
-                    ) : (
-                      <>
-                        <UploadCloudIcon className='size-12 text-amber-500 stroke-[1.5]' />
-                        <p className='text-sm sm:text-base font-medium text-slate-700'>Click to upload your resume (PDF)</p>
-                        <p className='text-xs text-slate-500'>We'll fill in your profile for you — no typing needed</p>
-                      </>
-                    )}
-                  </label>
-                  <input type='file' id='onboarding-resume' accept='.pdf' hidden disabled={isLoading} onChange={(e) => { uploadOnboardingResume(e.target.files[0]); e.target.value = '' }} />
+                  {/* Three ways in */}
+                  <div role='tablist' aria-label='How to add your details' className='grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4'>
+                    {[
+                      { id: 'upload', label: 'Upload a PDF', hint: 'Fastest' },
+                      { id: 'paste', label: 'Paste text', hint: 'From Word or LinkedIn' },
+                      { id: 'quick', label: 'Fill in quickly', hint: 'No resume yet' },
+                    ].map(option => (
+                      <button key={option.id} type='button' role='tab' aria-selected={onboardingMethod === option.id} disabled={isLoading}
+                        onClick={() => setOnboardingMethod(option.id)}
+                        className={`rounded-xl border-[1.5px] px-3 py-2.5 sm:py-3 flex sm:flex-col items-center sm:justify-center gap-2 sm:gap-0.5 text-left sm:text-center transition-colors ${onboardingMethod === option.id ? 'border-amber-500 bg-amber-50' : 'border-slate-200 hover:border-slate-300 bg-white'}`}>
+                        <span className='text-sm font-semibold text-slate-800'>{option.label}</span>
+                        <span className='hidden sm:block text-xs text-slate-500'>{option.hint}</span>
+                      </button>
+                    ))}
+                  </div>
 
-                  <div className='text-center mt-5 text-sm text-slate-500'>
-                    No resume yet?{' '}
-                    <button type='button' disabled={isLoading} onClick={() => finishOnboardingLater('/app/profile?onboarding=true')} className='text-amber-700 font-medium hover:underline'>
-                      Enter your details instead
+                  {onboardingMethod === 'upload' && (
+                    <>
+                      <label htmlFor='onboarding-resume' className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-8 sm:p-10 transition-colors ${isLoading ? 'border-amber-300 bg-amber-50 cursor-wait' : 'border-slate-300 hover:border-amber-500 hover:bg-amber-50 cursor-pointer'}`}>
+                        {isLoading ? (
+                          <>
+                            <LoaderCircleIcon className='size-10 text-amber-600 animate-spin' />
+                            <p className='text-sm font-medium text-slate-700'>Reading {onboardingFile?.name || 'your resume'}…</p>
+                            <p className='text-xs text-slate-500'>Pulling out your experience, education and skills</p>
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloudIcon className='size-12 text-amber-500 stroke-[1.5]' />
+                            <p className='text-sm sm:text-base font-medium text-slate-700'>Click to upload your resume (PDF)</p>
+                            <p className='text-xs text-slate-500'>We'll fill in your profile for you, no typing needed</p>
+                          </>
+                        )}
+                      </label>
+                      <input type='file' id='onboarding-resume' accept='.pdf' hidden disabled={isLoading} onChange={(e) => { uploadOnboardingResume(e.target.files[0]); e.target.value = '' }} />
+                      <p className='flex gap-2 items-start bg-slate-50 rounded-lg px-3 py-2.5 mt-3 text-xs sm:text-sm text-slate-600'>
+                        <span aria-hidden='true'>💡</span>
+                        <span>No PDF? On LinkedIn, open your profile, click <b>More → Save to PDF</b>, and upload that file here.</span>
+                      </p>
+                    </>
+                  )}
+
+                  {onboardingMethod === 'paste' && (
+                    <form onSubmit={submitPastedResume}>
+                      <label htmlFor='onboarding-paste' className='block text-sm font-medium text-slate-700 mb-1'>Paste your old resume or your LinkedIn "About" and "Experience" sections</label>
+                      <textarea id='onboarding-paste' value={pastedResume} onChange={(e) => setPastedResume(e.target.value)} rows={8} disabled={isLoading}
+                        placeholder="Paste anything: an old resume from Word or Google Docs, or your LinkedIn profile text. We'll sort it into jobs, skills and education."
+                        className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base resize-y' required />
+                      <button type='submit' disabled={isLoading} className='mt-4 w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium'>
+                        {isLoading ? <><LoaderCircleIcon className='animate-spin size-5'/> Reading what you pasted…</> : <>Read my details <ArrowRightIcon className='size-4'/></>}
+                      </button>
+                    </form>
+                  )}
+
+                  {onboardingMethod === 'quick' && (
+                    <form onSubmit={submitQuickProfile} className='space-y-4'>
+                      <div className='flex items-center justify-between gap-3 bg-slate-50 rounded-xl px-3 py-2.5'>
+                        <div>
+                          <p className='text-sm font-medium text-slate-800'>I don't have work experience yet</p>
+                          <p className='text-xs text-slate-500'>Student or first job? We'll focus on your studies and projects.</p>
+                        </div>
+                        <button type='button' role='switch' aria-checked={noExperience} aria-label="I don't have work experience yet" onClick={() => setNoExperience(v => !v)}
+                          className={`relative w-11 h-6 rounded-full shrink-0 transition-colors ${noExperience ? 'bg-amber-500' : 'bg-slate-300'}`}>
+                          <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition-all ${noExperience ? 'left-[22px]' : 'left-0.5'}`} />
+                        </button>
+                      </div>
+
+                      <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                        <div><label htmlFor='q-name' className='block text-sm font-medium text-slate-700 mb-1'>Full name</label><input id='q-name' value={quickProfile.full_name} onChange={(e) => setQuick('full_name', e.target.value)} className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' required /></div>
+                        <div><label htmlFor='q-email' className='block text-sm font-medium text-slate-700 mb-1'>Email</label><input id='q-email' type='email' value={quickProfile.email} onChange={(e) => setQuick('email', e.target.value)} className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' required /></div>
+                      </div>
+
+                      {noExperience ? (
+                        <>
+                          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                            <div><label htmlFor='q-degree' className='block text-sm font-medium text-slate-700 mb-1'>What are you studying?</label><input id='q-degree' value={quickProfile.degree} onChange={(e) => setQuick('degree', e.target.value)} placeholder='e.g., BSc Computer Science' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' required /></div>
+                            <div><label htmlFor='q-school' className='block text-sm font-medium text-slate-700 mb-1'>School or university</label><input id='q-school' value={quickProfile.institution} onChange={(e) => setQuick('institution', e.target.value)} placeholder='e.g., University of Mumbai' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' /></div>
+                          </div>
+                          <div><label htmlFor='q-projects' className='block text-sm font-medium text-slate-700 mb-1'>Projects, internships or volunteering <span className='font-normal text-slate-500'>(plain words are fine)</span></label>
+                            <textarea id='q-projects' rows={3} value={quickProfile.projects} onChange={(e) => setQuick('projects', e.target.value)} placeholder='e.g., Built a budgeting app for my final-year project. Volunteered at a food bank every Saturday.' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base resize-y' /></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                            <div><label htmlFor='q-position' className='block text-sm font-medium text-slate-700 mb-1'>Current or last job title</label><input id='q-position' value={quickProfile.position} onChange={(e) => setQuick('position', e.target.value)} placeholder='e.g., Sales Associate' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' required /></div>
+                            <div><label htmlFor='q-company' className='block text-sm font-medium text-slate-700 mb-1'>Company</label><input id='q-company' value={quickProfile.company} onChange={(e) => setQuick('company', e.target.value)} placeholder='e.g., Target' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' required /></div>
+                          </div>
+                          <div className='grid grid-cols-2 gap-3'>
+                            <div><label htmlFor='q-start' className='block text-sm font-medium text-slate-700 mb-1'>Started</label><input id='q-start' value={quickProfile.start_date} onChange={(e) => setQuick('start_date', e.target.value)} placeholder='e.g., 2022' inputMode='numeric' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' /></div>
+                            <div><label htmlFor='q-end' className='block text-sm font-medium text-slate-700 mb-1'>Ended</label>
+                              <select id='q-end' value={quickProfile.end_date} onChange={(e) => setQuick('end_date', e.target.value)} className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base bg-white'>
+                                <option value='current'>Still working here</option>
+                                {Array.from({ length: 12 }, (_, i) => String(new Date().getFullYear() - i)).map(year => <option key={year} value={year}>{year}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                          <div><label htmlFor='q-did' className='block text-sm font-medium text-slate-700 mb-1'>What did you do there? <span className='font-normal text-slate-500'>(plain words are fine)</span></label>
+                            <textarea id='q-did' rows={3} value={quickProfile.did} onChange={(e) => setQuick('did', e.target.value)} placeholder='e.g., Helped customers find products, handled the till, trained 3 new staff, ran the weekend stock count.' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base resize-y' required /></div>
+                        </>
+                      )}
+
+                      <div>
+                        <label htmlFor='q-skill' className='block text-sm font-medium text-slate-700 mb-1'>Top skills <span className='font-normal text-slate-500'>(press Enter after each)</span></label>
+                        <div className='flex flex-wrap gap-1.5 border border-gray-300 rounded-lg p-2 focus-within:ring-2 focus-within:ring-yellow-500'>
+                          {quickProfile.skills.map(skill => (
+                            <span key={skill} className='flex items-center gap-1 bg-amber-100 text-amber-800 rounded-full pl-2.5 pr-1.5 py-0.5 text-sm'>
+                              {skill}
+                              <button type='button' aria-label={`Remove ${skill}`} onClick={() => setQuick('skills', quickProfile.skills.filter(s => s !== skill))} className='hover:text-amber-950'><XIcon className='size-3.5' /></button>
+                            </span>
+                          ))}
+                          <input id='q-skill' value={skillDraft} onChange={(e) => setSkillDraft(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addSkill() } }} onBlur={addSkill}
+                            placeholder={quickProfile.skills.length ? 'Add another' : 'e.g., Customer service'} className='flex-1 min-w-[140px] px-1 py-1 border-0 outline-none focus:outline-none focus:ring-0 text-base' />
+                        </div>
+                      </div>
+
+                      {!noExperience && (
+                        <div><label htmlFor='q-edu' className='block text-sm font-medium text-slate-700 mb-1'>Highest education <span className='font-normal text-slate-500'>(optional)</span></label>
+                          <input id='q-edu' value={quickProfile.education} onChange={(e) => setQuick('education', e.target.value)} placeholder='e.g., BCom, Delhi University, 2021' className='w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-base' /></div>
+                      )}
+
+                      <button type='submit' disabled={isLoading} className='w-full py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-white rounded-lg hover:from-yellow-600 hover:to-amber-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium'>
+                        {isLoading ? <><LoaderCircleIcon className='animate-spin size-5'/> Saving…</> : <>Save and continue <ArrowRightIcon className='size-4'/></>}
+                      </button>
+                      <p className='text-xs text-center text-slate-500'>You can add more jobs, projects and certificates later in <b>Your Resume Data</b>.</p>
+                    </form>
+                  )}
+
+                  <div className='text-center mt-4'>
+                    <button type='button' disabled={isLoading} onClick={() => finishOnboardingLater()} className='text-sm text-slate-500 hover:text-slate-700 underline underline-offset-2'>
+                      I'll do this later
                     </button>
                   </div>
                 </>
@@ -466,6 +661,9 @@ const Dashboard = () => {
                   )}
 
                   {tailorStage && <TailorProgress stage={tailorStage} retrying={tailorRetrying} />}
+                  {tailorStage && usedQuickForm && (
+                    <p className='text-xs text-center text-slate-500 mt-3'>Built from a short profile. Adding more detail in Your Resume Data makes the next one stronger.</p>
+                  )}
 
                   <div className={`space-y-4 ${tailorStage ? 'hidden' : ''}`}>
                     <div>
